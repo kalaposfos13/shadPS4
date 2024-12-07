@@ -71,6 +71,9 @@ s32 PS4_SYSV_ABI sceKernelCheckedReleaseDirectMemory(u64 start, size_t len) {
 
 s32 PS4_SYSV_ABI sceKernelReleaseDirectMemory(u64 start, size_t len) {
     auto* memory = Core::Memory::Instance();
+    if (len == 0) {
+        return ORBIS_OK;
+    }
     memory->Free(start, len);
     return ORBIS_OK;
 }

@@ -232,6 +232,7 @@ int PS4_SYSV_ABI sceKernelDeleteSema(OrbisKernelSema sem) {
         return ORBIS_KERNEL_ERROR_ESRCH;
     }
     sem->Delete();
+    delete sem;
     return ORBIS_OK;
 }
 
