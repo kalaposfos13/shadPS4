@@ -495,7 +495,7 @@ int PS4_SYSV_ABI sceKernelMunmap(void* addr, size_t len) {
         return ORBIS_OK;
     }
     auto* memory = Core::Memory::Instance();
-    return memory->UnmapMemory(std::bit_cast<VAddr>(addr), len);;
+    return memory->UnmapMemory(std::bit_cast<VAddr>(addr), len);
 }
 
 int PS4_SYSV_ABI posix_munmap(void* addr, size_t len) {
