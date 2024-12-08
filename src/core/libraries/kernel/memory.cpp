@@ -71,6 +71,9 @@ s32 PS4_SYSV_ABI sceKernelCheckedReleaseDirectMemory(u64 start, size_t len) {
 
 s32 PS4_SYSV_ABI sceKernelReleaseDirectMemory(u64 start, size_t len) {
     auto* memory = Core::Memory::Instance();
+    if (len == 0) {
+        return ORBIS_OK;
+    }
     memory->Free(start, len);
     return ORBIS_OK;
 }
@@ -492,8 +495,7 @@ int PS4_SYSV_ABI sceKernelMunmap(void* addr, size_t len) {
         return ORBIS_OK;
     }
     auto* memory = Core::Memory::Instance();
-    memory->UnmapMemory(std::bit_cast<VAddr>(addr), len);
-    return ORBIS_OK;
+    return memory->UnmapMemory(std::bit_cast<VAddr>(addr), len);
 }
 
 int PS4_SYSV_ABI posix_munmap(void* addr, size_t len) {
