@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "common/assert.h"
+#include "common/alignment.h"
 #include "common/logging/log.h"
 #include "common/scope_exit.h"
 #include "common/singleton.h"
@@ -348,6 +349,13 @@ s64 PS4_SYSV_ABI sceKernelRead(int d, void* buf, size_t nbytes) {
     }
 
     std::scoped_lock lk{file->m_mutex};
+    VAddr base = Common::AlignDown(VAddr(buf), 4_KB);
+    VAddr end = Common::AlignDown(VAddr(buf) + nbytes, 4_KB);
+    do {
+        volatile u8* ptr = reinterpret_cast<volatile u8*>(base);
+        *ptr = *ptr;
+        base += 4_KB;
+    } while (base <= end);
     if (file->type == Core::FileSys::FileType::Device) {
         return file->device->read(buf, nbytes);
     }
@@ -547,6 +555,13 @@ s64 PS4_SYSV_ABI sceKernelPreadv(int d, SceKernelIovec* iov, int iovcnt, s64 off
 }
 
 s64 PS4_SYSV_ABI sceKernelPread(int d, void* buf, size_t nbytes, s64 offset) {
+    VAddr base = Common::AlignDown(VAddr(buf), 4_KB);
+    VAddr end = Common::AlignDown(VAddr(buf) + nbytes, 4_KB);
+    do {
+        volatile u8* ptr = reinterpret_cast<volatile u8*>(base);
+        *ptr = *ptr;
+        base += 4_KB;
+    } while (base <= end);
     SceKernelIovec iovec{buf, nbytes};
     return sceKernelPreadv(d, &iovec, 1, offset);
 }

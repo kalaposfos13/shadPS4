@@ -883,7 +883,7 @@ if (ENABLE_DISCORD_RPC)
 endif()
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    target_compile_definitions(shadps4 PRIVATE ENABLE_USERFAULTFD)
+    # target_compile_definitions(shadps4 PRIVATE ENABLE_USERFAULTFD)
 endif()
 
 if (APPLE)
