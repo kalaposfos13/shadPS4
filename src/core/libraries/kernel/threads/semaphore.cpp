@@ -111,15 +111,19 @@ public:
         BinarySemaphore sem;
         u32 priority;
         s32 need_count;
+        std::string thr_name;
         bool was_signaled{};
         bool was_deleted{};
         bool was_cancled{};
 
-        explicit WaitingThread(s32 need_count, bool is_fifo) : sem{0}, need_count{need_count} {
+        explicit WaitingThread(s32 need_count, bool is_fifo)
+            : sem{0}, priority{0}, need_count{need_count} {
             // Retrieve calling thread priority for sorting into waiting threads list.
             if (!is_fifo) {
                 priority = g_curthread->attr.prio;
             }
+
+            thr_name = g_curthread->name;
         }
 
         int GetResult(bool timed_out) {
