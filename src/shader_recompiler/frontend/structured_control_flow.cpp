@@ -833,7 +833,7 @@ IR::AbstractSyntaxList BuildASL(Common::ObjectPool<IR::Inst>& inst_pool,
     TranslatePass{inst_pool,     block_pool, stmt_pool,    root,   syntax_list,
                   cfg.inst_list, info,       runtime_info, profile};
     if (info.translation_failed) {
-        ASSERT_MSG(!info.translation_failed, "Shader translation has failed");
+        LOG_ERROR(Render_Recompiler, "Shader translation has failed. Shader hash: {:X}", info.pgm_hash);
     }
     return syntax_list;
 }
