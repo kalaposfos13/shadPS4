@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "common/assert.h"
+#include "common/logging/log.h"
 #include "core/libraries/ajm/ajm_at9.h"
 #include "error_codes.h"
 
@@ -73,7 +74,9 @@ std::tuple<u32, u32> AjmAt9Decoder::ProcessData(std::span<u8>& in_buf, SparseOut
     default:
         UNREACHABLE();
     }
-    // ASSERT_MSG(ret == At9Status::ERR_SUCCESS, "Atrac9Decode failed ret = {:#x}", ret);
+    if (ret != At9Status::ERR_SUCCESS) {
+        LOG_ERROR(Lib_Ajm, "Atrac9Decode failed ret = {:#x}", ret);
+    }
     in_buf = in_buf.subspan(bytes_used);
 
     m_superframe_bytes_remain -= bytes_used;
