@@ -714,8 +714,10 @@ void PatchImageInstruction(IR::Block& block, IR::Inst& inst, Info& info, Descrip
     if (inst_info.has_lod) {
         ASSERT(inst.GetOpcode() == IR::Opcode::ImageFetch);
         if (!(image.GetType() != AmdGpu::ImageType::Color2DMsaa &&
-            image.GetType() != AmdGpu::ImageType::Color2DMsaaArray)) {
+              image.GetType() != AmdGpu::ImageType::Color2DMsaaArray)) {
             LOG_CRITICAL(Render_Recompiler, "Unexpected image type: {}", image.GetType());
+            inst.SetArg(4, arg);
+            return;
         }
         inst.SetArg(3, arg);
     } else if (image.GetType() == AmdGpu::ImageType::Color2DMsaa ||
