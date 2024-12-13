@@ -153,6 +153,10 @@ void Translator::EmitVectorMemory(const GcnInst& inst) {
         // Image misc operations
     case Opcode::IMAGE_GET_LOD:
         return IMAGE_GET_LOD(inst);
+    
+    case Opcode::IMAGE_STORE_MIP:
+        LOG_CRITICAL(Render_Recompiler, "Replacing IMAGE_STORE_MIP with IMAGE_STORE as a temporary workaround");
+        return IMAGE_STORE(inst);
 
     default:
         LogMissingOpcode(inst);
