@@ -671,6 +671,7 @@ set(SHADER_RECOMPILER src/shader_recompiler/exception.h
                       src/shader_recompiler/ir/passes/resource_tracking_pass.cpp
                       src/shader_recompiler/ir/passes/ring_access_elimination.cpp
                       src/shader_recompiler/ir/passes/shader_info_collection_pass.cpp
+                      src/shader_recompiler/ir/passes/shared_memory_barrier_pass.cpp
                       src/shader_recompiler/ir/passes/ssa_rewrite_pass.cpp
                       src/shader_recompiler/ir/abstract_syntax_list.h
                       src/shader_recompiler/ir/attribute.cpp
@@ -812,6 +813,8 @@ set(QT_GUI src/qt_gui/about_dialog.cpp
            src/qt_gui/background_music_player.h
            src/qt_gui/cheats_patches.cpp
            src/qt_gui/cheats_patches.h
+           src/qt_gui/compatibility_info.cpp
+           src/qt_gui/compatibility_info.h
            src/qt_gui/main_window_ui.h
            src/qt_gui/main_window.cpp
            src/qt_gui/main_window.h
@@ -898,11 +901,16 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 endif()
 
 if (APPLE)
-  option(USE_SYSTEM_VULKAN_LOADER "Enables using the system Vulkan loader instead of directly linking with MoltenVK. Useful for loading validation layers." OFF)
-  if (USE_SYSTEM_VULKAN_LOADER)
-      target_compile_definitions(shadps4 PRIVATE USE_SYSTEM_VULKAN_LOADER=1)
+  if (ENABLE_QT_GUI)
+      # Include MoltenVK in the app bundle, along with an ICD file so it can be found by the system Vulkan loader if used for loading layers.
+      target_sources(shadps4 PRIVATE externals/MoltenVK/MoltenVK_icd.json)
+      set_source_files_properties(externals/MoltenVK/MoltenVK_icd.json
+          PROPERTIES MACOSX_PACKAGE_LOCATION Resources/vulkan/icd.d)
+      add_custom_command(TARGET shadps4 POST_BUILD
+          COMMAND cmake -E copy $<TARGET_LINKER_FILE:MoltenVK> $<TARGET_BUNDLE_DIR:shadps4>/Contents/Frameworks/libMoltenVK.dylib)
+      set_property(TARGET shadps4 APPEND PROPERTY BUILD_RPATH "@executable_path/../Frameworks")
   else()
-      # Link MoltenVK for Vulkan support
+      # For non-bundled SDL build, just do a normal library link.
       target_link_libraries(shadps4 PRIVATE MoltenVK)
   endif()
 
