@@ -44,7 +44,7 @@ private:
 
     QString quickstart() {
         return
-            R"(The keyboard and controller remapping backend, GUI and documentation have been written by kalaposfos
+            R"(The keyboard and mouse remapping backend, GUI and documentation have been written by kalaposfos
 
 In this section, you will find information about the project, its features and help on setting up your ideal setup.
 To view the config file's syntax, check out the Syntax tab, for keybind names, visit Normal Keybinds and Special Bindings, and if you are here to view emulator-wide keybinds, you can find it in the FAQ section.
@@ -70,11 +70,14 @@ A: The code recognises the line as wrong, and skip it, so the rest of the file w
 
 Q: I want to bind <input> to <output>, but your code doesn't support <input>!
 A: Some keys are intentionally omitted, but if you read the bindings through, and you're sure it is not there and isn't one of the intentionally disabled ones, open an issue on https://github.com/shadps4-emu/shadPS4.
+
+Q: Can I rebind controller inputs?
+A: Not yet.
 )";
     }
     QString syntax() {
         return
-            R"(This is the full list of currently supported mouse, keyboard and controller inputs, and how to use them.
+            R"(This is the full list of currently supported mouse and keyboard inputs, and how to use them.
 Emulator-reserved keys: F1 through F12
 
 Syntax (aka how a line can look like):
@@ -118,14 +121,13 @@ Mouse:
     The following wheel inputs cannot be bound to axis input, only button:
         'mousewheelup', 'mousewheeldown', 'mousewheelleft', 'mousewheelright'
 
-Controller:
-    The touchpad currently can't be rebound to anything else, but you can bind buttons to it.
+Controller (for output only):
     If you have a controller that has different names for buttons, it will still work, just look up what are the equivalent names for that controller
     The same left-right rule still applies here.
     Buttons:
         'triangle', 'circle', 'cross', 'square', 'l1', 'l3',
         'options', touchpad', 'up', 'down', 'left', 'right'
-    Axes if you bind them to a button input:
+    Axes:
         'axis_left_x_plus', 'axis_left_x_minus', 'axis_left_y_plus', 'axis_left_y_minus',
         'axis_right_x_plus', ..., 'axis_right_y_minus',
         'l2'

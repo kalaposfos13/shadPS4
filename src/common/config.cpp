@@ -816,34 +816,6 @@ axis_left_x_minus = a
 axis_left_x_plus = d
 axis_left_y_minus = w
 axis_left_y_plus = s
-
-#Controller bindings
-
-triangle = triangle
-cross = cross
-square = square
-circle = circle
-
-l1 = l1
-l2 = l2
-l3 = l3
-r1 = r1
-r2 = r2
-r3 = r3
-
-pad_up = pad_up
-pad_down = pad_down
-pad_left = pad_left
-pad_right = pad_right
-
-options = options
-touchpad = back
-
-axis_left_x = axis_left_x
-axis_left_y = axis_left_y
-
-axis_right_x = axis_right_x
-axis_right_y = axis_right_y
 )";
 }
 std::filesystem::path GetFoolproofKbmConfigFile(const std::string& game_id) {

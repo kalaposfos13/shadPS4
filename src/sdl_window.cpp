@@ -1,12 +1,12 @@
 // SPDX-FileCopyrightText: Copyright 2024 shadPS4 Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
-#include <SDL3/SDL_events.h>
 #include <SDL3/SDL_hints.h>
-#include <SDL3/SDL_init.h>
-#include <SDL3/SDL_properties.h>
-#include <SDL3/SDL_timer.h>
-#include <SDL3/SDL_video.h>
+#include "SDL3/SDL_events.h"
+#include "SDL3/SDL_init.h"
+#include "SDL3/SDL_properties.h"
+#include "SDL3/SDL_timer.h"
+#include "SDL3/SDL_video.h"
 
 #include "common/assert.h"
 #include "common/config.h"
@@ -26,6 +26,43 @@
 namespace Frontend {
 
 using namespace Libraries::Pad;
+
+static OrbisPadButtonDataOffset SDLGamepadToOrbisButton(u8 button) {
+    switch (button) {
+    case SDL_GAMEPAD_BUTTON_DPAD_DOWN:
+        return OrbisPadButtonDataOffset::Down;
+    case SDL_GAMEPAD_BUTTON_DPAD_UP:
+        return OrbisPadButtonDataOffset::Up;
+    case SDL_GAMEPAD_BUTTON_DPAD_LEFT:
+        return OrbisPadButtonDataOffset::Left;
+    case SDL_GAMEPAD_BUTTON_DPAD_RIGHT:
+        return OrbisPadButtonDataOffset::Right;
+    case SDL_GAMEPAD_BUTTON_SOUTH:
+        return OrbisPadButtonDataOffset::Cross;
+    case SDL_GAMEPAD_BUTTON_NORTH:
+        return OrbisPadButtonDataOffset::Triangle;
+    case SDL_GAMEPAD_BUTTON_WEST:
+        return OrbisPadButtonDataOffset::Square;
+    case SDL_GAMEPAD_BUTTON_EAST:
+        return OrbisPadButtonDataOffset::Circle;
+    case SDL_GAMEPAD_BUTTON_START:
+        return OrbisPadButtonDataOffset::Options;
+    case SDL_GAMEPAD_BUTTON_TOUCHPAD:
+        return OrbisPadButtonDataOffset::TouchPad;
+    case SDL_GAMEPAD_BUTTON_BACK:
+        return OrbisPadButtonDataOffset::TouchPad;
+    case SDL_GAMEPAD_BUTTON_LEFT_SHOULDER:
+        return OrbisPadButtonDataOffset::L1;
+    case SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER:
+        return OrbisPadButtonDataOffset::R1;
+    case SDL_GAMEPAD_BUTTON_LEFT_STICK:
+        return OrbisPadButtonDataOffset::L3;
+    case SDL_GAMEPAD_BUTTON_RIGHT_STICK:
+        return OrbisPadButtonDataOffset::R3;
+    default:
+        return OrbisPadButtonDataOffset::None;
+    }
+}
 
 static Uint32 SDLCALL PollController(void* userdata, SDL_TimerID timer_id, Uint32 interval) {
     auto* controller = reinterpret_cast<Input::GameController*>(userdata);
@@ -123,20 +160,14 @@ void WindowSDL::WaitEvent() {
     case SDL_EVENT_KEY_UP:
         OnKeyboardMouseInput(&event);
         break;
-    case SDL_EVENT_GAMEPAD_ADDED:
-    case SDL_EVENT_GAMEPAD_REMOVED:
-        controller->TryOpenSDLController();
-        break;
-    case SDL_EVENT_GAMEPAD_TOUCHPAD_DOWN:
-    case SDL_EVENT_GAMEPAD_TOUCHPAD_UP:
-    case SDL_EVENT_GAMEPAD_TOUCHPAD_MOTION:
-        controller->SetTouchpadState(event.gtouchpad.finger,
-                                     event.type != SDL_EVENT_GAMEPAD_TOUCHPAD_UP, event.gtouchpad.x,
-                                     event.gtouchpad.y);
-        break;
     case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
     case SDL_EVENT_GAMEPAD_BUTTON_UP:
     case SDL_EVENT_GAMEPAD_AXIS_MOTION:
+    case SDL_EVENT_GAMEPAD_ADDED:
+    case SDL_EVENT_GAMEPAD_REMOVED:
+    case SDL_EVENT_GAMEPAD_TOUCHPAD_DOWN:
+    case SDL_EVENT_GAMEPAD_TOUCHPAD_UP:
+    case SDL_EVENT_GAMEPAD_TOUCHPAD_MOTION:
         OnGamepadEvent(&event);
         break;
     case SDL_EVENT_QUIT:
@@ -233,23 +264,58 @@ void WindowSDL::OnKeyboardMouseInput(const SDL_Event* event) {
 }
 
 void WindowSDL::OnGamepadEvent(const SDL_Event* event) {
-
-    bool input_down = event->type == SDL_EVENT_GAMEPAD_AXIS_MOTION ||
-                      event->type == SDL_EVENT_GAMEPAD_BUTTON_DOWN;
-    u32 input_id = Input::InputBinding::GetInputIDFromEvent(*event);
-
-    // the touchpad button shouldn't be rebound to anything else,
-    // as it would break the entire touchpad handling
-    // You can still bind other things to it though
-    if (event->gbutton.button == SDL_GAMEPAD_BUTTON_TOUCHPAD) {
-        controller->CheckButton(0, OrbisPadButtonDataOffset::TouchPad, input_down);
-        return;
+    auto button = OrbisPadButtonDataOffset::None;
+    Input::Axis axis = Input::Axis::AxisMax;
+    switch (event->type) {
+    case SDL_EVENT_GAMEPAD_ADDED:
+    case SDL_EVENT_GAMEPAD_REMOVED:
+        controller->TryOpenSDLController();
+        break;
+    case SDL_EVENT_GAMEPAD_TOUCHPAD_DOWN:
+    case SDL_EVENT_GAMEPAD_TOUCHPAD_UP:
+    case SDL_EVENT_GAMEPAD_TOUCHPAD_MOTION:
+        controller->SetTouchpadState(event->gtouchpad.finger,
+                                     event->type != SDL_EVENT_GAMEPAD_TOUCHPAD_UP,
+                                     event->gtouchpad.x, event->gtouchpad.y);
+        break;
+    case SDL_EVENT_GAMEPAD_BUTTON_DOWN:
+    case SDL_EVENT_GAMEPAD_BUTTON_UP: {
+        button = SDLGamepadToOrbisButton(event->gbutton.button);
+        if (button == OrbisPadButtonDataOffset::None) {
+            break;
+        }
+        if (event->gbutton.button != SDL_GAMEPAD_BUTTON_BACK) {
+            controller->CheckButton(0, button, event->type == SDL_EVENT_GAMEPAD_BUTTON_DOWN);
+            break;
+        }
+        const auto backButtonBehavior = Config::getBackButtonBehavior();
+        if (backButtonBehavior != "none") {
+            float x = backButtonBehavior == "left" ? 0.25f
+                                                   : (backButtonBehavior == "right" ? 0.75f : 0.5f);
+            // trigger a touchpad event so that the touchpad emulation for back button works
+            controller->SetTouchpadState(0, true, x, 0.5f);
+            controller->CheckButton(0, button, event->type == SDL_EVENT_GAMEPAD_BUTTON_DOWN);
+        }
+        break;
     }
+    case SDL_EVENT_GAMEPAD_AXIS_MOTION:
+        axis = event->gaxis.axis == SDL_GAMEPAD_AXIS_LEFTX           ? Input::Axis::LeftX
+               : event->gaxis.axis == SDL_GAMEPAD_AXIS_LEFTY         ? Input::Axis::LeftY
+               : event->gaxis.axis == SDL_GAMEPAD_AXIS_RIGHTX        ? Input::Axis::RightX
+               : event->gaxis.axis == SDL_GAMEPAD_AXIS_RIGHTY        ? Input::Axis::RightY
+               : event->gaxis.axis == SDL_GAMEPAD_AXIS_LEFT_TRIGGER  ? Input::Axis::TriggerLeft
+               : event->gaxis.axis == SDL_GAMEPAD_AXIS_RIGHT_TRIGGER ? Input::Axis::TriggerRight
+                                                                     : Input::Axis::AxisMax;
+        if (axis != Input::Axis::AxisMax) {
+            if (event->gaxis.axis == SDL_GAMEPAD_AXIS_LEFT_TRIGGER ||
+                event->gaxis.axis == SDL_GAMEPAD_AXIS_RIGHT_TRIGGER) {
+                controller->Axis(0, axis, Input::GetAxis(0, 0x8000, event->gaxis.value));
 
-    bool inputs_changed = Input::UpdatePressedKeys(input_id, input_down);
-
-    if (inputs_changed) {
-        Input::ActivateOutputsFromInputs();
+            } else {
+                controller->Axis(0, axis, Input::GetAxis(-0x8000, 0x8000, event->gaxis.value));
+            }
+        }
+        break;
     }
 }
 
