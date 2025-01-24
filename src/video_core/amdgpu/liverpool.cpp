@@ -289,6 +289,25 @@ Liverpool::Task Liverpool::ProcessGraphics(std::span<const u32> dcb, std::span<c
             case PM4ItOpcode::ContextControl: {
                 break;
             }
+            case PM4ItOpcode::MemSemaphore: {
+                const auto* mem_semaphore = reinterpret_cast<const PM4CmdMemSemaphore*>(header);
+                const auto addr = mem_semaphore->Address<VAddr>();
+                const auto select = mem_semaphore->semSel;
+                const auto signal_type = mem_semaphore->signalType;
+                using enum PM4CmdMemSemaphore::MemSemaphoreSelect;
+                using enum PM4CmdMemSemaphore::MemSemaphoreSignalType;
+                LOG_DEBUG(Lib_GnmDriver,
+                    "MemSemaphore GFX addr = {:#X}: {}, {}",
+                    addr,
+                    select.Value() == SignalSemaphore ? "signal" : "wait",
+                    signal_type.Value() == SignalIncrementOrDecrement
+                        ? "increment/decrement" : "set 1/do nothing"
+                );
+                if (rasterizer) {
+                    rasterizer->GlobalBarrier();
+                }
+                break;
+            }
             case PM4ItOpcode::ClearState: {
                 regs.SetDefaults();
                 break;
@@ -863,6 +882,23 @@ Liverpool::Task Liverpool::ProcessCompute(std::span<const u32> acb, u32 vqid) {
         }
         case PM4ItOpcode::EventWrite: {
             // const auto* event = reinterpret_cast<const PM4CmdEventWrite*>(header);
+            break;
+        case PM4ItOpcode::MemSemaphore: {
+            const auto* mem_semaphore = reinterpret_cast<const PM4CmdMemSemaphore*>(header);
+            const auto addr = mem_semaphore->Address<VAddr>();
+            const auto select = mem_semaphore->semSel;
+            const auto signal_type = mem_semaphore->signalType;
+            using enum PM4CmdMemSemaphore::MemSemaphoreSelect;
+            using enum PM4CmdMemSemaphore::MemSemaphoreSignalType;
+            LOG_DEBUG(Lib_GnmDriver, "MemSemaphore CE addr = {:#X}: {}, {}",
+                addr,
+                select.Value() == SignalSemaphore ? "signal" : "wait",
+                signal_type.Value() == SignalIncrementOrDecrement
+                    ? "increment/decrement" : "set 1/do nothing"
+            );
+            if (rasterizer) {
+                rasterizer->GlobalBarrier();
+            }
             break;
         }
         default:

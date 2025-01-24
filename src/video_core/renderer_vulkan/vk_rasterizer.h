@@ -61,6 +61,7 @@ public:
     void UnmapMemory(VAddr addr, u64 size);
 
     void CpSync();
+    void GlobalBarrier();
     u64 Flush();
     void Finish();
 
