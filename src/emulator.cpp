@@ -269,6 +269,8 @@ void Emulator::Run(const std::filesystem::path& file, const std::vector<std::str
         }
     });
 
+    Libraries::OverrideSpecificFunctionsAsHLE(&linker->GetHLESymbols());
+
 #ifdef ENABLE_DISCORD_RPC
     // Discord RPC
     if (Config::getEnableDiscordRPC()) {

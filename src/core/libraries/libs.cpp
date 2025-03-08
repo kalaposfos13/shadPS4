@@ -17,6 +17,7 @@
 #include "core/libraries/ime/ime_dialog.h"
 #include "core/libraries/kernel/kernel.h"
 #include "core/libraries/libc_internal/libc_internal.h"
+#include "core/libraries/libc_internal/printf.h"
 #include "core/libraries/libpng/pngdec.h"
 #include "core/libraries/libs.h"
 #include "core/libraries/mouse/mouse.h"
@@ -115,6 +116,10 @@ void InitHLELibs(Core::Loader::SymbolsResolver* sym) {
     Libraries::NpParty::RegisterlibSceNpParty(sym);
     Libraries::Zlib::RegisterlibSceZlib(sym);
     Libraries::Hmd::RegisterlibSceHmd(sym);
+}
+
+void OverrideSpecificFunctionsAsHLE(Core::Loader::SymbolsResolver* sym) {
+    LIB_FUNCTION("Q2V+iqvjgC0", "libc", 1, "libc", 1, 1, Libraries::LibcInternal::vsnprintf_ctx);
 }
 
 } // namespace Libraries

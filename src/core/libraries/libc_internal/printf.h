@@ -62,6 +62,7 @@
 #include <cstring>
 #include <string>
 
+#include "common/logging/log.h"
 #include "common/va_ctx.h"
 
 namespace Libraries::LibcInternal {
@@ -724,6 +725,12 @@ static inline int _vsnprintf(out_fct_type out, char* buffer, const char* format,
 
     // termination
     out((char)0, buffer, idx < maxlen ? idx : maxlen - 1U, maxlen);
+
+    std::string log = std::string(buffer);
+    if(log[log.length() - 1] == '\n') {
+        log.pop_back();
+    }
+    LOG_INFO(Lib_LibC, "Output: {}", log);
 
     // return written chars without terminating \0
     return (int)idx;

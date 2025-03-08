@@ -42,5 +42,6 @@
 namespace Libraries {
 
 void InitHLELibs(Core::Loader::SymbolsResolver* sym);
+void OverrideSpecificFunctionsAsHLE(Core::Loader::SymbolsResolver* sym);
 
 } // namespace Libraries
