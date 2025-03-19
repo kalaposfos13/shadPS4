@@ -10,6 +10,7 @@
 #include "common/path_util.h"
 #include "common/string_util.h"
 #include "common/thread.h"
+#include "common/va_ctx.h"
 #include "core/aerolib/aerolib.h"
 #include "core/aerolib/stubs.h"
 #include "core/libraries/kernel/memory.h"
@@ -17,6 +18,13 @@
 #include "core/linker.h"
 #include "core/memory.h"
 #include "core/tls.h"
+
+#include "core/file_format/psf.h"
+#include "core/gt7_hooks.h"
+#include "core/gts_hooks.h"
+#include "core/gtscb_hooks.h"
+
+#include "core/LightHook.h"
 
 namespace Core {
 
@@ -101,6 +109,17 @@ void Linker::Execute(const std::vector<std::string> args) {
 
     memory->SetupMemoryRegions(fmem_size, use_extended_mem1, use_extended_mem2);
 
+    auto param_sfo = Common::Singleton<PSF>::Instance();
+    auto title_id = param_sfo->GetString("TITLE_ID");
+
+    /*
+    if (title_id == "CUSA02168")
+        GTSHooks::Initialize(module);
+    else if (title_id == "CUSA07836")
+        GTSCBHooks::Initialize(module);
+    else if (title_id == "CUSA24767")
+        GT7Hooks::Initialize(module);
+    */
     main_thread.Run([this, module, args](std::stop_token) {
         Common::SetCurrentThreadName("GAME_MainThread");
         LoadSharedLibraries();
