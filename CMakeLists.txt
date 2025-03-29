@@ -143,26 +143,37 @@ if (GIT_REMOTE_RESULT OR GIT_REMOTE_NAME STREQUAL "")
   set(GIT_REMOTE_NAME "origin")
 
   # Retrieve environment variables
-  if (DEFINED ENV{GITHUB_HEAD_REF})
+  if (DEFINED ENV{GITHUB_HEAD_REF} AND NOT "$ENV{GITHUB_HEAD_REF}" STREQUAL "")
     set(GITHUB_HEAD_REF "$ENV{GITHUB_HEAD_REF}")
+    message("github head ref: $ENV{GITHUB_HEAD_REF}")
   else()
     set(GITHUB_HEAD_REF "")
   endif()
 
-  if (DEFINED ENV{GITHUB_REF})
+  if (DEFINED ENV{GITHUB_REF} AND NOT "$ENV{GITHUB_REF}" STREQUAL "")
     string(REGEX REPLACE "^refs/[^/]*/" "" GITHUB_BRANCH "$ENV{GITHUB_REF}")
+    message("github ref: $ENV{GITHUB_REF}")
   else()
     set(GITHUB_BRANCH "")
   endif()
 
-  if (DEFINED ENV{GITHUB_EVENT_PATH})
+  if (DEFINED ENV{GITHUB_EVENT_PATH} AND NOT "$ENV{GITHUB_EVENT_PATH}" STREQUAL "")
     file(READ "$ENV{GITHUB_EVENT_PATH}" GITHUB_EVENT_JSON)
-    string(JSON PR_NUMBER GET ${GITHUB_EVENT_JSON} "number")
+    
+    # Try to get the PR number, but capture failure
+    string(JSON PR_NUMBER ERROR_VARIABLE JSON_ERROR RESULT_VARIABLE JSON_RESULT GET ${GITHUB_EVENT_JSON} "number")
+  
+    if (NOT JSON_RESULT EQUAL 0)
+      set(PR_NUMBER "")
+      message("PR number not found, proceeding without it.")
+    endif()
   else()
     set(PR_NUMBER "")
   endif()
 
-  if (NOT "${PR_NUMBER}" STREQUAL "" AND NOT "${GITHUB_HEAD_REF}" STREQUAL "")
+  if ("${PR_NUMBER}" STREQUAL "" AND NOT "${GITHUB_BRANCH}" STREQUAL "")
+    set(GIT_BRANCH "${GITHUB_BRANCH}")
+  elseif (NOT "${PR_NUMBER}" STREQUAL "" AND NOT "${GITHUB_HEAD_REF}" STREQUAL "")
     set(GIT_BRANCH "pr-${PR_NUMBER}-${GITHUB_HEAD_REF}")
   elseif (NOT "${PR_NUMBER}" STREQUAL "" AND NOT "${GITHUB_BRANCH}" STREQUAL "")
     set(GIT_BRANCH "pr-${PR_NUMBER}-${GITHUB_BRANCH}")
