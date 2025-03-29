@@ -141,6 +141,7 @@ if (GIT_REMOTE_RESULT OR GIT_REMOTE_NAME STREQUAL "")
 
   if (DEFINED ENV{GITHUB_HEAD_REF})  # PR branch name
     set(GIT_BRANCH "pr-$ENV{GITHUB_HEAD_REF}")
+    message("GITHUB_HEAD_REF is '$ENV{GITHUB_HEAD_REF}'")
   elseif (DEFINED ENV{GITHUB_REF})  # Normal branch name
     message("GITHUB_REF is '$ENV{GITHUB_REF}'")
     string(REGEX REPLACE "^refs/(heads|tags)/" "" GIT_BRANCH "$ENV{GITHUB_REF}")
