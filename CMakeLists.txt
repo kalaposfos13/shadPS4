@@ -137,63 +137,83 @@ if (GIT_REMOTE_RESULT OR GIT_REMOTE_NAME STREQUAL "")
   )
 endif()
 
-# If running in GitHub Actions and the above fails
-if (GIT_REMOTE_RESULT OR GIT_REMOTE_NAME STREQUAL "")
-  message("check github")
-  set(GIT_REMOTE_NAME "origin")
+message("Starting Git detection")
 
-  # Retrieve environment variables
-  if (DEFINED ENV{GITHUB_HEAD_REF})
-    set(GITHUB_HEAD_REF "$ENV{GITHUB_HEAD_REF}")
-  else()
-    set(GITHUB_HEAD_REF "")
-  endif()
+# Try to get upstream remote and branch
+message("Checking for upstream remote and branch")
+execute_process(
+  COMMAND git rev-parse --abbrev-ref --symbolic-full-name @{u}
+  OUTPUT_VARIABLE GIT_UPSTREAM
+  RESULT_VARIABLE GIT_UPSTREAM_RESULT
+  ERROR_QUIET
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 
-  if (DEFINED ENV{GITHUB_REF})
-    string(REGEX REPLACE "^refs/[^/]*/" "" GITHUB_BRANCH "$ENV{GITHUB_REF}")
-  else()
-    set(GITHUB_BRANCH "")
-  endif()
-
-  if (DEFINED ENV{GITHUB_EVENT_PATH})
-    file(READ "$ENV{GITHUB_EVENT_PATH}" GITHUB_EVENT_JSON)
-    string(JSON PR_NUMBER GET ${GITHUB_EVENT_JSON} "number")
-  else()
-    set(PR_NUMBER "")
-  endif()
-
-  if (NOT "${PR_NUMBER}" STREQUAL "" AND NOT "${GITHUB_HEAD_REF}" STREQUAL "")
-    set(GIT_BRANCH "pr-${PR_NUMBER}-${GITHUB_HEAD_REF}")
-  elseif (NOT "${PR_NUMBER}" STREQUAL "" AND NOT "${GITHUB_BRANCH}" STREQUAL "")
-    set(GIT_BRANCH "pr-${PR_NUMBER}-${GITHUB_BRANCH}")
-  elseif (NOT "${PR_NUMBER}" STREQUAL "")
-    set(GIT_BRANCH "pr-${PR_NUMBER}")
-  else()
-    message("couldn't find branch")
-    set(GIT_BRANCH "detached-head")
-  endif()
+# Extract remote name and branch if upstream retrieval was successful
+if (NOT GIT_UPSTREAM_RESULT AND NOT "${GIT_UPSTREAM}" STREQUAL "")
+  string(REGEX MATCH "([^/]*)/(.*)" _MATCH ${GIT_UPSTREAM})
+  set(GIT_REMOTE_NAME "${CMAKE_MATCH_1}")
+  set(GIT_BRANCH "${CMAKE_MATCH_2}")
 else()
-  # Extract remote name if the output contains a remote/branch format
-  string(FIND "${GIT_REMOTE_NAME}" "/" INDEX)
-  if (INDEX GREATER -1)
-    string(SUBSTRING "${GIT_REMOTE_NAME}" 0 "${INDEX}" GIT_REMOTE_NAME)
-  else()
-    # If no remote is present (only a branch name), default to origin
+  message("Upstream not found, checking default push remote")
+  execute_process(
+    COMMAND git config --get remote.pushDefault
+    OUTPUT_VARIABLE GIT_REMOTE_NAME
+    RESULT_VARIABLE GIT_REMOTE_RESULT
+    ERROR_QUIET
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+
+  # If no pushDefault, fallback to origin
+  if (GIT_REMOTE_RESULT OR "${GIT_REMOTE_NAME}" STREQUAL "")
     set(GIT_REMOTE_NAME "origin")
+  endif()
+
+  # Get current branch
+  execute_process(
+    COMMAND git rev-parse --abbrev-ref HEAD
+    OUTPUT_VARIABLE GIT_BRANCH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+  )
+
+  if ("${GIT_BRANCH}" STREQUAL "HEAD")
+    set(GIT_BRANCH "detached-head")
   endif()
 endif()
 
-# Get remote link
-message("getting remote link")
+# Handle GitHub Actions environment variables
+if (DEFINED ENV{GITHUB_ACTIONS})
+  message("Running in GitHub Actions")
+  set(GIT_REMOTE_NAME "origin")
+  
+  if (DEFINED ENV{GITHUB_HEAD_REF} AND NOT "$ENV{GITHUB_HEAD_REF}" STREQUAL "")
+    set(GIT_BRANCH "$ENV{GITHUB_HEAD_REF}")
+  elseif (DEFINED ENV{GITHUB_REF})
+    string(REGEX MATCH "^refs/pull/([0-9]+)/merge$" _MATCH "$ENV{GITHUB_REF}")
+    if (CMAKE_MATCH_1)
+      set(GIT_BRANCH "pr-${CMAKE_MATCH_1}-${GIT_BRANCH}")
+    else()
+      string(REGEX REPLACE "^refs/heads/" "" GIT_BRANCH "$ENV{GITHUB_REF}")
+      string(REGEX REPLACE "^refs/tags/" "tag-" GIT_BRANCH "$GIT_BRANCH")
+    endif()
+  endif()
+endif()
+
+# Get remote URL
+message("Retrieving remote URL")
 execute_process(
   COMMAND git config --get remote.${GIT_REMOTE_NAME}.url
   OUTPUT_VARIABLE GIT_REMOTE_URL
   OUTPUT_STRIP_TRAILING_WHITESPACE
+  ERROR_QUIET
 )
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/common/scm_rev.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/src/common/scm_rev.cpp" @ONLY)
 
-message("end git things, remote: ${GIT_REMOTE_NAME}, branch: ${GIT_BRANCH}")
+message("Git detection complete: Remote: ${GIT_REMOTE_NAME}, Branch: ${GIT_BRANCH}")
+
+this_is_invalid()
 
 find_package(Boost 1.84.0 CONFIG)
 find_package(FFmpeg 5.1.2 MODULE)
