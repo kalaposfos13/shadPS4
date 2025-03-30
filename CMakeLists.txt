@@ -157,7 +157,12 @@ if (GIT_REMOTE_RESULT OR GIT_REMOTE_NAME STREQUAL "")
 
   if (DEFINED ENV{GITHUB_EVENT_PATH})
     file(READ "$ENV{GITHUB_EVENT_PATH}" GITHUB_EVENT_JSON)
-    string(JSON PR_NUMBER GET ${GITHUB_EVENT_JSON} "number")
+    string(JSON PR_NUMBER ERROR_VARIABLE JSON_ERROR RESULT_VARIABLE JSON_RESULT GET ${GITHUB_EVENT_JSON} "number")
+
+    if (NOT JSON_RESULT EQUAL 0)
+      set(PR_NUMBER "")
+      message("PR number not found, proceeding without it.")
+    endif()
   else()
     set(PR_NUMBER "")
   endif()
@@ -194,6 +199,8 @@ execute_process(
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/common/scm_rev.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/src/common/scm_rev.cpp" @ONLY)
 
 message("end git things, remote: ${GIT_REMOTE_NAME}, branch: ${GIT_BRANCH}")
+
+this_is_invalid()
 
 find_package(Boost 1.84.0 CONFIG)
 find_package(FFmpeg 5.1.2 MODULE)
