@@ -143,21 +143,33 @@ if (GIT_REMOTE_RESULT OR GIT_REMOTE_NAME STREQUAL "")
   set(GIT_REMOTE_NAME "origin")
 
   # Retrieve environment variables
-  if (DEFINED ENV{GITHUB_HEAD_REF})
+  if (DEFINED ENV{GITHUB_HEAD_REF} AND NOT "$ENV{GITHUB_HEAD_REF}" STREQUAL "")
     set(GITHUB_HEAD_REF "$ENV{GITHUB_HEAD_REF}")
+    message("github head ref: $ENV{GITHUB_HEAD_REF}")
   else()
     set(GITHUB_HEAD_REF "")
   endif()
 
-  if (DEFINED ENV{GITHUB_REF})
+  if (DEFINED ENV{GITHUB_REF} AND NOT "$ENV{GITHUB_REF}" STREQUAL "")
     string(REGEX REPLACE "^refs/[^/]*/" "" GITHUB_BRANCH "$ENV{GITHUB_REF}")
+    message("github ref: $ENV{GITHUB_REF}")
   else()
     set(GITHUB_BRANCH "")
   endif()
 
   if (DEFINED ENV{GITHUB_EVENT_PATH})
     file(READ "$ENV{GITHUB_EVENT_PATH}" GITHUB_EVENT_JSON)
-    string(JSON PR_NUMBER GET ${GITHUB_EVENT_JSON} "number")
+    string(
+      JSON PR_NUMBER 
+      ERROR_VARIABLE JSON_ERROR
+      GET ${GITHUB_EVENT_JSON} "number"
+    )
+    message("raw json: $ENV{GITHUB_EVENT_JSON}")
+    if (JSON_ERROR EQUAL 0)
+      message("pr number: ${PR_NUMBER}")
+    else()
+      set(PR_NUMBER "")
+    endif()
   else()
     set(PR_NUMBER "")
   endif()
@@ -168,6 +180,10 @@ if (GIT_REMOTE_RESULT OR GIT_REMOTE_NAME STREQUAL "")
     set(GIT_BRANCH "pr-${PR_NUMBER}-${GITHUB_BRANCH}")
   elseif (NOT "${PR_NUMBER}" STREQUAL "")
     set(GIT_BRANCH "pr-${PR_NUMBER}")
+  elseif ("${PR_NUMBER}" STREQUAL "" AND NOT "${GITHUB_HEAD_REF}" STREQUAL "")
+    set(GIT_BRANCH "${GITHUB_HEAD_REF}")
+  elseif ("${PR_NUMBER}" STREQUAL "" AND NOT "${GITHUB_REF}" STREQUAL "")
+      set(GIT_BRANCH "${GITHUB_REF}")
   else()
     message("couldn't find branch")
     set(GIT_BRANCH "detached-head")
@@ -194,6 +210,8 @@ execute_process(
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/common/scm_rev.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/src/common/scm_rev.cpp" @ONLY)
 
 message("end git things, remote: ${GIT_REMOTE_NAME}, branch: ${GIT_BRANCH}")
+
+this_is_invalid()
 
 find_package(Boost 1.84.0 CONFIG)
 find_package(FFmpeg 5.1.2 MODULE)
