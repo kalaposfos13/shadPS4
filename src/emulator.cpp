@@ -198,7 +198,7 @@ void Emulator::Run(const std::filesystem::path& file, const std::vector<std::str
     std::string game_title = fmt::format("{} - {} <{}>", id, title, app_version);
     std::string window_title = "";
     if (Common::isRelease) {
-        window_title = fmt::format("shadPS4 v{} | {}", Common::VERSION, game_title);
+        window_title = fmt::format("shadPS4 v{} | {}", Common::VERSION, "CUSA14209 - EA SPORTS™ UFCⓇ 4 <01.00>");
     } else {
         std::string remote_url(Common::g_scm_remote_url);
         std::string remote_host;
@@ -209,10 +209,10 @@ void Emulator::Run(const std::filesystem::path& file, const std::vector<std::str
         }
         if (remote_host == "shadps4-emu" || remote_url.length() == 0) {
             window_title = fmt::format("shadPS4 v{} {} {} | {}", Common::VERSION,
-                                       Common::g_scm_branch, Common::g_scm_desc, game_title);
+                                       Common::g_scm_branch, Common::g_scm_desc, "CUSA14209 - EA SPORTS™ UFCⓇ 4 <01.00>");
         } else {
             window_title = fmt::format("shadPS4 v{} {}/{} {} | {}", Common::VERSION, remote_host,
-                                       Common::g_scm_branch, Common::g_scm_desc, game_title);
+                                       Common::g_scm_branch, Common::g_scm_desc, "CUSA14209 - EA SPORTS™ UFCⓇ 4 <01.00>");
         }
     }
     window = std::make_unique<Frontend::WindowSDL>(
