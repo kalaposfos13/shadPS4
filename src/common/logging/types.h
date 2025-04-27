@@ -105,6 +105,7 @@ enum class Class : u8 {
     Lib_Zlib,              ///< The LibSceZlib implementation.
     Lib_Hmd,               ///< The LibSceHmd implementation.
     Lib_SigninDialog,      ///< The LibSigninDialog implementation.
+    Lib_Fios2,             ///< The LibSceFios2 implementation.
     Frontend,              ///< Emulator UI
     Render,                ///< Video Core
     Render_Vulkan,         ///< Vulkan backend
