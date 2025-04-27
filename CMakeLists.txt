@@ -596,6 +596,8 @@ set(MISC_LIBS  src/core/libraries/screenshot/screenshot.cpp
                src/core/libraries/ulobjmgr/ulobjmgr.h
                src/core/libraries/signin_dialog/signindialog.cpp
                src/core/libraries/signin_dialog/signindialog.h
+               src/core/libraries/fios2/fios2.cpp
+               src/core/libraries/fios2/fios2.h
 )
 
 set(CAMERA_LIBS  src/core/libraries/camera/camera.cpp

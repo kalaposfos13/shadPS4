@@ -63,6 +63,7 @@
 #include "core/libraries/voice/voice.h"
 #include "core/libraries/web_browser_dialog/webbrowserdialog.h"
 #include "core/libraries/zlib/zlib_sce.h"
+#include "core/libraries/fios2/fios2.h"
 #include "fiber/fiber.h"
 #include "jpeg/jpegenc.h"
 
@@ -130,6 +131,7 @@ void InitHLELibs(Core::Loader::SymbolsResolver* sym) {
     Libraries::CompanionHttpd::RegisterlibSceCompanionHttpd(sym);
     Libraries::CompanionUtil::RegisterlibSceCompanionUtil(sym);
     Libraries::Voice::RegisterlibSceVoice(sym);
+    Libraries::Fios2::RegisterlibSceFios2(sym);
 }
 
 } // namespace Libraries
