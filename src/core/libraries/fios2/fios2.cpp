@@ -889,54 +889,6 @@ void RegisterlibSceFios2(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("QKsI9N7K1zE", f, 1, f, 1, 1, sceFiosStat);
     LIB_FUNCTION("jayvY07C5dk", f, 1, f, 1, 1, sceFiosStatSync);
 
-    // archive
-    LIB_FUNCTION("GxAF6y9l98M", f, 1, f, 1, 1, sceFiosArchiveGetDecompressorThreadCount);
-    LIB_FUNCTION("ERmiOK9VT0g", f, 1, f, 1, 1, sceFiosArchiveGetMountBufferSize);
-    LIB_FUNCTION("UUriaXy7G90", f, 1, f, 1, 1, sceFiosArchiveGetMountBufferSizeSync);
-    LIB_FUNCTION("pIU8u6VsLM8", f, 1, f, 1, 1, sceFiosArchiveMount);
-    LIB_FUNCTION("xutLbQdqyb4", f, 1, f, 1, 1, sceFiosArchiveMountSync);
-    LIB_FUNCTION("VKQ8pi4466g", f, 1, f, 1, 1, sceFiosArchiveMountWithOrder);
-    LIB_FUNCTION("GEAzhWJM1mY", f, 1, f, 1, 1, sceFiosArchiveMountWithOrderSync);
-    LIB_FUNCTION("Dfwp-U1OfRI", f, 1, f, 1, 1, sceFiosArchiveSetDecompressorThreadCount);
-    LIB_FUNCTION("YfTBBU5nONQ", f, 1, f, 1, 1, sceFiosArchiveUnmount);
-    LIB_FUNCTION("yy6C7k7FPZY", f, 1, f, 1, 1, sceFiosArchiveUnmountSync);
-
-    // cache
-    LIB_FUNCTION("7CXAnIwFY3U", f, 1, f, 1, 1, sceFiosCacheContainsFileRangeSync);
-    LIB_FUNCTION("H6wju6uvjmA", f, 1, f, 1, 1, sceFiosCacheContainsFileSync);
-    LIB_FUNCTION("8e4TgQd155k", f, 1, f, 1, 1, sceFiosCacheFlushFileRangeSync);
-    LIB_FUNCTION("R4YQI0YpbB0", f, 1, f, 1, 1, sceFiosCacheFlushFileSync);
-    LIB_FUNCTION("NRe2Dtymlmk", f, 1, f, 1, 1, sceFiosCacheFlushSync);
-    LIB_FUNCTION("iGpuaBFQroQ", f, 1, f, 1, 1, sceFiosCachePrefetchFH);
-    LIB_FUNCTION("uT4EBfl284o", f, 1, f, 1, 1, sceFiosCachePrefetchFHRange);
-    LIB_FUNCTION("tm3Hb4s0et8", f, 1, f, 1, 1, sceFiosCachePrefetchFHRangeSync);
-    LIB_FUNCTION("zIx-FcuPXVM", f, 1, f, 1, 1, sceFiosCachePrefetchFHSync);
-    LIB_FUNCTION("T8upMyvUPz0", f, 1, f, 1, 1, sceFiosCachePrefetchFile);
-    LIB_FUNCTION("FYGZ0F5ZglA", f, 1, f, 1, 1, sceFiosCachePrefetchFileRange);
-    LIB_FUNCTION("ZzE6WN+QBbE", f, 1, f, 1, 1, sceFiosCachePrefetchFileRangeSync);
-    LIB_FUNCTION("bC0WTypscWg", f, 1, f, 1, 1, sceFiosCachePrefetchFileSync);
-
-    // misc + init + shutdown
-    LIB_FUNCTION("-q4M5WX0Jrs", f, 1, f, 1, 1, sceFiosCancelAllOps);
-    LIB_FUNCTION("wb8H3F+T6Ew", f, 1, f, 1, 1, sceFiosClearTimeStamps);
-    LIB_FUNCTION("aKxpgAMSJ04", f, 1, f, 1, 1, sceFiosCloseAllFiles);
-    LIB_FUNCTION("l4OVTpJCyQI", f, 1, f, 1, 1, sceFiosUpdateParameters);
-    LIB_FUNCTION("fJTrPsXNsBY", f, 1, f, 1, 1, sceFiosDebugDumpDate);
-    LIB_FUNCTION("FyuoXPzv780", f, 1, f, 1, 1, sceFiosDebugDumpDH);
-    LIB_FUNCTION("8BLW2WiSIuI", f, 1, f, 1, 1, sceFiosDebugDumpError);
-    LIB_FUNCTION("Sj5lbc4Y0mI", f, 1, f, 1, 1, sceFiosDebugDumpFH);
-    LIB_FUNCTION("4-yhZ7aj3VE", f, 1, f, 1, 1, sceFiosDebugDumpOp);
-    LIB_FUNCTION("tMYHEVj4j+o", f, 1, f, 1, 1, sceFiosSuspend);
-    LIB_FUNCTION("3HAgZPl1v+4", f, 1, f, 1, 1, sceFiosTerminate);
-    LIB_FUNCTION("vKL406KPJRs", f, 1, f, 1, 1, sceFiosResume);
-    LIB_FUNCTION("ZPm4ROwjxi4", f, 1, f, 1, 1, sceFiosShutdownAndCancelOps);
-    LIB_FUNCTION("YkayyuR6HvI", f, 1, f, 1, 1, sceFiosIsIdle);
-    LIB_FUNCTION("aKWnlLIobGA", f, 1, f, 1, 1, sceFiosIsInitialized);
-    LIB_FUNCTION("F7whoytBofE", f, 1, f, 1, 1, sceFiosIsSuspended);
-    LIB_FUNCTION("8IGjwtnvYwI", f, 1, f, 1, 1, sceFiosIsValidHandle);
-    LIB_FUNCTION("Lxgze5-E3uQ", f, 1, f, 1, 1, sceFiosGetSuspendCount);
-    LIB_FUNCTION("wAKZ-det+yo", f, 1, f, 1, 1, sceFiosInitialize);
-
     // fiosDH
     LIB_FUNCTION("oT68xenFqSY", f, 1, f, 1, 1, sceFiosDHClose);
     LIB_FUNCTION("0-p4O8FINmU", f, 1, f, 1, 1, sceFiosDHCloseSync);
@@ -946,10 +898,6 @@ void RegisterlibSceFios2(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("kG+A6NNwDow", f, 1, f, 1, 1, sceFiosDHRead);
     LIB_FUNCTION("odjOGg8harg", f, 1, f, 1, 1, sceFiosDHReadSync);
     LIB_FUNCTION("lHKLprulT24", f, 1, f, 1, 1, sceFiosGetAllDHs);
-
-    // dll
-    LIB_FUNCTION("PIw2ZEh6JyI", f, 1, f, 1, 1, sceFiosDLLInitialize);
-    LIB_FUNCTION("kPvgi8x497Q", f, 1, f, 1, 1, sceFiosDLLTerminate);
 
     // fiosFH
     LIB_FUNCTION("+mfO27a-bEY", f, 1, f, 1, 1, sceFiosDeallocatePassthruFH);
@@ -989,13 +937,44 @@ void RegisterlibSceFios2(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("t4vLDMxzzf0", f, 1, f, 1, 1, sceFiosFHWritevSync);
     LIB_FUNCTION("4Kgi9D47mC8", f, 1, f, 1, 1, sceFiosGetAllFHs);
 
+    // misc + init + shutdown
+    LIB_FUNCTION("-q4M5WX0Jrs", f, 1, f, 1, 1, sceFiosCancelAllOps);
+    LIB_FUNCTION("wb8H3F+T6Ew", f, 1, f, 1, 1, sceFiosClearTimeStamps);
+    LIB_FUNCTION("aKxpgAMSJ04", f, 1, f, 1, 1, sceFiosCloseAllFiles);
+    LIB_FUNCTION("l4OVTpJCyQI", f, 1, f, 1, 1, sceFiosUpdateParameters);
+    LIB_FUNCTION("fJTrPsXNsBY", f, 1, f, 1, 1, sceFiosDebugDumpDate);
+    LIB_FUNCTION("FyuoXPzv780", f, 1, f, 1, 1, sceFiosDebugDumpDH);
+    LIB_FUNCTION("8BLW2WiSIuI", f, 1, f, 1, 1, sceFiosDebugDumpError);
+    LIB_FUNCTION("Sj5lbc4Y0mI", f, 1, f, 1, 1, sceFiosDebugDumpFH);
+    LIB_FUNCTION("4-yhZ7aj3VE", f, 1, f, 1, 1, sceFiosDebugDumpOp);
+    LIB_FUNCTION("tMYHEVj4j+o", f, 1, f, 1, 1, sceFiosSuspend);
+    LIB_FUNCTION("3HAgZPl1v+4", f, 1, f, 1, 1, sceFiosTerminate);
+    LIB_FUNCTION("vKL406KPJRs", f, 1, f, 1, 1, sceFiosResume);
+    LIB_FUNCTION("ZPm4ROwjxi4", f, 1, f, 1, 1, sceFiosShutdownAndCancelOps);
+    LIB_FUNCTION("YkayyuR6HvI", f, 1, f, 1, 1, sceFiosIsIdle);
+    LIB_FUNCTION("aKWnlLIobGA", f, 1, f, 1, 1, sceFiosIsInitialized);
+    LIB_FUNCTION("F7whoytBofE", f, 1, f, 1, 1, sceFiosIsSuspended);
+    LIB_FUNCTION("8IGjwtnvYwI", f, 1, f, 1, 1, sceFiosIsValidHandle);
+    LIB_FUNCTION("Lxgze5-E3uQ", f, 1, f, 1, 1, sceFiosGetSuspendCount);
+    LIB_FUNCTION("wAKZ-det+yo", f, 1, f, 1, 1, sceFiosInitialize);
+
+    // date + time
+    LIB_FUNCTION("DCfnYVX6xBo", f, 1, f, 1, 1, sceFiosPrintTimeStamps);
+    LIB_FUNCTION("NUkBGOZARi4", f, 1, f, 1, 1, sceFiosTimeGetCurrent);
+    LIB_FUNCTION("F1dCP7qkqok", f, 1, f, 1, 1, sceFiosTimeIntervalFromNanoseconds);
+    LIB_FUNCTION("vZNIcB3n+bg", f, 1, f, 1, 1, sceFiosTimeIntervalToNanoseconds);
+    LIB_FUNCTION("m96WzIHunT8", f, 1, f, 1, 1, sceFiosTraceTimestamp);
+    LIB_FUNCTION("92xCv12VJIA", f, 1, f, 1, 1, sceFiosSaveTimeStamp);
+    LIB_FUNCTION("axVqO-tslwo", f, 1, f, 1, 1, sceFiosDateFromComponents);
+    LIB_FUNCTION("tQ6zNr0O6GA", f, 1, f, 1, 1, sceFiosDateGetCurrent);
+    LIB_FUNCTION("Rm+hiwvSnxw", f, 1, f, 1, 1, sceFiosDateToComponents);
+
     // io filter
     LIB_FUNCTION("lgITuBsRo2o", f, 1, f, 1, 1, sceFiosIOFilterAdd);
     LIB_FUNCTION("lAikj8EfcJg", f, 1, f, 1, 1, sceFiosIOFilterCache);
     LIB_FUNCTION("gHxxOQxKW3E", f, 1, f, 1, 1, sceFiosIOFilterGetInfo);
     LIB_FUNCTION("OIGbkgGOu6E", f, 1, f, 1, 1, sceFiosIOFilterPsarcDearchiver);
     LIB_FUNCTION("ahIXyuwF0-o", f, 1, f, 1, 1, sceFiosIOFilterRemove);
-
 
     // operations
     LIB_FUNCTION("FA7dUleeGik", f, 1, f, 1, 1, sceFiosOpCancel);
@@ -1023,6 +1002,37 @@ void RegisterlibSceFios2(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("2JtEQrjeUR4", f, 1, f, 1, 1, sceFiosSetGlobalDefaultOpAttr);
     LIB_FUNCTION("4Ml2G-TSCho", f, 1, f, 1, 1, sceFiosSetThreadDefaultOpAttr);
 
+    // cache
+    LIB_FUNCTION("7CXAnIwFY3U", f, 1, f, 1, 1, sceFiosCacheContainsFileRangeSync);
+    LIB_FUNCTION("H6wju6uvjmA", f, 1, f, 1, 1, sceFiosCacheContainsFileSync);
+    LIB_FUNCTION("8e4TgQd155k", f, 1, f, 1, 1, sceFiosCacheFlushFileRangeSync);
+    LIB_FUNCTION("R4YQI0YpbB0", f, 1, f, 1, 1, sceFiosCacheFlushFileSync);
+    LIB_FUNCTION("NRe2Dtymlmk", f, 1, f, 1, 1, sceFiosCacheFlushSync);
+    LIB_FUNCTION("iGpuaBFQroQ", f, 1, f, 1, 1, sceFiosCachePrefetchFH);
+    LIB_FUNCTION("uT4EBfl284o", f, 1, f, 1, 1, sceFiosCachePrefetchFHRange);
+    LIB_FUNCTION("tm3Hb4s0et8", f, 1, f, 1, 1, sceFiosCachePrefetchFHRangeSync);
+    LIB_FUNCTION("zIx-FcuPXVM", f, 1, f, 1, 1, sceFiosCachePrefetchFHSync);
+    LIB_FUNCTION("T8upMyvUPz0", f, 1, f, 1, 1, sceFiosCachePrefetchFile);
+    LIB_FUNCTION("FYGZ0F5ZglA", f, 1, f, 1, 1, sceFiosCachePrefetchFileRange);
+    LIB_FUNCTION("ZzE6WN+QBbE", f, 1, f, 1, 1, sceFiosCachePrefetchFileRangeSync);
+    LIB_FUNCTION("bC0WTypscWg", f, 1, f, 1, 1, sceFiosCachePrefetchFileSync);
+
+    // archive
+    LIB_FUNCTION("GxAF6y9l98M", f, 1, f, 1, 1, sceFiosArchiveGetDecompressorThreadCount);
+    LIB_FUNCTION("ERmiOK9VT0g", f, 1, f, 1, 1, sceFiosArchiveGetMountBufferSize);
+    LIB_FUNCTION("UUriaXy7G90", f, 1, f, 1, 1, sceFiosArchiveGetMountBufferSizeSync);
+    LIB_FUNCTION("pIU8u6VsLM8", f, 1, f, 1, 1, sceFiosArchiveMount);
+    LIB_FUNCTION("xutLbQdqyb4", f, 1, f, 1, 1, sceFiosArchiveMountSync);
+    LIB_FUNCTION("VKQ8pi4466g", f, 1, f, 1, 1, sceFiosArchiveMountWithOrder);
+    LIB_FUNCTION("GEAzhWJM1mY", f, 1, f, 1, 1, sceFiosArchiveMountWithOrderSync);
+    LIB_FUNCTION("Dfwp-U1OfRI", f, 1, f, 1, 1, sceFiosArchiveSetDecompressorThreadCount);
+    LIB_FUNCTION("YfTBBU5nONQ", f, 1, f, 1, 1, sceFiosArchiveUnmount);
+    LIB_FUNCTION("yy6C7k7FPZY", f, 1, f, 1, 1, sceFiosArchiveUnmountSync);
+
+    // print
+    LIB_FUNCTION("z0zd9JqbxYs", f, 1, f, 1, 1, sceFiosPrintf);
+    LIB_FUNCTION("FOEUXzOE0ow", f, 1, f, 1, 1, sceFiosVprintf);
+
     // overlay
     LIB_FUNCTION("TXABsmiiqto", f, 1, f, 1, 1, sceFiosOverlayAdd);
     LIB_FUNCTION("lFVNuWYTTFs", f, 1, f, 1, 1, sceFiosOverlayGetInfo);
@@ -1031,20 +1041,9 @@ void RegisterlibSceFios2(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("MuMnDaXBTm0", f, 1, f, 1, 1, sceFiosOverlayRemove);
     LIB_FUNCTION("8inAOixHSQw", f, 1, f, 1, 1, sceFiosOverlayResolveSync);
 
-    // date + time
-    LIB_FUNCTION("DCfnYVX6xBo", f, 1, f, 1, 1, sceFiosPrintTimeStamps);
-    LIB_FUNCTION("NUkBGOZARi4", f, 1, f, 1, 1, sceFiosTimeGetCurrent);
-    LIB_FUNCTION("F1dCP7qkqok", f, 1, f, 1, 1, sceFiosTimeIntervalFromNanoseconds);
-    LIB_FUNCTION("vZNIcB3n+bg", f, 1, f, 1, 1, sceFiosTimeIntervalToNanoseconds);
-    LIB_FUNCTION("m96WzIHunT8", f, 1, f, 1, 1, sceFiosTraceTimestamp);
-    LIB_FUNCTION("92xCv12VJIA", f, 1, f, 1, 1, sceFiosSaveTimeStamp);
-    LIB_FUNCTION("axVqO-tslwo", f, 1, f, 1, 1, sceFiosDateFromComponents);
-    LIB_FUNCTION("tQ6zNr0O6GA", f, 1, f, 1, 1, sceFiosDateGetCurrent);
-    LIB_FUNCTION("Rm+hiwvSnxw", f, 1, f, 1, 1, sceFiosDateToComponents);
-
-    // print
-    LIB_FUNCTION("z0zd9JqbxYs", f, 1, f, 1, 1, sceFiosPrintf);
-    LIB_FUNCTION("FOEUXzOE0ow", f, 1, f, 1, 1, sceFiosVprintf);
+    // dll
+    LIB_FUNCTION("PIw2ZEh6JyI", f, 1, f, 1, 1, sceFiosDLLInitialize);
+    LIB_FUNCTION("kPvgi8x497Q", f, 1, f, 1, 1, sceFiosDLLTerminate);
 };
 
 } // namespace Libraries::Fios2
