@@ -1,12 +1,15 @@
 // SPDX-FileCopyrightText: Copyright 2025 shadPS4 Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <mutex>
 #include "common/logging/log.h"
 #include "core/libraries/error_codes.h"
 #include "core/libraries/fios2/fios2.h"
 #include "core/libraries/libs.h"
 
 namespace Libraries::Fios2 {
+
+std::mutex m{};
 
 s32 PS4_SYSV_ABI sceFiosArchiveGetDecompressorThreadCount() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
@@ -20,7 +23,8 @@ s32 PS4_SYSV_ABI sceFiosArchiveGetMountBufferSize() {
 
 s32 PS4_SYSV_ABI sceFiosArchiveGetMountBufferSizeSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosArchiveGetMountBufferSize();
 }
 
 s32 PS4_SYSV_ABI sceFiosArchiveMount() {
@@ -30,7 +34,8 @@ s32 PS4_SYSV_ABI sceFiosArchiveMount() {
 
 s32 PS4_SYSV_ABI sceFiosArchiveMountSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosArchiveMount();
 }
 
 s32 PS4_SYSV_ABI sceFiosArchiveMountWithOrder() {
@@ -40,7 +45,8 @@ s32 PS4_SYSV_ABI sceFiosArchiveMountWithOrder() {
 
 s32 PS4_SYSV_ABI sceFiosArchiveMountWithOrderSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosArchiveMountWithOrder();
 }
 
 s32 PS4_SYSV_ABI sceFiosArchiveSetDecompressorThreadCount() {
@@ -55,31 +61,37 @@ s32 PS4_SYSV_ABI sceFiosArchiveUnmount() {
 
 s32 PS4_SYSV_ABI sceFiosArchiveUnmountSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
+    std::scoped_lock l{m};
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI sceFiosCacheContainsFileRangeSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
+    std::scoped_lock l{m};
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI sceFiosCacheContainsFileSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
+    std::scoped_lock l{m};
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI sceFiosCacheFlushFileRangeSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
+    std::scoped_lock l{m};
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI sceFiosCacheFlushFileSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
+    std::scoped_lock l{m};
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI sceFiosCacheFlushSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
+    std::scoped_lock l{m};
     return ORBIS_OK;
 }
 
@@ -95,11 +107,13 @@ s32 PS4_SYSV_ABI sceFiosCachePrefetchFHRange() {
 
 s32 PS4_SYSV_ABI sceFiosCachePrefetchFHRangeSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosCachePrefetchFHRange();
 }
 
 s32 PS4_SYSV_ABI sceFiosCachePrefetchFHSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
+    std::scoped_lock l{m};
     return ORBIS_OK;
 }
 
@@ -115,12 +129,14 @@ s32 PS4_SYSV_ABI sceFiosCachePrefetchFileRange() {
 
 s32 PS4_SYSV_ABI sceFiosCachePrefetchFileRangeSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosCachePrefetchFileRange();
 }
 
 s32 PS4_SYSV_ABI sceFiosCachePrefetchFileSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosCachePrefetchFile();
 }
 
 s32 PS4_SYSV_ABI sceFiosCancelAllOps() {
@@ -190,7 +206,8 @@ s32 PS4_SYSV_ABI sceFiosDelete() {
 
 s32 PS4_SYSV_ABI sceFiosDeleteSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosDelete();
 }
 
 s32 PS4_SYSV_ABI sceFiosDHClose() {
@@ -200,7 +217,8 @@ s32 PS4_SYSV_ABI sceFiosDHClose() {
 
 s32 PS4_SYSV_ABI sceFiosDHCloseSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosDHClose();
 }
 
 s32 PS4_SYSV_ABI sceFiosDHGetPath() {
@@ -215,7 +233,8 @@ s32 PS4_SYSV_ABI sceFiosDHOpen() {
 
 s32 PS4_SYSV_ABI sceFiosDHOpenSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosDHOpen();
 }
 
 s32 PS4_SYSV_ABI sceFiosDHRead() {
@@ -225,7 +244,8 @@ s32 PS4_SYSV_ABI sceFiosDHRead() {
 
 s32 PS4_SYSV_ABI sceFiosDHReadSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosDHRead();
 }
 
 s32 PS4_SYSV_ABI sceFiosDirectoryCreate() {
@@ -235,7 +255,8 @@ s32 PS4_SYSV_ABI sceFiosDirectoryCreate() {
 
 s32 PS4_SYSV_ABI sceFiosDirectoryCreateSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosDirectoryCreate();
 }
 
 s32 PS4_SYSV_ABI sceFiosDirectoryCreateWithMode() {
@@ -245,7 +266,8 @@ s32 PS4_SYSV_ABI sceFiosDirectoryCreateWithMode() {
 
 s32 PS4_SYSV_ABI sceFiosDirectoryCreateWithModeSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosDirectoryCreateWithMode();
 }
 
 s32 PS4_SYSV_ABI sceFiosDirectoryDelete() {
@@ -255,7 +277,8 @@ s32 PS4_SYSV_ABI sceFiosDirectoryDelete() {
 
 s32 PS4_SYSV_ABI sceFiosDirectoryDeleteSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosDirectoryDelete();
 }
 
 bool PS4_SYSV_ABI sceFiosDirectoryExists() {
@@ -265,7 +288,8 @@ bool PS4_SYSV_ABI sceFiosDirectoryExists() {
 
 bool PS4_SYSV_ABI sceFiosDirectoryExistsSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosDirectoryExists();
 }
 
 s32 PS4_SYSV_ABI sceFiosDLLInitialize() {
@@ -278,14 +302,15 @@ s32 PS4_SYSV_ABI sceFiosDLLTerminate() {
     return ORBIS_OK;
 }
 
-bool PS4_SYSV_ABI sceFiosExists(char* path, u64 param_2) {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called path: {} param_2: {}", path, param_2);
+bool PS4_SYSV_ABI sceFiosExists(void* param_1, char* param_2) {
+    LOG_ERROR(Lib_Fios2, "(STUBBED) called path: {} param_2: {}", param_1, param_2);
     return ORBIS_OK;
 }
 
 bool PS4_SYSV_ABI sceFiosExistsSync(void* param_1, char* param_2) {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called param_1: {} param_2: {}", param_1, param_2);
-    return true;
+    LOG_ERROR(Lib_Fios2, "(STUBBED) called");
+    std::scoped_lock l{m};
+    return sceFiosExists(param_1, param_2);
 }
 
 s32 PS4_SYSV_ABI sceFiosFHClose() {
@@ -295,7 +320,8 @@ s32 PS4_SYSV_ABI sceFiosFHClose() {
 
 s32 PS4_SYSV_ABI sceFiosFHCloseSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosFHClose();
 }
 
 s32 PS4_SYSV_ABI sceFiosFHGetOpenParams() {
@@ -320,19 +346,22 @@ s32 PS4_SYSV_ABI sceFiosFHOpen() {
 
 s32 PS4_SYSV_ABI sceFiosFHOpenSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosFHOpen();
 }
 
-s32 PS4_SYSV_ABI sceFiosFHOpenWithMode() {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called");
+s32 PS4_SYSV_ABI sceFiosFHOpenWithMode(void* param_1, void* param_2, char* param_3, u16* param_4,
+                                       u32 param_5) {
+    LOG_ERROR(Lib_Fios2, "(STUBBED) called param_1 {} param_2 {} param_3 {} param_4 {} param_5 {} ",
+              param_1, (void*)param_2, param_3, (void*)param_4, param_5);
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI sceFiosFHOpenWithModeSync(void* param_1, void* param_2, char* param_3,
                                            u16* param_4, u32 param_5) {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called param_1 {} param_2 {} param_3 {} param_4 {} param_5 {} ",
-              param_1, (void*)param_2, param_3, (void*)param_4, param_5);
-    return ORBIS_OK;
+    LOG_ERROR(Lib_Fios2, "(STUBBED) called");
+    std::scoped_lock l{m};
+    return sceFiosFHOpenWithMode(param_1, param_2, param_3, param_4, param_5);
 }
 
 s32 PS4_SYSV_ABI sceFiosFHPread() {
@@ -342,7 +371,8 @@ s32 PS4_SYSV_ABI sceFiosFHPread() {
 
 s32 PS4_SYSV_ABI sceFiosFHPreadSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosFHPread();
 }
 
 s32 PS4_SYSV_ABI sceFiosFHPreadv() {
@@ -352,7 +382,8 @@ s32 PS4_SYSV_ABI sceFiosFHPreadv() {
 
 s32 PS4_SYSV_ABI sceFiosFHPreadvSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosFHPreadv();
 }
 
 s32 PS4_SYSV_ABI sceFiosFHPwrite() {
@@ -362,7 +393,8 @@ s32 PS4_SYSV_ABI sceFiosFHPwrite() {
 
 s32 PS4_SYSV_ABI sceFiosFHPwriteSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosFHPwrite();
 }
 
 s32 PS4_SYSV_ABI sceFiosFHPwritev() {
@@ -372,7 +404,8 @@ s32 PS4_SYSV_ABI sceFiosFHPwritev() {
 
 s32 PS4_SYSV_ABI sceFiosFHPwritevSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosFHPwritev();
 }
 
 s32 PS4_SYSV_ABI sceFiosFHRead() {
@@ -382,7 +415,8 @@ s32 PS4_SYSV_ABI sceFiosFHRead() {
 
 s32 PS4_SYSV_ABI sceFiosFHReadSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosFHRead();
 }
 
 s32 PS4_SYSV_ABI sceFiosFHReadv() {
@@ -392,7 +426,8 @@ s32 PS4_SYSV_ABI sceFiosFHReadv() {
 
 s32 PS4_SYSV_ABI sceFiosFHReadvSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosFHReadv();
 }
 
 s32 PS4_SYSV_ABI sceFiosFHSeek() {
@@ -407,7 +442,8 @@ s32 PS4_SYSV_ABI sceFiosFHStat() {
 
 s32 PS4_SYSV_ABI sceFiosFHStatSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosFHStat();
 }
 
 s32 PS4_SYSV_ABI sceFiosFHSync() {
@@ -417,7 +453,8 @@ s32 PS4_SYSV_ABI sceFiosFHSync() {
 
 s32 PS4_SYSV_ABI sceFiosFHSyncSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosFHSync();
 }
 
 s32 PS4_SYSV_ABI sceFiosFHTell() {
@@ -437,7 +474,8 @@ s32 PS4_SYSV_ABI sceFiosFHTruncate() {
 
 s32 PS4_SYSV_ABI sceFiosFHTruncateSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosFHTruncate();
 }
 
 s32 PS4_SYSV_ABI sceFiosFHWrite() {
@@ -447,7 +485,8 @@ s32 PS4_SYSV_ABI sceFiosFHWrite() {
 
 s32 PS4_SYSV_ABI sceFiosFHWriteSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosFHWrite();
 }
 
 s32 PS4_SYSV_ABI sceFiosFHWritev() {
@@ -457,7 +496,8 @@ s32 PS4_SYSV_ABI sceFiosFHWritev() {
 
 s32 PS4_SYSV_ABI sceFiosFHWritevSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosFHWritev();
 }
 
 s32 PS4_SYSV_ABI sceFiosFileDelete() {
@@ -467,7 +507,8 @@ s32 PS4_SYSV_ABI sceFiosFileDelete() {
 
 s32 PS4_SYSV_ABI sceFiosFileDeleteSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosFileDelete();
 }
 
 bool PS4_SYSV_ABI sceFiosFileExists() {
@@ -477,7 +518,8 @@ bool PS4_SYSV_ABI sceFiosFileExists() {
 
 bool PS4_SYSV_ABI sceFiosFileExistsSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosFileExists();
 }
 
 s32 PS4_SYSV_ABI sceFiosFileGetSize() {
@@ -487,7 +529,8 @@ s32 PS4_SYSV_ABI sceFiosFileGetSize() {
 
 s32 PS4_SYSV_ABI sceFiosFileGetSizeSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosFileGetSize();
 }
 
 s32 PS4_SYSV_ABI sceFiosFilenoToFH() {
@@ -502,7 +545,8 @@ s32 PS4_SYSV_ABI sceFiosFileRead() {
 
 s32 PS4_SYSV_ABI sceFiosFileReadSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosFileRead();
 }
 
 s32 PS4_SYSV_ABI sceFiosFileTruncate() {
@@ -512,7 +556,8 @@ s32 PS4_SYSV_ABI sceFiosFileTruncate() {
 
 s32 PS4_SYSV_ABI sceFiosFileTruncateSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosFileTruncate();
 }
 
 s32 PS4_SYSV_ABI sceFiosFileWrite() {
@@ -522,7 +567,8 @@ s32 PS4_SYSV_ABI sceFiosFileWrite() {
 
 s32 PS4_SYSV_ABI sceFiosFileWriteSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosFileWrite();
 }
 
 s32 PS4_SYSV_ABI sceFiosGetAllDHs() {
@@ -762,7 +808,8 @@ s32 PS4_SYSV_ABI sceFiosRename() {
 
 s32 PS4_SYSV_ABI sceFiosRenameSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosRename();
 }
 
 s32 PS4_SYSV_ABI sceFiosResolve() {
@@ -772,7 +819,8 @@ s32 PS4_SYSV_ABI sceFiosResolve() {
 
 s32 PS4_SYSV_ABI sceFiosResolveSync() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosResolve();
 }
 
 s32 PS4_SYSV_ABI sceFiosResume() {
@@ -800,14 +848,15 @@ s32 PS4_SYSV_ABI sceFiosShutdownAndCancelOps() {
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI sceFiosStat() {
+s32 PS4_SYSV_ABI sceFiosStat(char* param_1, char* param_2, char* param_3) {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI sceFiosStatSync(char* param_1, char* param_2, char* param_3) {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    return sceFiosStat(param_1, param_2, param_3);
 }
 
 s32 PS4_SYSV_ABI sceFiosSuspend() {
@@ -889,7 +938,7 @@ void RegisterlibSceFios2(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("QKsI9N7K1zE", f, 1, f, 1, 1, sceFiosStat);
     LIB_FUNCTION("jayvY07C5dk", f, 1, f, 1, 1, sceFiosStatSync);
 
-    // fiosDH
+    // fiosDH (directory handle)
     LIB_FUNCTION("oT68xenFqSY", f, 1, f, 1, 1, sceFiosDHClose);
     LIB_FUNCTION("0-p4O8FINmU", f, 1, f, 1, 1, sceFiosDHCloseSync);
     LIB_FUNCTION("K7SHCEr+PkQ", f, 1, f, 1, 1, sceFiosDHGetPath);
@@ -899,7 +948,7 @@ void RegisterlibSceFios2(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("odjOGg8harg", f, 1, f, 1, 1, sceFiosDHReadSync);
     LIB_FUNCTION("lHKLprulT24", f, 1, f, 1, 1, sceFiosGetAllDHs);
 
-    // fiosFH
+    // fiosFH (file handle)
     LIB_FUNCTION("+mfO27a-bEY", f, 1, f, 1, 1, sceFiosDeallocatePassthruFH);
     LIB_FUNCTION("5sYNBNK+W3g", f, 1, f, 1, 1, sceFiosFHClose);
     LIB_FUNCTION("AOujSGqU+ms", f, 1, f, 1, 1, sceFiosFHCloseSync);
@@ -936,6 +985,7 @@ void RegisterlibSceFios2(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("2PKMNZuXcPQ", f, 1, f, 1, 1, sceFiosFHWritev);
     LIB_FUNCTION("t4vLDMxzzf0", f, 1, f, 1, 1, sceFiosFHWritevSync);
     LIB_FUNCTION("4Kgi9D47mC8", f, 1, f, 1, 1, sceFiosGetAllFHs);
+    LIB_FUNCTION("8IGjwtnvYwI", f, 1, f, 1, 1, sceFiosIsValidHandle);
 
     // misc + init + shutdown
     LIB_FUNCTION("-q4M5WX0Jrs", f, 1, f, 1, 1, sceFiosCancelAllOps);
@@ -954,7 +1004,6 @@ void RegisterlibSceFios2(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("YkayyuR6HvI", f, 1, f, 1, 1, sceFiosIsIdle);
     LIB_FUNCTION("aKWnlLIobGA", f, 1, f, 1, 1, sceFiosIsInitialized);
     LIB_FUNCTION("F7whoytBofE", f, 1, f, 1, 1, sceFiosIsSuspended);
-    LIB_FUNCTION("8IGjwtnvYwI", f, 1, f, 1, 1, sceFiosIsValidHandle);
     LIB_FUNCTION("Lxgze5-E3uQ", f, 1, f, 1, 1, sceFiosGetSuspendCount);
     LIB_FUNCTION("wAKZ-det+yo", f, 1, f, 1, 1, sceFiosInitialize);
 
