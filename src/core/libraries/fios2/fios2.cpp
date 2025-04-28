@@ -851,202 +851,200 @@ s32 PS4_SYSV_ABI sceFiosVprintf() {
 }
 
 void RegisterlibSceFios2(Core::Loader::SymbolsResolver* sym) {
-    // todo only link required functions
-    return;
+    const char* f = "libSceFios2";
 
-    // LIB_FUNCTION("GxAF6y9l98M", "libSceFios2", 1, "libSceFios2", 1, 1,
-    //              sceFiosArchiveGetDecompressorThreadCount);
-    // LIB_FUNCTION("ERmiOK9VT0g", "libSceFios2", 1, "libSceFios2", 1, 1,
-    //              sceFiosArchiveGetMountBufferSize);
-    // LIB_FUNCTION("UUriaXy7G90", "libSceFios2", 1, "libSceFios2", 1, 1,
-    //              sceFiosArchiveGetMountBufferSizeSync);
-    // LIB_FUNCTION("pIU8u6VsLM8", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosArchiveMount);
-    // LIB_FUNCTION("xutLbQdqyb4", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosArchiveMountSync);
-    // LIB_FUNCTION("VKQ8pi4466g", "libSceFios2", 1, "libSceFios2", 1, 1,
-    //              sceFiosArchiveMountWithOrder);
-    // LIB_FUNCTION("GEAzhWJM1mY", "libSceFios2", 1, "libSceFios2", 1, 1,
-    //              sceFiosArchiveMountWithOrderSync);
-    // LIB_FUNCTION("Dfwp-U1OfRI", "libSceFios2", 1, "libSceFios2", 1, 1,
-    //              sceFiosArchiveSetDecompressorThreadCount);
-    // LIB_FUNCTION("YfTBBU5nONQ", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosArchiveUnmount);
-    // LIB_FUNCTION("yy6C7k7FPZY", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosArchiveUnmountSync); LIB_FUNCTION("7CXAnIwFY3U", "libSceFios2", 1, "libSceFios2", 1,
-    // 1,
-    //              sceFiosCacheContainsFileRangeSync);
-    LIB_FUNCTION("H6wju6uvjmA", "libSceFios2", 1, "libSceFios2", 1, 1,
-                 sceFiosCacheContainsFileSync);
-    LIB_FUNCTION("8e4TgQd155k", "libSceFios2", 1, "libSceFios2", 1, 1,
-                 sceFiosCacheFlushFileRangeSync);
-    LIB_FUNCTION("R4YQI0YpbB0", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosCacheFlushFileSync);
-    LIB_FUNCTION("NRe2Dtymlmk", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosCacheFlushSync);
-    LIB_FUNCTION("iGpuaBFQroQ", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosCachePrefetchFH);
-    LIB_FUNCTION("uT4EBfl284o", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosCachePrefetchFHRange);
-    LIB_FUNCTION("tm3Hb4s0et8", "libSceFios2", 1, "libSceFios2", 1, 1,
-                 sceFiosCachePrefetchFHRangeSync);
-    LIB_FUNCTION("zIx-FcuPXVM", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosCachePrefetchFHSync);
-    LIB_FUNCTION("T8upMyvUPz0", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosCachePrefetchFile);
-    LIB_FUNCTION("FYGZ0F5ZglA", "libSceFios2", 1, "libSceFios2", 1, 1,
-                 sceFiosCachePrefetchFileRange);
-    LIB_FUNCTION("ZzE6WN+QBbE", "libSceFios2", 1, "libSceFios2", 1, 1,
-                 sceFiosCachePrefetchFileRangeSync);
-    LIB_FUNCTION("bC0WTypscWg", "libSceFios2", 1, "libSceFios2", 1, 1,
-                 sceFiosCachePrefetchFileSync);
-    LIB_FUNCTION("-q4M5WX0Jrs", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosCancelAllOps);
-    LIB_FUNCTION("wb8H3F+T6Ew", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosClearTimeStamps);
-    LIB_FUNCTION("aKxpgAMSJ04", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosCloseAllFiles);
-    LIB_FUNCTION("axVqO-tslwo", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDateFromComponents);
-    LIB_FUNCTION("tQ6zNr0O6GA", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDateGetCurrent);
-    LIB_FUNCTION("Rm+hiwvSnxw", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDateToComponents);
-    LIB_FUNCTION("+mfO27a-bEY", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDeallocatePassthruFH);
-    LIB_FUNCTION("fJTrPsXNsBY", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDebugDumpDate);
-    LIB_FUNCTION("FyuoXPzv780", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDebugDumpDH);
-    LIB_FUNCTION("8BLW2WiSIuI", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDebugDumpError);
-    LIB_FUNCTION("Sj5lbc4Y0mI", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDebugDumpFH);
-    LIB_FUNCTION("4-yhZ7aj3VE", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDebugDumpOp);
-    LIB_FUNCTION("nomcox0J32k", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDelete);
-    LIB_FUNCTION("KsVTc04kN9k", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDeleteSync);
-    LIB_FUNCTION("oT68xenFqSY", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDHClose);
-    LIB_FUNCTION("0-p4O8FINmU", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDHCloseSync);
-    LIB_FUNCTION("K7SHCEr+PkQ", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDHGetPath);
-    LIB_FUNCTION("uCkgJOrYUL4", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDHOpen);
-    LIB_FUNCTION("GGqucL9F+YI", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDHOpenSync);
-    LIB_FUNCTION("kG+A6NNwDow", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDHRead);
-    LIB_FUNCTION("odjOGg8harg", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDHReadSync);
-    LIB_FUNCTION("-ULUBK21QgE", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDirectoryCreate);
-    LIB_FUNCTION("nWuza0ZdfqA", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDirectoryCreateSync);
-    LIB_FUNCTION("C5J+ANTy0qI", "libSceFios2", 1, "libSceFios2", 1, 1,
-                 sceFiosDirectoryCreateWithMode);
-    LIB_FUNCTION("U6Qhv-QWXTc", "libSceFios2", 1, "libSceFios2", 1, 1,
-                 sceFiosDirectoryCreateWithModeSync);
-    LIB_FUNCTION("rTjM9QpSyOM", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDirectoryDelete);
-    LIB_FUNCTION("n5TUlwdhGSA", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDirectoryDeleteSync);
-    LIB_FUNCTION("vtHd00f0O50", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDirectoryExists);
-    LIB_FUNCTION("OOuvHKTu4Oc", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDirectoryExistsSync);
-    LIB_FUNCTION("PIw2ZEh6JyI", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDLLInitialize);
-    LIB_FUNCTION("kPvgi8x497Q", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosDLLTerminate);
-    LIB_FUNCTION("LHqFYb+U52E", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosExists);
-    LIB_FUNCTION("2ZaHWy3IhKQ", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosExistsSync);
-    // LIB_FUNCTION("5sYNBNK+W3g", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosFHClose);
-    // LIB_FUNCTION("AOujSGqU+ms", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosFHCloseSync);
-    // LIB_FUNCTION("lP9bRJMj0GU", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosFHGetOpenParams);
-    // LIB_FUNCTION("Mif6IzBa0hc", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosFHGetPath);
-    // LIB_FUNCTION("FdjoqFQOlt0", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosFHGetSize);
-    // LIB_FUNCTION("er6TkQFUvp0", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosFHOpen);
-    // LIB_FUNCTION("b44anV2D7K0", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosFHOpenSync);
-    // LIB_FUNCTION("jjzbvzquenM", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosFHOpenWithMode);
-    // LIB_FUNCTION("w13Ojm7ON9o", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosFHOpenWithModeSync); LIB_FUNCTION("rR8wq7YFRZs", "libSceFios2", 1, "libSceFios2", 1,
-    // 1, sceFiosFHPread); LIB_FUNCTION("2m9+Opco-hk", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosFHPreadSync); LIB_FUNCTION("pl4pWsecyrY", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosFHPreadv); LIB_FUNCTION("OHl4kz+OCws", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosFHPreadvSync); LIB_FUNCTION("PbxGVfOvUQY", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosFHPwrite); LIB_FUNCTION("gMcfOtHW6zk", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosFHPwriteSync); LIB_FUNCTION("3UPU8hbpaW0", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosFHPwritev); LIB_FUNCTION("J6Ujb3RviBA", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosFHPwritevSync); LIB_FUNCTION("cg-VoPqZYss", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosFHRead); LIB_FUNCTION("Bn2ZF4ZjeuQ", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosFHReadSync); LIB_FUNCTION("Socc-lFocbc", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosFHReadv); LIB_FUNCTION("ltWdd+agvD0", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosFHReadvSync); LIB_FUNCTION("xReSebwKApA", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosFHSeek); LIB_FUNCTION("--2iRpRn5Bw", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosFHStat); LIB_FUNCTION("xP45eIntEis", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosFHStatSync); LIB_FUNCTION("dQnI6o2OEC8", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosFHSync); LIB_FUNCTION("EzzSJz6yuMc", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosFHSyncSync); LIB_FUNCTION("MrRFrdgpsx8", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosFHTell); LIB_FUNCTION("8dzXU5GxsjI", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosFHToFileno); LIB_FUNCTION("0--XhDM7E-Q", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosFHTruncate); LIB_FUNCTION("tWS4uYFTU0M", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosFHTruncateSync); LIB_FUNCTION("urUHkGGweA4", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosFHWrite); LIB_FUNCTION("Kl-TbrDU9YM", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosFHWriteSync); LIB_FUNCTION("2PKMNZuXcPQ", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosFHWritev); LIB_FUNCTION("t4vLDMxzzf0", "libSceFios2", 1, "libSceFios2", 1, 1,
-    // sceFiosFHWritevSync);
-    LIB_FUNCTION("VQ8e5t8vtYg", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosFileDelete);
-    LIB_FUNCTION("bDupEgbQ6Fk", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosFileDeleteSync);
-    LIB_FUNCTION("OY8v8WDzn3s", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosFileExists);
-    LIB_FUNCTION("NwOHMRM2Ppw", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosFileExistsSync);
-    LIB_FUNCTION("6jTNxzXckKU", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosFileGetSize);
-    LIB_FUNCTION("zF8-CRvRXnM", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosFileGetSizeSync);
-    LIB_FUNCTION("oRgsgfJY3Mc", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosFilenoToFH);
-    LIB_FUNCTION("YlKCkfJL+Y8", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosFileRead);
-    LIB_FUNCTION("kVMxSiYD6tc", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosFileReadSync);
-    LIB_FUNCTION("9oCCIMp7zLo", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosFileTruncate);
-    LIB_FUNCTION("gRA2pp3a1-k", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosFileTruncateSync);
-    LIB_FUNCTION("q8CfetImdIY", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosFileWrite);
-    LIB_FUNCTION("wj-U+mMbyAM", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosFileWriteSync);
-    LIB_FUNCTION("lHKLprulT24", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosGetAllDHs);
-    LIB_FUNCTION("4Kgi9D47mC8", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosGetAllFHs);
-    LIB_FUNCTION("VdN2hNRay+E", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosGetAllOps);
-    LIB_FUNCTION("+AGLl-l-WVE", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosGetDefaultOpAttr);
-    LIB_FUNCTION("xiTqbFc7w+w", "libSceFios2", 1, "libSceFios2", 1, 1,
-                 sceFiosGetGlobalDefaultOpAttr);
-    LIB_FUNCTION("Lxgze5-E3uQ", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosGetSuspendCount);
-    LIB_FUNCTION("fZjp7AUc+DY", "libSceFios2", 1, "libSceFios2", 1, 1,
-                 sceFiosGetThreadDefaultOpAttr);
-    // LIB_FUNCTION("wAKZ-det+yo", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosInitialize);
-    // LIB_FUNCTION("lgITuBsRo2o", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosIOFilterAdd);
-    // LIB_FUNCTION("lAikj8EfcJg", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosIOFilterCache);
-    // LIB_FUNCTION("gHxxOQxKW3E", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosIOFilterGetInfo);
-    // LIB_FUNCTION("OIGbkgGOu6E", "libSceFios2", 1, "libSceFios2", 1, 1,
-    //              sceFiosIOFilterPsarcDearchiver);
-    // LIB_FUNCTION("ahIXyuwF0-o", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosIOFilterRemove);
-    LIB_FUNCTION("YkayyuR6HvI", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosIsIdle);
-    LIB_FUNCTION("aKWnlLIobGA", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosIsInitialized);
-    LIB_FUNCTION("F7whoytBofE", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosIsSuspended);
-    LIB_FUNCTION("8IGjwtnvYwI", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosIsValidHandle);
-    LIB_FUNCTION("FA7dUleeGik", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosOpCancel);
-    LIB_FUNCTION("5cyEcilO-J0", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosOpDelete);
-    LIB_FUNCTION("+FRvKknUj1I", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosOpGetActualCount);
-    LIB_FUNCTION("U44GbnRZ0NA", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosOpGetAttr);
-    LIB_FUNCTION("52bk-Ucb5s0", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosOpGetBuffer);
-    LIB_FUNCTION("X+7rIfY97Ps", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosOpGetError);
-    LIB_FUNCTION("J9ujmUpwWAc", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosOpGetOffset);
-    LIB_FUNCTION("4fZAv0vbycQ", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosOpGetPath);
-    LIB_FUNCTION("51jH2C+it2s", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosOpGetRequestCount);
-    LIB_FUNCTION("+8vcurPhbEY", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosOpIsCancelled);
-    LIB_FUNCTION("bfgo2Otmqz0", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosOpIsDone);
-    LIB_FUNCTION("DX1JP95j3Gg", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosOpReschedule);
-    LIB_FUNCTION("csVTpsP0RLk", "libSceFios2", 1, "libSceFios2", 1, 1,
-                 sceFiosOpRescheduleWithPriority);
-    LIB_FUNCTION("bHFaiUhZCrQ", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosOpSetBuffer);
-    LIB_FUNCTION("2wvqS7Odb6M", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosOpSyncWait);
-    LIB_FUNCTION("nP-LabYxHbk", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosOpSyncWaitForIO);
-    LIB_FUNCTION("SnoQQWnGK9I", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosOpWait);
-    LIB_FUNCTION("ZSsFitZ4Kpk", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosOpWaitUntil);
-    LIB_FUNCTION("TXABsmiiqto", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosOverlayAdd);
-    LIB_FUNCTION("lFVNuWYTTFs", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosOverlayGetInfo);
-    LIB_FUNCTION("qcZZ8FqdT8c", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosOverlayGetList);
-    LIB_FUNCTION("qD5Su6YGVWM", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosOverlayModify);
-    LIB_FUNCTION("MuMnDaXBTm0", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosOverlayRemove);
-    LIB_FUNCTION("8inAOixHSQw", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosOverlayResolveSync);
-    LIB_FUNCTION("VoXRcLMOH7w", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosPathcmp);
-    LIB_FUNCTION("zePYFs8UtNw", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosPathncmp);
-    LIB_FUNCTION("M8m6+Xnz9Ds", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosPathNormalize);
-    LIB_FUNCTION("z0zd9JqbxYs", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosPrintf);
-    LIB_FUNCTION("DCfnYVX6xBo", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosPrintTimeStamps);
-    LIB_FUNCTION("uYx2ZEq998s", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosRename);
-    LIB_FUNCTION("G-39lsdSgXo", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosRenameSync);
-    LIB_FUNCTION("hqP0nzTTxdo", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosResolve);
-    LIB_FUNCTION("oiK6kLAtAIE", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosResolveSync);
-    LIB_FUNCTION("vKL406KPJRs", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosResume);
-    LIB_FUNCTION("92xCv12VJIA", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosSaveTimeStamp);
-    LIB_FUNCTION("2JtEQrjeUR4", "libSceFios2", 1, "libSceFios2", 1, 1,
-                 sceFiosSetGlobalDefaultOpAttr);
-    LIB_FUNCTION("4Ml2G-TSCho", "libSceFios2", 1, "libSceFios2", 1, 1,
-                 sceFiosSetThreadDefaultOpAttr);
-    LIB_FUNCTION("ZPm4ROwjxi4", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosShutdownAndCancelOps);
-    LIB_FUNCTION("QKsI9N7K1zE", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosStat);
-    // LIB_FUNCTION("jayvY07C5dk", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosStatSync);
-    LIB_FUNCTION("tMYHEVj4j+o", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosSuspend);
-    LIB_FUNCTION("3HAgZPl1v+4", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosTerminate);
-    LIB_FUNCTION("NUkBGOZARi4", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosTimeGetCurrent);
-    LIB_FUNCTION("F1dCP7qkqok", "libSceFios2", 1, "libSceFios2", 1, 1,
-                 sceFiosTimeIntervalFromNanoseconds);
-    LIB_FUNCTION("vZNIcB3n+bg", "libSceFios2", 1, "libSceFios2", 1, 1,
-                 sceFiosTimeIntervalToNanoseconds);
-    LIB_FUNCTION("m96WzIHunT8", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosTraceTimestamp);
-    LIB_FUNCTION("l4OVTpJCyQI", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosUpdateParameters);
-    LIB_FUNCTION("FOEUXzOE0ow", "libSceFios2", 1, "libSceFios2", 1, 1, sceFiosVprintf);
+    // common
+    LIB_FUNCTION("LHqFYb+U52E", f, 1, f, 1, 1, sceFiosExists);
+    LIB_FUNCTION("2ZaHWy3IhKQ", f, 1, f, 1, 1, sceFiosExistsSync);
+    LIB_FUNCTION("nomcox0J32k", f, 1, f, 1, 1, sceFiosDelete);
+    LIB_FUNCTION("KsVTc04kN9k", f, 1, f, 1, 1, sceFiosDeleteSync);
+    LIB_FUNCTION("VQ8e5t8vtYg", f, 1, f, 1, 1, sceFiosFileDelete);
+    LIB_FUNCTION("bDupEgbQ6Fk", f, 1, f, 1, 1, sceFiosFileDeleteSync);
+    LIB_FUNCTION("OY8v8WDzn3s", f, 1, f, 1, 1, sceFiosFileExists);
+    LIB_FUNCTION("NwOHMRM2Ppw", f, 1, f, 1, 1, sceFiosFileExistsSync);
+    LIB_FUNCTION("6jTNxzXckKU", f, 1, f, 1, 1, sceFiosFileGetSize);
+    LIB_FUNCTION("zF8-CRvRXnM", f, 1, f, 1, 1, sceFiosFileGetSizeSync);
+    LIB_FUNCTION("oRgsgfJY3Mc", f, 1, f, 1, 1, sceFiosFilenoToFH);
+    LIB_FUNCTION("YlKCkfJL+Y8", f, 1, f, 1, 1, sceFiosFileRead);
+    LIB_FUNCTION("kVMxSiYD6tc", f, 1, f, 1, 1, sceFiosFileReadSync);
+    LIB_FUNCTION("9oCCIMp7zLo", f, 1, f, 1, 1, sceFiosFileTruncate);
+    LIB_FUNCTION("gRA2pp3a1-k", f, 1, f, 1, 1, sceFiosFileTruncateSync);
+    LIB_FUNCTION("q8CfetImdIY", f, 1, f, 1, 1, sceFiosFileWrite);
+    LIB_FUNCTION("wj-U+mMbyAM", f, 1, f, 1, 1, sceFiosFileWriteSync);
+    LIB_FUNCTION("-ULUBK21QgE", f, 1, f, 1, 1, sceFiosDirectoryCreate);
+    LIB_FUNCTION("nWuza0ZdfqA", f, 1, f, 1, 1, sceFiosDirectoryCreateSync);
+    LIB_FUNCTION("C5J+ANTy0qI", f, 1, f, 1, 1, sceFiosDirectoryCreateWithMode);
+    LIB_FUNCTION("U6Qhv-QWXTc", f, 1, f, 1, 1, sceFiosDirectoryCreateWithModeSync);
+    LIB_FUNCTION("rTjM9QpSyOM", f, 1, f, 1, 1, sceFiosDirectoryDelete);
+    LIB_FUNCTION("n5TUlwdhGSA", f, 1, f, 1, 1, sceFiosDirectoryDeleteSync);
+    LIB_FUNCTION("vtHd00f0O50", f, 1, f, 1, 1, sceFiosDirectoryExists);
+    LIB_FUNCTION("OOuvHKTu4Oc", f, 1, f, 1, 1, sceFiosDirectoryExistsSync);
+    LIB_FUNCTION("VoXRcLMOH7w", f, 1, f, 1, 1, sceFiosPathcmp);
+    LIB_FUNCTION("zePYFs8UtNw", f, 1, f, 1, 1, sceFiosPathncmp);
+    LIB_FUNCTION("M8m6+Xnz9Ds", f, 1, f, 1, 1, sceFiosPathNormalize);
+    LIB_FUNCTION("uYx2ZEq998s", f, 1, f, 1, 1, sceFiosRename);
+    LIB_FUNCTION("G-39lsdSgXo", f, 1, f, 1, 1, sceFiosRenameSync);
+    LIB_FUNCTION("hqP0nzTTxdo", f, 1, f, 1, 1, sceFiosResolve);
+    LIB_FUNCTION("oiK6kLAtAIE", f, 1, f, 1, 1, sceFiosResolveSync);
+    LIB_FUNCTION("QKsI9N7K1zE", f, 1, f, 1, 1, sceFiosStat);
+    LIB_FUNCTION("jayvY07C5dk", f, 1, f, 1, 1, sceFiosStatSync);
+
+    // archive
+    LIB_FUNCTION("GxAF6y9l98M", f, 1, f, 1, 1, sceFiosArchiveGetDecompressorThreadCount);
+    LIB_FUNCTION("ERmiOK9VT0g", f, 1, f, 1, 1, sceFiosArchiveGetMountBufferSize);
+    LIB_FUNCTION("UUriaXy7G90", f, 1, f, 1, 1, sceFiosArchiveGetMountBufferSizeSync);
+    LIB_FUNCTION("pIU8u6VsLM8", f, 1, f, 1, 1, sceFiosArchiveMount);
+    LIB_FUNCTION("xutLbQdqyb4", f, 1, f, 1, 1, sceFiosArchiveMountSync);
+    LIB_FUNCTION("VKQ8pi4466g", f, 1, f, 1, 1, sceFiosArchiveMountWithOrder);
+    LIB_FUNCTION("GEAzhWJM1mY", f, 1, f, 1, 1, sceFiosArchiveMountWithOrderSync);
+    LIB_FUNCTION("Dfwp-U1OfRI", f, 1, f, 1, 1, sceFiosArchiveSetDecompressorThreadCount);
+    LIB_FUNCTION("YfTBBU5nONQ", f, 1, f, 1, 1, sceFiosArchiveUnmount);
+    LIB_FUNCTION("yy6C7k7FPZY", f, 1, f, 1, 1, sceFiosArchiveUnmountSync);
+
+    // cache
+    LIB_FUNCTION("7CXAnIwFY3U", f, 1, f, 1, 1, sceFiosCacheContainsFileRangeSync);
+    LIB_FUNCTION("H6wju6uvjmA", f, 1, f, 1, 1, sceFiosCacheContainsFileSync);
+    LIB_FUNCTION("8e4TgQd155k", f, 1, f, 1, 1, sceFiosCacheFlushFileRangeSync);
+    LIB_FUNCTION("R4YQI0YpbB0", f, 1, f, 1, 1, sceFiosCacheFlushFileSync);
+    LIB_FUNCTION("NRe2Dtymlmk", f, 1, f, 1, 1, sceFiosCacheFlushSync);
+    LIB_FUNCTION("iGpuaBFQroQ", f, 1, f, 1, 1, sceFiosCachePrefetchFH);
+    LIB_FUNCTION("uT4EBfl284o", f, 1, f, 1, 1, sceFiosCachePrefetchFHRange);
+    LIB_FUNCTION("tm3Hb4s0et8", f, 1, f, 1, 1, sceFiosCachePrefetchFHRangeSync);
+    LIB_FUNCTION("zIx-FcuPXVM", f, 1, f, 1, 1, sceFiosCachePrefetchFHSync);
+    LIB_FUNCTION("T8upMyvUPz0", f, 1, f, 1, 1, sceFiosCachePrefetchFile);
+    LIB_FUNCTION("FYGZ0F5ZglA", f, 1, f, 1, 1, sceFiosCachePrefetchFileRange);
+    LIB_FUNCTION("ZzE6WN+QBbE", f, 1, f, 1, 1, sceFiosCachePrefetchFileRangeSync);
+    LIB_FUNCTION("bC0WTypscWg", f, 1, f, 1, 1, sceFiosCachePrefetchFileSync);
+
+    // misc + init + shutdown
+    LIB_FUNCTION("-q4M5WX0Jrs", f, 1, f, 1, 1, sceFiosCancelAllOps);
+    LIB_FUNCTION("wb8H3F+T6Ew", f, 1, f, 1, 1, sceFiosClearTimeStamps);
+    LIB_FUNCTION("aKxpgAMSJ04", f, 1, f, 1, 1, sceFiosCloseAllFiles);
+    LIB_FUNCTION("l4OVTpJCyQI", f, 1, f, 1, 1, sceFiosUpdateParameters);
+    LIB_FUNCTION("fJTrPsXNsBY", f, 1, f, 1, 1, sceFiosDebugDumpDate);
+    LIB_FUNCTION("FyuoXPzv780", f, 1, f, 1, 1, sceFiosDebugDumpDH);
+    LIB_FUNCTION("8BLW2WiSIuI", f, 1, f, 1, 1, sceFiosDebugDumpError);
+    LIB_FUNCTION("Sj5lbc4Y0mI", f, 1, f, 1, 1, sceFiosDebugDumpFH);
+    LIB_FUNCTION("4-yhZ7aj3VE", f, 1, f, 1, 1, sceFiosDebugDumpOp);
+    LIB_FUNCTION("tMYHEVj4j+o", f, 1, f, 1, 1, sceFiosSuspend);
+    LIB_FUNCTION("3HAgZPl1v+4", f, 1, f, 1, 1, sceFiosTerminate);
+    LIB_FUNCTION("vKL406KPJRs", f, 1, f, 1, 1, sceFiosResume);
+    LIB_FUNCTION("ZPm4ROwjxi4", f, 1, f, 1, 1, sceFiosShutdownAndCancelOps);
+    LIB_FUNCTION("YkayyuR6HvI", f, 1, f, 1, 1, sceFiosIsIdle);
+    LIB_FUNCTION("aKWnlLIobGA", f, 1, f, 1, 1, sceFiosIsInitialized);
+    LIB_FUNCTION("F7whoytBofE", f, 1, f, 1, 1, sceFiosIsSuspended);
+    LIB_FUNCTION("8IGjwtnvYwI", f, 1, f, 1, 1, sceFiosIsValidHandle);
+    LIB_FUNCTION("Lxgze5-E3uQ", f, 1, f, 1, 1, sceFiosGetSuspendCount);
+    LIB_FUNCTION("wAKZ-det+yo", f, 1, f, 1, 1, sceFiosInitialize);
+
+    // fiosDH
+    LIB_FUNCTION("oT68xenFqSY", f, 1, f, 1, 1, sceFiosDHClose);
+    LIB_FUNCTION("0-p4O8FINmU", f, 1, f, 1, 1, sceFiosDHCloseSync);
+    LIB_FUNCTION("K7SHCEr+PkQ", f, 1, f, 1, 1, sceFiosDHGetPath);
+    LIB_FUNCTION("uCkgJOrYUL4", f, 1, f, 1, 1, sceFiosDHOpen);
+    LIB_FUNCTION("GGqucL9F+YI", f, 1, f, 1, 1, sceFiosDHOpenSync);
+    LIB_FUNCTION("kG+A6NNwDow", f, 1, f, 1, 1, sceFiosDHRead);
+    LIB_FUNCTION("odjOGg8harg", f, 1, f, 1, 1, sceFiosDHReadSync);
+    LIB_FUNCTION("lHKLprulT24", f, 1, f, 1, 1, sceFiosGetAllDHs);
+
+    // dll
+    LIB_FUNCTION("PIw2ZEh6JyI", f, 1, f, 1, 1, sceFiosDLLInitialize);
+    LIB_FUNCTION("kPvgi8x497Q", f, 1, f, 1, 1, sceFiosDLLTerminate);
+
+    // fiosFH
+    LIB_FUNCTION("+mfO27a-bEY", f, 1, f, 1, 1, sceFiosDeallocatePassthruFH);
+    LIB_FUNCTION("5sYNBNK+W3g", f, 1, f, 1, 1, sceFiosFHClose);
+    LIB_FUNCTION("AOujSGqU+ms", f, 1, f, 1, 1, sceFiosFHCloseSync);
+    LIB_FUNCTION("lP9bRJMj0GU", f, 1, f, 1, 1, sceFiosFHGetOpenParams);
+    LIB_FUNCTION("Mif6IzBa0hc", f, 1, f, 1, 1, sceFiosFHGetPath);
+    LIB_FUNCTION("FdjoqFQOlt0", f, 1, f, 1, 1, sceFiosFHGetSize);
+    LIB_FUNCTION("er6TkQFUvp0", f, 1, f, 1, 1, sceFiosFHOpen);
+    LIB_FUNCTION("b44anV2D7K0", f, 1, f, 1, 1, sceFiosFHOpenSync);
+    LIB_FUNCTION("jjzbvzquenM", f, 1, f, 1, 1, sceFiosFHOpenWithMode);
+    LIB_FUNCTION("w13Ojm7ON9o", f, 1, f, 1, 1, sceFiosFHOpenWithModeSync);
+    LIB_FUNCTION("rR8wq7YFRZs", f, 1, f, 1, 1, sceFiosFHPread);
+    LIB_FUNCTION("2m9+Opco-hk", f, 1, f, 1, 1, sceFiosFHPreadSync);
+    LIB_FUNCTION("pl4pWsecyrY", f, 1, f, 1, 1, sceFiosFHPreadv);
+    LIB_FUNCTION("OHl4kz+OCws", f, 1, f, 1, 1, sceFiosFHPreadvSync);
+    LIB_FUNCTION("PbxGVfOvUQY", f, 1, f, 1, 1, sceFiosFHPwrite);
+    LIB_FUNCTION("gMcfOtHW6zk", f, 1, f, 1, 1, sceFiosFHPwriteSync);
+    LIB_FUNCTION("3UPU8hbpaW0", f, 1, f, 1, 1, sceFiosFHPwritev);
+    LIB_FUNCTION("J6Ujb3RviBA", f, 1, f, 1, 1, sceFiosFHPwritevSync);
+    LIB_FUNCTION("cg-VoPqZYss", f, 1, f, 1, 1, sceFiosFHRead);
+    LIB_FUNCTION("Bn2ZF4ZjeuQ", f, 1, f, 1, 1, sceFiosFHReadSync);
+    LIB_FUNCTION("Socc-lFocbc", f, 1, f, 1, 1, sceFiosFHReadv);
+    LIB_FUNCTION("ltWdd+agvD0", f, 1, f, 1, 1, sceFiosFHReadvSync);
+    LIB_FUNCTION("xReSebwKApA", f, 1, f, 1, 1, sceFiosFHSeek);
+    LIB_FUNCTION("--2iRpRn5Bw", f, 1, f, 1, 1, sceFiosFHStat);
+    LIB_FUNCTION("xP45eIntEis", f, 1, f, 1, 1, sceFiosFHStatSync);
+    LIB_FUNCTION("dQnI6o2OEC8", f, 1, f, 1, 1, sceFiosFHSync);
+    LIB_FUNCTION("EzzSJz6yuMc", f, 1, f, 1, 1, sceFiosFHSyncSync);
+    LIB_FUNCTION("MrRFrdgpsx8", f, 1, f, 1, 1, sceFiosFHTell);
+    LIB_FUNCTION("8dzXU5GxsjI", f, 1, f, 1, 1, sceFiosFHToFileno);
+    LIB_FUNCTION("0--XhDM7E-Q", f, 1, f, 1, 1, sceFiosFHTruncate);
+    LIB_FUNCTION("tWS4uYFTU0M", f, 1, f, 1, 1, sceFiosFHTruncateSync);
+    LIB_FUNCTION("urUHkGGweA4", f, 1, f, 1, 1, sceFiosFHWrite);
+    LIB_FUNCTION("Kl-TbrDU9YM", f, 1, f, 1, 1, sceFiosFHWriteSync);
+    LIB_FUNCTION("2PKMNZuXcPQ", f, 1, f, 1, 1, sceFiosFHWritev);
+    LIB_FUNCTION("t4vLDMxzzf0", f, 1, f, 1, 1, sceFiosFHWritevSync);
+    LIB_FUNCTION("4Kgi9D47mC8", f, 1, f, 1, 1, sceFiosGetAllFHs);
+
+    // io filter
+    LIB_FUNCTION("lgITuBsRo2o", f, 1, f, 1, 1, sceFiosIOFilterAdd);
+    LIB_FUNCTION("lAikj8EfcJg", f, 1, f, 1, 1, sceFiosIOFilterCache);
+    LIB_FUNCTION("gHxxOQxKW3E", f, 1, f, 1, 1, sceFiosIOFilterGetInfo);
+    LIB_FUNCTION("OIGbkgGOu6E", f, 1, f, 1, 1, sceFiosIOFilterPsarcDearchiver);
+    LIB_FUNCTION("ahIXyuwF0-o", f, 1, f, 1, 1, sceFiosIOFilterRemove);
+
+
+    // operations
+    LIB_FUNCTION("FA7dUleeGik", f, 1, f, 1, 1, sceFiosOpCancel);
+    LIB_FUNCTION("5cyEcilO-J0", f, 1, f, 1, 1, sceFiosOpDelete);
+    LIB_FUNCTION("+FRvKknUj1I", f, 1, f, 1, 1, sceFiosOpGetActualCount);
+    LIB_FUNCTION("U44GbnRZ0NA", f, 1, f, 1, 1, sceFiosOpGetAttr);
+    LIB_FUNCTION("52bk-Ucb5s0", f, 1, f, 1, 1, sceFiosOpGetBuffer);
+    LIB_FUNCTION("X+7rIfY97Ps", f, 1, f, 1, 1, sceFiosOpGetError);
+    LIB_FUNCTION("J9ujmUpwWAc", f, 1, f, 1, 1, sceFiosOpGetOffset);
+    LIB_FUNCTION("4fZAv0vbycQ", f, 1, f, 1, 1, sceFiosOpGetPath);
+    LIB_FUNCTION("51jH2C+it2s", f, 1, f, 1, 1, sceFiosOpGetRequestCount);
+    LIB_FUNCTION("+8vcurPhbEY", f, 1, f, 1, 1, sceFiosOpIsCancelled);
+    LIB_FUNCTION("bfgo2Otmqz0", f, 1, f, 1, 1, sceFiosOpIsDone);
+    LIB_FUNCTION("DX1JP95j3Gg", f, 1, f, 1, 1, sceFiosOpReschedule);
+    LIB_FUNCTION("csVTpsP0RLk", f, 1, f, 1, 1, sceFiosOpRescheduleWithPriority);
+    LIB_FUNCTION("bHFaiUhZCrQ", f, 1, f, 1, 1, sceFiosOpSetBuffer);
+    LIB_FUNCTION("2wvqS7Odb6M", f, 1, f, 1, 1, sceFiosOpSyncWait);
+    LIB_FUNCTION("nP-LabYxHbk", f, 1, f, 1, 1, sceFiosOpSyncWaitForIO);
+    LIB_FUNCTION("SnoQQWnGK9I", f, 1, f, 1, 1, sceFiosOpWait);
+    LIB_FUNCTION("ZSsFitZ4Kpk", f, 1, f, 1, 1, sceFiosOpWaitUntil);
+    LIB_FUNCTION("VdN2hNRay+E", f, 1, f, 1, 1, sceFiosGetAllOps);
+    LIB_FUNCTION("+AGLl-l-WVE", f, 1, f, 1, 1, sceFiosGetDefaultOpAttr);
+    LIB_FUNCTION("xiTqbFc7w+w", f, 1, f, 1, 1, sceFiosGetGlobalDefaultOpAttr);
+    LIB_FUNCTION("fZjp7AUc+DY", f, 1, f, 1, 1, sceFiosGetThreadDefaultOpAttr);
+    LIB_FUNCTION("2JtEQrjeUR4", f, 1, f, 1, 1, sceFiosSetGlobalDefaultOpAttr);
+    LIB_FUNCTION("4Ml2G-TSCho", f, 1, f, 1, 1, sceFiosSetThreadDefaultOpAttr);
+
+    // overlay
+    LIB_FUNCTION("TXABsmiiqto", f, 1, f, 1, 1, sceFiosOverlayAdd);
+    LIB_FUNCTION("lFVNuWYTTFs", f, 1, f, 1, 1, sceFiosOverlayGetInfo);
+    LIB_FUNCTION("qcZZ8FqdT8c", f, 1, f, 1, 1, sceFiosOverlayGetList);
+    LIB_FUNCTION("qD5Su6YGVWM", f, 1, f, 1, 1, sceFiosOverlayModify);
+    LIB_FUNCTION("MuMnDaXBTm0", f, 1, f, 1, 1, sceFiosOverlayRemove);
+    LIB_FUNCTION("8inAOixHSQw", f, 1, f, 1, 1, sceFiosOverlayResolveSync);
+
+    // date + time
+    LIB_FUNCTION("DCfnYVX6xBo", f, 1, f, 1, 1, sceFiosPrintTimeStamps);
+    LIB_FUNCTION("NUkBGOZARi4", f, 1, f, 1, 1, sceFiosTimeGetCurrent);
+    LIB_FUNCTION("F1dCP7qkqok", f, 1, f, 1, 1, sceFiosTimeIntervalFromNanoseconds);
+    LIB_FUNCTION("vZNIcB3n+bg", f, 1, f, 1, 1, sceFiosTimeIntervalToNanoseconds);
+    LIB_FUNCTION("m96WzIHunT8", f, 1, f, 1, 1, sceFiosTraceTimestamp);
+    LIB_FUNCTION("92xCv12VJIA", f, 1, f, 1, 1, sceFiosSaveTimeStamp);
+    LIB_FUNCTION("axVqO-tslwo", f, 1, f, 1, 1, sceFiosDateFromComponents);
+    LIB_FUNCTION("tQ6zNr0O6GA", f, 1, f, 1, 1, sceFiosDateGetCurrent);
+    LIB_FUNCTION("Rm+hiwvSnxw", f, 1, f, 1, 1, sceFiosDateToComponents);
+
+    // print
+    LIB_FUNCTION("z0zd9JqbxYs", f, 1, f, 1, 1, sceFiosPrintf);
+    LIB_FUNCTION("FOEUXzOE0ow", f, 1, f, 1, 1, sceFiosVprintf);
 };
 
 } // namespace Libraries::Fios2
