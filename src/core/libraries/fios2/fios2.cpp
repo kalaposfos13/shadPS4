@@ -6,12 +6,14 @@
 #include "core/libraries/error_codes.h"
 #include "core/libraries/fios2/fios2.h"
 #include "core/libraries/fios2/fios2_error.h"
+#include "core/libraries/kernel/file_system.h"
 #include "core/libraries/libs.h"
 
 namespace Libraries::Fios2 {
 
 OrbisFiosOp op_count = 0;
 std::unordered_map<OrbisFiosOp, s32> op_return_codes_map{};
+std::unordered_map<OrbisFiosOp, OrbisFiosSize> op_io_return_codes_map{};
 
 u8 PS4_SYSV_ABI sceFiosArchiveGetDecompressorThreadCount() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
@@ -382,15 +384,20 @@ s32 PS4_SYSV_ABI sceFiosFHOpenWithModeSync(void* param_1, void* param_2, char* p
     return sceFiosFHOpenWithMode(param_1, param_2, param_3, param_4, param_5);
 }
 
-s32 PS4_SYSV_ABI sceFiosFHPread() {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+OrbisFiosOp PS4_SYSV_ABI sceFiosFHPread(const OrbisFiosOpAttr* pAttr, OrbisFiosFH fh, void* pBuf,
+                                OrbisFiosSize length, OrbisFiosOffset offset) {
+    LOG_WARNING(Lib_Fios2, "(DUMMY) called");
+    OrbisFiosSize ret = Kernel::sceKernelPread(fh, pBuf, length, offset);
+    OrbisFiosOp op = ++op_count;
+    op_io_return_codes_map.emplace(op, ret);
+    return op;
 }
 
-s32 PS4_SYSV_ABI sceFiosFHPreadSync() {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-
-    return sceFiosFHPread();
+s32 PS4_SYSV_ABI sceFiosFHPreadSync(const OrbisFiosOpAttr* pAttr, OrbisFiosFH fh, void* pBuf,
+                                    OrbisFiosSize length, OrbisFiosOffset offset) {
+    LOG_WARNING(Lib_Fios2, "(STUBBED) called");
+    OrbisFiosOp op = sceFiosFHPread(pAttr, fh, pBuf, length, offset);
+    return sceFiosOpSyncWaitForIO(op);
 }
 
 s32 PS4_SYSV_ABI sceFiosFHPreadv() {
@@ -755,14 +762,14 @@ s32 PS4_SYSV_ABI sceFiosOpSyncWait(OrbisFiosOp op) {
     return ret;
 }
 
-s32 PS4_SYSV_ABI sceFiosOpSyncWaitForIO(OrbisFiosOp op) {
+OrbisFiosSize PS4_SYSV_ABI sceFiosOpSyncWaitForIO(OrbisFiosOp op) {
     LOG_INFO(Lib_Fios2, "called");
-    auto it = op_return_codes_map.find(op);
-    if (it == op_return_codes_map.end()) {
+    auto it = op_io_return_codes_map.find(op);
+    if (it == op_io_return_codes_map.end()) {
         return SCE_FIOS_ERROR_BAD_OP;
     }
-    s32 ret = it->second;
-    op_return_codes_map.erase(it);
+    OrbisFiosSize ret = it->second;
+    op_io_return_codes_map.erase(it);
     return ret;
 }
 
@@ -878,15 +885,19 @@ s32 PS4_SYSV_ABI sceFiosShutdownAndCancelOps() {
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI sceFiosStat(char* param_1, char* param_2, char* param_3) {
+s32 PS4_SYSV_ABI sceFiosStat(const OrbisFiosOpAttr* pAttr, const char* pPath,
+                             OrbisFiosStat* pOutStatus) {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+    OrbisFiosOp op = ++op_count;
+    op_return_codes_map.emplace(op, ORBIS_OK);
+    return op;
 }
 
-s32 PS4_SYSV_ABI sceFiosStatSync(char* param_1, char* param_2, char* param_3) {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-
-    return sceFiosStat(param_1, param_2, param_3);
+s32 PS4_SYSV_ABI sceFiosStatSync(const OrbisFiosOpAttr* pAttr, const char* pPath,
+                                 OrbisFiosStat* pOutStatus) {
+    LOG_ERROR(Lib_Fios2, "(STUBBED) called, pPath = {}", pPath);
+    OrbisFiosOp op = sceFiosStat(pAttr, pPath, pOutStatus);
+    return sceFiosOpSyncWait(op);
 }
 
 s32 PS4_SYSV_ABI sceFiosSuspend() {
@@ -931,6 +942,13 @@ s32 PS4_SYSV_ABI sceFiosVprintf() {
 
 void RegisterlibSceFios2(Core::Loader::SymbolsResolver* sym) {
     const char* f = "libSceFios2";
+
+    // force on
+    // LIB_FUNCTION("UUriaXy7G90", f, 1, f, 1, 1, sceFiosArchiveGetMountBufferSizeSync);
+    LIB_FUNCTION("rR8wq7YFRZs", f, 1, f, 1, 1, sceFiosFHPread);
+    LIB_FUNCTION("2m9+Opco-hk", f, 1, f, 1, 1, sceFiosFHPreadSync);
+
+    return;
 
     // common
     LIB_FUNCTION("LHqFYb+U52E", f, 1, f, 1, 1, sceFiosExists);
