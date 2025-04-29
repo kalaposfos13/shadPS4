@@ -598,6 +598,7 @@ set(MISC_LIBS  src/core/libraries/screenshot/screenshot.cpp
                src/core/libraries/signin_dialog/signindialog.h
                src/core/libraries/fios2/fios2.cpp
                src/core/libraries/fios2/fios2.h
+               src/core/libraries/fios2/fios2_error.h
 )
 
 set(CAMERA_LIBS  src/core/libraries/camera/camera.cpp
