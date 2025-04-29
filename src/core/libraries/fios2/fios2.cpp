@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <mutex>
+#include <string>
+
 #include "common/logging/log.h"
 #include "core/libraries/error_codes.h"
 #include "core/libraries/fios2/fios2.h"
@@ -14,6 +16,17 @@ namespace Libraries::Fios2 {
 OrbisFiosOp op_count = 0;
 std::unordered_map<OrbisFiosOp, s32> op_return_codes_map{};
 std::unordered_map<OrbisFiosOp, OrbisFiosSize> op_io_return_codes_map{};
+
+const char* ToApp0(const char* _arc) {
+    static thread_local std::string result;
+    std::string arc(_arc);
+    auto first_slash = arc.find('/');
+    if (first_slash == std::string::npos || first_slash == 0) {
+        return _arc;
+    }
+    result = "/app0" + arc.substr(first_slash);
+    return result.c_str();
+}
 
 u8 PS4_SYSV_ABI sceFiosArchiveGetDecompressorThreadCount() {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
@@ -314,9 +327,9 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosExists(const OrbisFiosOpAttr* pAttr, const char*
     LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {} path: {}", (void*)pAttr, pPath);
 
     Kernel::OrbisKernelStat st;
-    bool exists = (Kernel::posix_stat(pPath, &st) == ORBIS_OK);
+    bool exists = (Kernel::posix_stat(ToApp0(pPath), &st) == ORBIS_OK);
     OrbisFiosOp op = ++op_count;
-    op_return_codes_map.emplace(op, exists ? 1 : 0); // 1 = true, 0 = false
+    op_return_codes_map.emplace(op, exists ? 1 : 0);
     return op;
 }
 
@@ -352,10 +365,10 @@ s32 PS4_SYSV_ABI sceFiosFHGetSize() {
 
 OrbisFiosOp PS4_SYSV_ABI sceFiosFHOpen(const OrbisFiosOpAttr* pAttr, OrbisFiosFH* pOutFH,
                                        const char* pPath, const OrbisFiosOpenParams* pOpenParams) {
-    LOG_WARNING(Lib_Fios2, "(DUMMY) called");
+    LOG_WARNING(Lib_Fios2, "(DUMMY) called, path: {}", pPath);
 
     s32 open_flags = pOpenParams ? pOpenParams->openFlags : 0;
-    s32 fd = Kernel::sceKernelOpen(pPath, open_flags, 0);
+    s32 fd = Kernel::sceKernelOpen(ToApp0(pPath), open_flags, 0);
     if (fd < 0) {
         OrbisFiosOp op = ++op_count;
         op_return_codes_map.emplace(op, fd);
@@ -566,7 +579,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFileGetSize(const OrbisFiosOpAttr* pAttr, const 
 
     OrbisFiosOp op = ++op_count;
     Kernel::OrbisKernelStat stat{};
-    if (Kernel::sceKernelStat(pPath, &stat) < 0) {
+    if (Kernel::sceKernelStat(ToApp0(pPath), &stat) < 0) {
         op_io_return_codes_map.emplace(op, ORBIS_FIOS_ERROR_BAD_PATH);
         return op;
     }
@@ -590,7 +603,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFileRead(const OrbisFiosOpAttr* pAttr, const cha
     LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {} path: {}", (void*)pAttr, pPath);
 
     OrbisFiosOp op = ++op_count;
-    s32 fd = Kernel::sceKernelOpen(pPath, Kernel::ORBIS_KERNEL_O_RDONLY, 0);
+    s32 fd = Kernel::sceKernelOpen(ToApp0(pPath), Kernel::ORBIS_KERNEL_O_RDONLY, 0);
     if (fd < 0) {
         op_io_return_codes_map.emplace(op, ORBIS_FIOS_ERROR_BAD_PATH);
         return op;
@@ -922,7 +935,7 @@ s32 PS4_SYSV_ABI sceFiosStat(const OrbisFiosOpAttr* pAttr, const char* pPath,
 
     OrbisFiosOp op = ++op_count;
     Kernel::OrbisKernelStat kstat{};
-    s32 ret = Kernel::posix_stat(pPath, &kstat);
+    s32 ret = Kernel::posix_stat(ToApp0(pPath), &kstat);
     if (ret < 0) {
         op_return_codes_map.emplace(op, ORBIS_FIOS_ERROR_BAD_PATH);
         return op;
