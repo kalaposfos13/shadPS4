@@ -12,6 +12,7 @@
 #include "core/libraries/companion/companion_httpd.h"
 #include "core/libraries/companion/companion_util.h"
 #include "core/libraries/disc_map/disc_map.h"
+#include "core/libraries/fios2/fios2.h"
 #include "core/libraries/game_live_streaming/gamelivestreaming.h"
 #include "core/libraries/gnmdriver/gnmdriver.h"
 #include "core/libraries/hmd/hmd.h"
@@ -63,7 +64,6 @@
 #include "core/libraries/voice/voice.h"
 #include "core/libraries/web_browser_dialog/webbrowserdialog.h"
 #include "core/libraries/zlib/zlib_sce.h"
-#include "core/libraries/fios2/fios2.h"
 #include "fiber/fiber.h"
 #include "jpeg/jpegenc.h"
 
