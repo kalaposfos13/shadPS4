@@ -582,15 +582,23 @@ bool PS4_SYSV_ABI sceFiosFileExistsSync() {
     return sceFiosFileExists();
 }
 
-s32 PS4_SYSV_ABI sceFiosFileGetSize() {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+OrbisFiosOp PS4_SYSV_ABI sceFiosFileGetSize(const OrbisFiosOpAttr* pAttr, const char* pPath) {
+    LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {} path: {}", (void*)pAttr, pPath);
+
+    OrbisFiosOp op = ++op_count;
+    Kernel::OrbisKernelStat stat{};
+    if (Kernel::sceKernelStat(pPath, &stat) < 0) {
+        op_io_return_codes_map.emplace(op, ORBIS_FIOS_ERROR_BAD_PATH);
+        return op;
+    }
+
+    op_io_return_codes_map.emplace(op, stat.st_size);
+    return op;
 }
 
-s32 PS4_SYSV_ABI sceFiosFileGetSizeSync() {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-
-    return sceFiosFileGetSize();
+OrbisFiosSize PS4_SYSV_ABI sceFiosFileGetSizeSync(const OrbisFiosOpAttr* pAttr, const char* pPath) {
+    OrbisFiosOp op = sceFiosFileGetSize(pAttr, pPath);
+    return sceFiosOpSyncWaitForIO(op);
 }
 
 s32 PS4_SYSV_ABI sceFiosFilenoToFH() {
@@ -598,15 +606,28 @@ s32 PS4_SYSV_ABI sceFiosFilenoToFH() {
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI sceFiosFileRead() {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+OrbisFiosOp PS4_SYSV_ABI sceFiosFileRead(const OrbisFiosOpAttr* pAttr, const char* pPath,
+                                         void* pBuf, OrbisFiosSize length, OrbisFiosOffset offset) {
+    LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {} path: {}", (void*)pAttr, pPath);
+
+    OrbisFiosOp op = ++op_count;
+    s32 fd = Kernel::sceKernelOpen(pPath, Kernel::ORBIS_KERNEL_O_RDONLY, 0);
+    if (fd < 0) {
+        op_io_return_codes_map.emplace(op, ORBIS_FIOS_ERROR_BAD_PATH);
+        return op;
+    }
+
+    s64 ret = Kernel::sceKernelPread(fd, pBuf, length, offset);
+    Kernel::sceKernelClose(fd);
+    op_io_return_codes_map.emplace(op, ret);
+    return op;
 }
 
-s32 PS4_SYSV_ABI sceFiosFileReadSync() {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-
-    return sceFiosFileRead();
+OrbisFiosSize PS4_SYSV_ABI sceFiosFileReadSync(const OrbisFiosOpAttr* pAttr, const char* pPath,
+                                               void* pBuf, OrbisFiosSize length,
+                                               OrbisFiosOffset offset) {
+    OrbisFiosOp op = sceFiosFileRead(pAttr, pPath, pBuf, length, offset);
+    return sceFiosOpSyncWaitForIO(op);
 }
 
 s32 PS4_SYSV_ABI sceFiosFileTruncate() {
@@ -790,7 +811,7 @@ s32 PS4_SYSV_ABI sceFiosOpSyncWait(OrbisFiosOp op) {
     LOG_DEBUG(Lib_Fios2, "called");
     auto it = op_return_codes_map.find(op);
     if (it == op_return_codes_map.end()) {
-        return SCE_FIOS_ERROR_BAD_OP;
+        return ORBIS_FIOS_ERROR_BAD_OP;
     }
     s32 ret = it->second;
     op_return_codes_map.erase(it);
@@ -801,7 +822,7 @@ OrbisFiosSize PS4_SYSV_ABI sceFiosOpSyncWaitForIO(OrbisFiosOp op) {
     LOG_DEBUG(Lib_Fios2, "called");
     auto it = op_io_return_codes_map.find(op);
     if (it == op_io_return_codes_map.end()) {
-        return SCE_FIOS_ERROR_BAD_OP;
+        return ORBIS_FIOS_ERROR_BAD_OP;
     }
     OrbisFiosSize ret = it->second;
     op_io_return_codes_map.erase(it);
@@ -922,15 +943,35 @@ s32 PS4_SYSV_ABI sceFiosShutdownAndCancelOps() {
 
 s32 PS4_SYSV_ABI sceFiosStat(const OrbisFiosOpAttr* pAttr, const char* pPath,
                              OrbisFiosStat* pOutStatus) {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called");
+    LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {} path: {}", (void*)pAttr, pPath);
+
     OrbisFiosOp op = ++op_count;
+    Kernel::OrbisKernelStat kstat{};
+    s32 ret = Kernel::posix_stat(pPath, &kstat);
+    if (ret < 0) {
+        op_return_codes_map.emplace(op, ORBIS_FIOS_ERROR_BAD_PATH);
+        return op;
+    }
+
+    pOutStatus->fileSize = kstat.st_size;
+    pOutStatus->accessDate = kstat.st_atim.tv_sec;
+    pOutStatus->modificationDate = kstat.st_mtim.tv_sec;
+    pOutStatus->creationDate = kstat.st_birthtim.tv_sec;
+    pOutStatus->statFlags = 0;
+    pOutStatus->reserved = 0;
+    pOutStatus->uid = kstat.st_uid;
+    pOutStatus->gid = kstat.st_gid;
+    pOutStatus->dev = kstat.st_dev;
+    pOutStatus->ino = kstat.st_ino;
+    pOutStatus->mode = kstat.st_mode;
+
     op_return_codes_map.emplace(op, ORBIS_OK);
     return op;
 }
 
 s32 PS4_SYSV_ABI sceFiosStatSync(const OrbisFiosOpAttr* pAttr, const char* pPath,
                                  OrbisFiosStat* pOutStatus) {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called, pPath = {}", pPath);
+    LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {} path: {}", (void*)pAttr, pPath);
     OrbisFiosOp op = sceFiosStat(pAttr, pPath, pOutStatus);
     return sceFiosOpSyncWait(op);
 }
@@ -1066,42 +1107,42 @@ void RegisterlibSceFios2(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("8IGjwtnvYwI", f, 1, f, 1, 1, sceFiosIsValidHandle);
 
     // misc + init + shutdown
-    LIB_FUNCTION("-q4M5WX0Jrs", f, 1, f, 1, 1, sceFiosCancelAllOps);
-    LIB_FUNCTION("wb8H3F+T6Ew", f, 1, f, 1, 1, sceFiosClearTimeStamps);
-    LIB_FUNCTION("aKxpgAMSJ04", f, 1, f, 1, 1, sceFiosCloseAllFiles);
-    LIB_FUNCTION("l4OVTpJCyQI", f, 1, f, 1, 1, sceFiosUpdateParameters);
-    LIB_FUNCTION("fJTrPsXNsBY", f, 1, f, 1, 1, sceFiosDebugDumpDate);
-    LIB_FUNCTION("FyuoXPzv780", f, 1, f, 1, 1, sceFiosDebugDumpDH);
-    LIB_FUNCTION("8BLW2WiSIuI", f, 1, f, 1, 1, sceFiosDebugDumpError);
-    LIB_FUNCTION("Sj5lbc4Y0mI", f, 1, f, 1, 1, sceFiosDebugDumpFH);
-    LIB_FUNCTION("4-yhZ7aj3VE", f, 1, f, 1, 1, sceFiosDebugDumpOp);
-    LIB_FUNCTION("tMYHEVj4j+o", f, 1, f, 1, 1, sceFiosSuspend);
-    LIB_FUNCTION("3HAgZPl1v+4", f, 1, f, 1, 1, sceFiosTerminate);
-    LIB_FUNCTION("vKL406KPJRs", f, 1, f, 1, 1, sceFiosResume);
-    LIB_FUNCTION("ZPm4ROwjxi4", f, 1, f, 1, 1, sceFiosShutdownAndCancelOps);
-    LIB_FUNCTION("YkayyuR6HvI", f, 1, f, 1, 1, sceFiosIsIdle);
-    LIB_FUNCTION("aKWnlLIobGA", f, 1, f, 1, 1, sceFiosIsInitialized);
-    LIB_FUNCTION("F7whoytBofE", f, 1, f, 1, 1, sceFiosIsSuspended);
-    LIB_FUNCTION("Lxgze5-E3uQ", f, 1, f, 1, 1, sceFiosGetSuspendCount);
-    LIB_FUNCTION("wAKZ-det+yo", f, 1, f, 1, 1, sceFiosInitialize);
+    // LIB_FUNCTION("-q4M5WX0Jrs", f, 1, f, 1, 1, sceFiosCancelAllOps);
+    // LIB_FUNCTION("wb8H3F+T6Ew", f, 1, f, 1, 1, sceFiosClearTimeStamps);
+    // LIB_FUNCTION("aKxpgAMSJ04", f, 1, f, 1, 1, sceFiosCloseAllFiles);
+    // LIB_FUNCTION("l4OVTpJCyQI", f, 1, f, 1, 1, sceFiosUpdateParameters);
+    // LIB_FUNCTION("fJTrPsXNsBY", f, 1, f, 1, 1, sceFiosDebugDumpDate);
+    // LIB_FUNCTION("FyuoXPzv780", f, 1, f, 1, 1, sceFiosDebugDumpDH);
+    // LIB_FUNCTION("8BLW2WiSIuI", f, 1, f, 1, 1, sceFiosDebugDumpError);
+    // LIB_FUNCTION("Sj5lbc4Y0mI", f, 1, f, 1, 1, sceFiosDebugDumpFH);
+    // LIB_FUNCTION("4-yhZ7aj3VE", f, 1, f, 1, 1, sceFiosDebugDumpOp);
+    // LIB_FUNCTION("tMYHEVj4j+o", f, 1, f, 1, 1, sceFiosSuspend);
+    // LIB_FUNCTION("3HAgZPl1v+4", f, 1, f, 1, 1, sceFiosTerminate);
+    // LIB_FUNCTION("vKL406KPJRs", f, 1, f, 1, 1, sceFiosResume);
+    // LIB_FUNCTION("ZPm4ROwjxi4", f, 1, f, 1, 1, sceFiosShutdownAndCancelOps);
+    // LIB_FUNCTION("YkayyuR6HvI", f, 1, f, 1, 1, sceFiosIsIdle);
+    // LIB_FUNCTION("aKWnlLIobGA", f, 1, f, 1, 1, sceFiosIsInitialized);
+    // LIB_FUNCTION("F7whoytBofE", f, 1, f, 1, 1, sceFiosIsSuspended);
+    // LIB_FUNCTION("Lxgze5-E3uQ", f, 1, f, 1, 1, sceFiosGetSuspendCount);
+    // LIB_FUNCTION("wAKZ-det+yo", f, 1, f, 1, 1, sceFiosInitialize);
 
     // date + time
-    LIB_FUNCTION("DCfnYVX6xBo", f, 1, f, 1, 1, sceFiosPrintTimeStamps);
-    LIB_FUNCTION("NUkBGOZARi4", f, 1, f, 1, 1, sceFiosTimeGetCurrent);
-    LIB_FUNCTION("F1dCP7qkqok", f, 1, f, 1, 1, sceFiosTimeIntervalFromNanoseconds);
-    LIB_FUNCTION("vZNIcB3n+bg", f, 1, f, 1, 1, sceFiosTimeIntervalToNanoseconds);
-    LIB_FUNCTION("m96WzIHunT8", f, 1, f, 1, 1, sceFiosTraceTimestamp);
-    LIB_FUNCTION("92xCv12VJIA", f, 1, f, 1, 1, sceFiosSaveTimeStamp);
-    LIB_FUNCTION("axVqO-tslwo", f, 1, f, 1, 1, sceFiosDateFromComponents);
-    LIB_FUNCTION("tQ6zNr0O6GA", f, 1, f, 1, 1, sceFiosDateGetCurrent);
-    LIB_FUNCTION("Rm+hiwvSnxw", f, 1, f, 1, 1, sceFiosDateToComponents);
+    // LIB_FUNCTION("DCfnYVX6xBo", f, 1, f, 1, 1, sceFiosPrintTimeStamps);
+    // LIB_FUNCTION("NUkBGOZARi4", f, 1, f, 1, 1, sceFiosTimeGetCurrent);
+    // LIB_FUNCTION("F1dCP7qkqok", f, 1, f, 1, 1, sceFiosTimeIntervalFromNanoseconds);
+    // LIB_FUNCTION("vZNIcB3n+bg", f, 1, f, 1, 1, sceFiosTimeIntervalToNanoseconds);
+    // LIB_FUNCTION("m96WzIHunT8", f, 1, f, 1, 1, sceFiosTraceTimestamp);
+    // LIB_FUNCTION("92xCv12VJIA", f, 1, f, 1, 1, sceFiosSaveTimeStamp);
+    // LIB_FUNCTION("axVqO-tslwo", f, 1, f, 1, 1, sceFiosDateFromComponents);
+    // LIB_FUNCTION("tQ6zNr0O6GA", f, 1, f, 1, 1, sceFiosDateGetCurrent);
+    // LIB_FUNCTION("Rm+hiwvSnxw", f, 1, f, 1, 1, sceFiosDateToComponents);
 
     // io filter
-    LIB_FUNCTION("lgITuBsRo2o", f, 1, f, 1, 1, sceFiosIOFilterAdd);
-    LIB_FUNCTION("lAikj8EfcJg", f, 1, f, 1, 1, sceFiosIOFilterCache);
-    LIB_FUNCTION("gHxxOQxKW3E", f, 1, f, 1, 1, sceFiosIOFilterGetInfo);
-    LIB_FUNCTION("OIGbkgGOu6E", f, 1, f, 1, 1, sceFiosIOFilterPsarcDearchiver);
-    LIB_FUNCTION("ahIXyuwF0-o", f, 1, f, 1, 1, sceFiosIOFilterRemove);
+    // LIB_FUNCTION("lgITuBsRo2o", f, 1, f, 1, 1, sceFiosIOFilterAdd);
+    // LIB_FUNCTION("lAikj8EfcJg", f, 1, f, 1, 1, sceFiosIOFilterCache);
+    // LIB_FUNCTION("gHxxOQxKW3E", f, 1, f, 1, 1, sceFiosIOFilterGetInfo);
+    // LIB_FUNCTION("OIGbkgGOu6E", f, 1, f, 1, 1, sceFiosIOFilterPsarcDearchiver);
+    // LIB_FUNCTION("ahIXyuwF0-o", f, 1, f, 1, 1, sceFiosIOFilterRemove);
 
     // operations
     LIB_FUNCTION("FA7dUleeGik", f, 1, f, 1, 1, sceFiosOpCancel);
@@ -1145,16 +1186,16 @@ void RegisterlibSceFios2(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("bC0WTypscWg", f, 1, f, 1, 1, sceFiosCachePrefetchFileSync);
 
     // archive
-    LIB_FUNCTION("GxAF6y9l98M", f, 1, f, 1, 1, sceFiosArchiveGetDecompressorThreadCount);
-    LIB_FUNCTION("ERmiOK9VT0g", f, 1, f, 1, 1, sceFiosArchiveGetMountBufferSize);
-    LIB_FUNCTION("UUriaXy7G90", f, 1, f, 1, 1, sceFiosArchiveGetMountBufferSizeSync);
-    LIB_FUNCTION("pIU8u6VsLM8", f, 1, f, 1, 1, sceFiosArchiveMount);
-    LIB_FUNCTION("xutLbQdqyb4", f, 1, f, 1, 1, sceFiosArchiveMountSync);
-    LIB_FUNCTION("VKQ8pi4466g", f, 1, f, 1, 1, sceFiosArchiveMountWithOrder);
-    LIB_FUNCTION("GEAzhWJM1mY", f, 1, f, 1, 1, sceFiosArchiveMountWithOrderSync);
-    LIB_FUNCTION("Dfwp-U1OfRI", f, 1, f, 1, 1, sceFiosArchiveSetDecompressorThreadCount);
-    LIB_FUNCTION("YfTBBU5nONQ", f, 1, f, 1, 1, sceFiosArchiveUnmount);
-    LIB_FUNCTION("yy6C7k7FPZY", f, 1, f, 1, 1, sceFiosArchiveUnmountSync);
+    // LIB_FUNCTION("GxAF6y9l98M", f, 1, f, 1, 1, sceFiosArchiveGetDecompressorThreadCount);
+    // LIB_FUNCTION("ERmiOK9VT0g", f, 1, f, 1, 1, sceFiosArchiveGetMountBufferSize);
+    // LIB_FUNCTION("UUriaXy7G90", f, 1, f, 1, 1, sceFiosArchiveGetMountBufferSizeSync);
+    // LIB_FUNCTION("pIU8u6VsLM8", f, 1, f, 1, 1, sceFiosArchiveMount);
+    // LIB_FUNCTION("xutLbQdqyb4", f, 1, f, 1, 1, sceFiosArchiveMountSync);
+    // LIB_FUNCTION("VKQ8pi4466g", f, 1, f, 1, 1, sceFiosArchiveMountWithOrder);
+    // LIB_FUNCTION("GEAzhWJM1mY", f, 1, f, 1, 1, sceFiosArchiveMountWithOrderSync);
+    // LIB_FUNCTION("Dfwp-U1OfRI", f, 1, f, 1, 1, sceFiosArchiveSetDecompressorThreadCount);
+    // LIB_FUNCTION("YfTBBU5nONQ", f, 1, f, 1, 1, sceFiosArchiveUnmount);
+    // LIB_FUNCTION("yy6C7k7FPZY", f, 1, f, 1, 1, sceFiosArchiveUnmountSync);
 
     // print
     LIB_FUNCTION("z0zd9JqbxYs", f, 1, f, 1, 1, sceFiosPrintf);
