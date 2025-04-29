@@ -9,6 +9,7 @@
 #include "core/libraries/audio3d/audio3d.h"
 #include "core/libraries/avplayer/avplayer.h"
 #include "core/libraries/disc_map/disc_map.h"
+#include "core/libraries/fios2/fios2.h"
 #include "core/libraries/game_live_streaming/gamelivestreaming.h"
 #include "core/libraries/gnmdriver/gnmdriver.h"
 #include "core/libraries/hmd/hmd.h"
@@ -59,7 +60,6 @@
 #include "core/libraries/videoout/video_out.h"
 #include "core/libraries/web_browser_dialog/webbrowserdialog.h"
 #include "core/libraries/zlib/zlib_sce.h"
-#include "core/libraries/fios2/fios2.h"
 #include "fiber/fiber.h"
 #include "jpeg/jpegenc.h"
 

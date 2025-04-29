@@ -49,22 +49,17 @@ typedef struct OrbisFiosOpenParams {
     OrbisFiosBuffer buffer;
 } OrbisFiosOpenParams;
 
-typedef int (*OrbisFiosOpCallback)(
-    void *pContext,
-    OrbisFiosOp op,
-    OrbisFiosOpEvent event,
-    int err
-);
+typedef int (*OrbisFiosOpCallback)(void* pContext, OrbisFiosOp op, OrbisFiosOpEvent event, int err);
 
 typedef struct OrbisFiosOpAttr {
     OrbisFiosTime deadline;
     OrbisFiosOpCallback pCallback;
-    void *pCallbackContext;
-    int32_t priority:8;
-    uint32_t opflags:24;
+    void* pCallbackContext;
+    int32_t priority : 8;
+    uint32_t opflags : 24;
     uint32_t userTag;
-    void *userPtr;
-    void *pReserved;
+    void* userPtr;
+    void* pReserved;
 } OrbisFiosOpAttr;
 
 s32 PS4_SYSV_ABI sceFiosOpSyncWait(OrbisFiosOp op);
