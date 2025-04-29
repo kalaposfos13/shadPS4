@@ -18,6 +18,7 @@ typedef OrbisFiosHandle OrbisFiosOp;
 
 typedef u8 OrbisFiosOpEvent;
 
+typedef s64 OrbisFiosSize;
 typedef s64 OrbisFiosOffset;
 typedef s64 OrbisFiosDate;
 typedef s64 OrbisFiosTime;
@@ -67,6 +68,7 @@ typedef struct OrbisFiosOpAttr {
 } OrbisFiosOpAttr;
 
 s32 PS4_SYSV_ABI sceFiosOpSyncWait(OrbisFiosOp op);
+OrbisFiosSize PS4_SYSV_ABI sceFiosOpSyncWaitForIO(OrbisFiosOp op);
 
 void RegisterlibSceFios2(Core::Loader::SymbolsResolver* sym);
 } // namespace Libraries::Fios2
