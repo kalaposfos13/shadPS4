@@ -42,7 +42,7 @@ void MntPoints::UnmountAll() {
 
 std::filesystem::path MntPoints::GetHostPath(std::string_view path, bool* is_read_only,
                                              bool force_base_path) {
-    // Evil games like Turok2 pass double slashes e.g /app0//game.kpf
+    // Evil games like Turok2 and GRR pass double slashes e.g /app0//game.kpf
     std::string corrected_path(path);
     size_t pos = corrected_path.find("//");
     while (pos != std::string::npos) {
