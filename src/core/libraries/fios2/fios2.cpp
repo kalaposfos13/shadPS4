@@ -4,8 +4,8 @@
 #include <mutex>
 #include <string>
 
-#include "common/logging/log.h"
 #include "common/assert.h"
+#include "common/logging/log.h"
 #include "core/libraries/error_codes.h"
 #include "core/libraries/fios2/fios2.h"
 #include "core/libraries/fios2/fios2_error.h"
@@ -252,7 +252,7 @@ s32 PS4_SYSV_ABI sceFiosDeleteSync() {
 }
 
 s32 PS4_SYSV_ABI sceFiosDHClose(const OrbisFiosOpAttr* pAttr, OrbisFiosDH dh) {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called");
+    LOG_WARNING(Lib_Fios2, "(STUBBED) called, dh: {}", dh);
     s32 ret = Kernel::sceKernelClose(dh);
     dh_path_map.erase(dh);
     OrbisFiosOp op = ++op_count;
@@ -278,6 +278,10 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosDHOpen(const OrbisFiosOpAttr* pAttr, OrbisFiosDH
 
     s32 dh = Kernel::sceKernelOpen(ToApp0(pPath), Kernel::ORBIS_KERNEL_O_DIRECTORY, 0);
     dh_path_map[dh] = pPath;
+
+    if (pOutDH) {
+        *pOutDH = dh;
+    }
 
     OrbisFiosOp op = ++op_count;
     op_return_codes_map.emplace(op, dh);
@@ -641,7 +645,7 @@ s32 PS4_SYSV_ABI sceFiosFileDeleteSync() {
 
 bool PS4_SYSV_ABI sceFiosFileExists(const OrbisFiosOpAttr* pAttr, const char* pPath) {
     LOG_WARNING(Lib_Fios2, "(DUMMY) called");
-    return sceFiosExists(pAttr,pPath,nullptr);
+    return sceFiosExists(pAttr, pPath, nullptr);
 }
 
 bool PS4_SYSV_ABI sceFiosFileExistsSync(const OrbisFiosOpAttr* pAttr, const char* pPath) {
