@@ -5,6 +5,7 @@
 #include <string>
 
 #include "common/logging/log.h"
+#include "common/assert.h"
 #include "core/libraries/error_codes.h"
 #include "core/libraries/fios2/fios2.h"
 #include "core/libraries/fios2/fios2_error.h"
@@ -294,6 +295,8 @@ s32 PS4_SYSV_ABI sceFiosDHOpenSync(const OrbisFiosOpAttr* pAttr, OrbisFiosDH* pO
 OrbisFiosOp PS4_SYSV_ABI sceFiosDHRead(const OrbisFiosOpAttr* pAttr, OrbisFiosDH dh,
                                        OrbisFiosDirEntry* pOutEntry) {
     LOG_WARNING(Lib_Fios2, "(DUMMY) called");
+
+    UNREACHABLE_MSG("todo");
 
     OrbisFiosOp op = ++op_count;
     op_return_codes_map.emplace(op, ORBIS_OK);
