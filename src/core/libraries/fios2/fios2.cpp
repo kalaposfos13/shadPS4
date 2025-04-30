@@ -10,6 +10,7 @@
 #include "core/libraries/fios2/fios2_error.h"
 #include "core/libraries/kernel/file_system.h"
 #include "core/libraries/libs.h"
+#include "core/tls.h"
 
 namespace Libraries::Fios2 {
 
@@ -26,6 +27,15 @@ const char* ToApp0(const char* _arc) {
     }
     result = "/app0" + arc.substr(first_slash);
     return result.c_str();
+}
+
+void CallFiosCallback(const OrbisFiosOpAttr* pAttr, OrbisFiosOp op, OrbisFiosOpEvent event,
+                      s32 err) {
+    if (pAttr && pAttr->pCallback) {
+        LOG_INFO(Lib_Fios2, "Calling callback at {}", (void*)pAttr->pCallback);
+        Core::ExecuteGuest(pAttr->pCallback, pAttr->pCallbackContext, op, event, err);
+        LOG_INFO(Lib_Fios2, "Callback returned");
+    }
 }
 
 u8 PS4_SYSV_ABI sceFiosArchiveGetDecompressorThreadCount() {
@@ -334,6 +344,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosExists(const OrbisFiosOpAttr* pAttr, const char*
     }
     OrbisFiosOp op = ++op_count;
     op_return_codes_map.emplace(op, exists ? 1 : 0);
+    CallFiosCallback(pAttr, op, ORBIS_OK, exists ? 1 : 0);
     return op;
 }
 
@@ -606,8 +617,10 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFileGetSize(const OrbisFiosOpAttr* pAttr, const 
         op_io_return_codes_map.emplace(op, ORBIS_FIOS_ERROR_BAD_PATH);
         return op;
     }
-    LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {} path: {} size: {}", (void*)pAttr, pPath, stat.st_size);
+    LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {} path: {} size: {}", (void*)pAttr, pPath,
+                stat.st_size);
     op_io_return_codes_map.emplace(op, stat.st_size);
+    CallFiosCallback(pAttr, op, ORBIS_OK, static_cast<s32>(stat.st_size));
     return op;
 }
 
@@ -624,18 +637,21 @@ s32 PS4_SYSV_ABI sceFiosFilenoToFH() {
 
 OrbisFiosOp PS4_SYSV_ABI sceFiosFileRead(const OrbisFiosOpAttr* pAttr, const char* pPath,
                                          void* pBuf, OrbisFiosSize length, OrbisFiosOffset offset) {
-    LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {} path: {}", (void*)pAttr, pPath);
+    LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {}, callback: {} path: {}", (void*)pAttr,
+                (void*)(pAttr ? pAttr->pCallback : nullptr), pPath);
 
     OrbisFiosOp op = ++op_count;
     s32 fd = Kernel::sceKernelOpen(ToApp0(pPath), Kernel::ORBIS_KERNEL_O_RDONLY, 0);
-    if (fd < 0) {
-        op_io_return_codes_map.emplace(op, ORBIS_FIOS_ERROR_BAD_PATH);
-        return op;
+    s64 ret = -1;
+
+    if (fd >= 0) {
+        ret = Kernel::sceKernelPread(fd, pBuf, length, offset);
+        Kernel::sceKernelClose(fd);
     }
 
-    s64 ret = Kernel::sceKernelPread(fd, pBuf, length, offset);
-    Kernel::sceKernelClose(fd);
-    op_io_return_codes_map.emplace(op, ret);
+    op_io_return_codes_map.emplace(op, ret >= 0 ? ret : ORBIS_FIOS_ERROR_BAD_PATH);
+    CallFiosCallback(pAttr, op, ORBIS_OK, static_cast<int>(ret));
+
     return op;
 }
 
@@ -977,7 +993,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosStat(const OrbisFiosOpAttr* pAttr, const char* p
     pOutStatus->accessDate = kstat.st_atim.tv_sec;
     pOutStatus->modificationDate = kstat.st_mtim.tv_sec;
     pOutStatus->creationDate = kstat.st_birthtim.tv_sec;
-    pOutStatus->statFlags = 5;
+    pOutStatus->statFlags = 5; // read + write + is file
     pOutStatus->reserved = 0;
     pOutStatus->uid = kstat.st_uid;
     pOutStatus->gid = kstat.st_gid;
