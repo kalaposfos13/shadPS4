@@ -71,6 +71,8 @@ s64 PS4_SYSV_ABI sceKernelWrite(s32 fd, const void* buf, size_t nbytes);
 s32 PS4_SYSV_ABI sceKernelOpen(const char* path, s32 flags, /* SceKernelMode*/ u16 mode);
 s32 PS4_SYSV_ABI sceKernelClose(s32 fd);
 s32 PS4_SYSV_ABI sceKernelStat(const char* path, OrbisKernelStat* sb);
+s32 PS4_SYSV_ABI sceKernelFstat(s32 fd, OrbisKernelStat* sb);
+s64 PS4_SYSV_ABI sceKernelLseek(s32 fd, s64 offset, s32 whence);
 s64 PS4_SYSV_ABI sceKernelRead(s32 fd, void* buf, size_t nbytes);
 s64 PS4_SYSV_ABI sceKernelPread(s32 fd, void* buf, size_t nbytes, s64 offset);
 s64 PS4_SYSV_ABI sceKernelPreadv(s32 fd, SceKernelIovec* iov, s32 iovcnt, s64 offset);

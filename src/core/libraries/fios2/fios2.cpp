@@ -263,24 +263,41 @@ s32 PS4_SYSV_ABI sceFiosDHGetPath() {
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI sceFiosDHOpen() {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+OrbisFiosOp PS4_SYSV_ABI sceFiosDHOpen(const OrbisFiosOpAttr* pAttr, OrbisFiosDH* pOutDH,
+                                       const char* pPath, OrbisFiosBuffer buf) {
+    LOG_WARNING(Lib_Fios2, "(DUMMY) called, path: {}", pPath);
+
+    s32 dh = Kernel::sceKernelOpen(ToApp0(pPath), Kernel::ORBIS_KERNEL_O_DIRECTORY, 0);
+
+    OrbisFiosOp op = ++op_count;
+    op_return_codes_map.emplace(op, dh);
+    CallFiosCallback(const_cast<OrbisFiosOpAttr*>(pAttr), op, OrbisFiosOpEvents::COMPLETE, dh);
+    return op;
 }
 
-s32 PS4_SYSV_ABI sceFiosDHOpenSync() {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+s32 PS4_SYSV_ABI sceFiosDHOpenSync(const OrbisFiosOpAttr* pAttr, OrbisFiosDH* pOutDH,
+                                   const char* pPath, OrbisFiosBuffer buf) {
+    LOG_DEBUG(Lib_Fios2, "(DUMMY) called");
+    OrbisFiosOp op = sceFiosDHOpen(pAttr, pOutDH, pPath, buf);
+    return sceFiosOpSyncWait(op);
 }
 
-s32 PS4_SYSV_ABI sceFiosDHRead() {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+OrbisFiosOp PS4_SYSV_ABI sceFiosDHRead(const OrbisFiosOpAttr* pAttr, OrbisFiosDH dh,
+                                       OrbisFiosDirEntry* pOutEntry) {
+    LOG_WARNING(Lib_Fios2, "(DUMMY) called");
+
+    OrbisFiosOp op = ++op_count;
+    op_return_codes_map.emplace(op, ORBIS_OK);
+    CallFiosCallback(const_cast<OrbisFiosOpAttr*>(pAttr), op, OrbisFiosOpEvents::COMPLETE,
+                     ORBIS_OK);
+    return op;
 }
 
-s32 PS4_SYSV_ABI sceFiosDHReadSync() {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+s32 PS4_SYSV_ABI sceFiosDHReadSync(const OrbisFiosOpAttr* pAttr, OrbisFiosDH dh,
+                                   OrbisFiosDirEntry* pOutEntry) {
+    LOG_DEBUG(Lib_Fios2, "(DUMMY) called");
+    OrbisFiosOp op = sceFiosDHRead(pAttr, dh, pOutEntry);
+    return sceFiosOpSyncWait(op);
 }
 
 s32 PS4_SYSV_ABI sceFiosDirectoryCreate() {
@@ -344,7 +361,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosExists(const OrbisFiosOpAttr* pAttr, const char*
     }
     OrbisFiosOp op = ++op_count;
     op_return_codes_map.emplace(op, exists ? 1 : 0);
-    CallFiosCallback(pAttr, op, ORBIS_OK, exists ? 1 : 0);
+    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::COMPLETE, exists ? 1 : 0);
     return op;
 }
 
@@ -377,9 +394,11 @@ s32 PS4_SYSV_ABI sceFiosFHGetPath() {
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI sceFiosFHGetSize() {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+OrbisFiosSize PS4_SYSV_ABI sceFiosFHGetSize(OrbisFiosFH fh) {
+    LOG_WARNING(Lib_Fios2, "(DUMMY) called");
+    Kernel::OrbisKernelStat sb{};
+    Kernel::sceKernelFstat(fh, &sb);
+    return sb.st_size;
 }
 
 OrbisFiosOp PS4_SYSV_ABI sceFiosFHOpenWithMode(const OrbisFiosOpAttr* pAttr, OrbisFiosFH* pOutFH,
@@ -525,9 +544,9 @@ OrbisFiosSize PS4_SYSV_ABI sceFiosFHReadvSync(const OrbisFiosOpAttr* pAttr, Orbi
     return sceFiosOpSyncWaitForIO(op);
 }
 
-s32 PS4_SYSV_ABI sceFiosFHSeek() {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+s32 PS4_SYSV_ABI sceFiosFHSeek(OrbisFiosFH fh, OrbisFiosOffset offset, OrbisFiosWhence whence) {
+    LOG_WARNING(Lib_Fios2, "(DUMMY) called");
+    return Kernel::sceKernelLseek(fh, offset, whence);
 }
 
 s32 PS4_SYSV_ABI sceFiosFHStat() {
@@ -620,7 +639,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFileGetSize(const OrbisFiosOpAttr* pAttr, const 
     LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {} path: {} size: {}", (void*)pAttr, pPath,
                 stat.st_size);
     op_io_return_codes_map.emplace(op, stat.st_size);
-    CallFiosCallback(pAttr, op, ORBIS_OK, static_cast<s32>(stat.st_size));
+    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::COMPLETE, static_cast<s32>(stat.st_size));
     return op;
 }
 
@@ -650,7 +669,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFileRead(const OrbisFiosOpAttr* pAttr, const cha
     }
 
     op_io_return_codes_map.emplace(op, ret >= 0 ? ret : ORBIS_FIOS_ERROR_BAD_PATH);
-    CallFiosCallback(pAttr, op, ORBIS_OK, static_cast<int>(ret));
+    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::COMPLETE, static_cast<int>(ret));
 
     return op;
 }
@@ -773,14 +792,20 @@ s32 PS4_SYSV_ABI sceFiosOpCancel() {
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI sceFiosOpDelete() {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called");
+s32 PS4_SYSV_ABI sceFiosOpDelete(OrbisFiosOp op) {
+    LOG_WARNING(Lib_Fios2, "(DUMMY) called");
+    op_return_codes_map.erase(op);
+    op_io_return_codes_map.erase(op);
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI sceFiosOpGetActualCount() {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+OrbisFiosSize PS4_SYSV_ABI sceFiosOpGetActualCount(OrbisFiosOp op) {
+    LOG_DEBUG(Lib_Fios2, "(DUMMY) called, op: {}", op);
+    if (op_io_return_codes_map.find(op) == op_io_return_codes_map.end()) {
+        LOG_WARNING(Lib_Fios2, "Bad op handle: {}", op);
+        return ORBIS_FIOS_ERROR_BAD_OP;
+    }
+    return op_io_return_codes_map.find(op)->second;
 }
 
 s32 PS4_SYSV_ABI sceFiosOpGetAttr() {
@@ -793,9 +818,13 @@ s32 PS4_SYSV_ABI sceFiosOpGetBuffer() {
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI sceFiosOpGetError() {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+s32 PS4_SYSV_ABI sceFiosOpGetError(OrbisFiosOp op) {
+    LOG_DEBUG(Lib_Fios2, "(DUMMY) called, op: {}", op);
+    if (op_return_codes_map.find(op) == op_return_codes_map.end()) {
+        LOG_WARNING(Lib_Fios2, "Bad op handle: {}", op);
+        return ORBIS_FIOS_ERROR_BAD_OP;
+    }
+    return op_return_codes_map.find(op)->second;
 }
 
 s32 PS4_SYSV_ABI sceFiosOpGetOffset() {
@@ -820,10 +849,11 @@ s32 PS4_SYSV_ABI sceFiosOpIsCancelled() {
 
 bool PS4_SYSV_ABI sceFiosOpIsDone(OrbisFiosOp op) {
     LOG_DEBUG(Lib_Fios2, "(DUMMY) called, op: {}", op);
-    auto it = op_return_codes_map.find(op);
-    if (it == op_return_codes_map.end()) {
-        LOG_ERROR(Lib_Fios2, "Bad op handle: {}", op);
-        return false;
+    if (op_return_codes_map.find(op) == op_return_codes_map.end()) {
+        if (op_io_return_codes_map.find(op) == op_io_return_codes_map.end()) {
+            LOG_ERROR(Lib_Fios2, "Bad op handle: {}", op);
+            return false;
+        }
     }
     return true;
 }
@@ -867,8 +897,8 @@ OrbisFiosSize PS4_SYSV_ABI sceFiosOpSyncWaitForIO(OrbisFiosOp op) {
     return ret;
 }
 
-s32 PS4_SYSV_ABI sceFiosOpWait() {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called");
+s32 PS4_SYSV_ABI sceFiosOpWait(OrbisFiosOp op) {
+    LOG_WARNING(Lib_Fios2, "(DUMMY) called, op: {}", op);
     return ORBIS_OK;
 }
 
