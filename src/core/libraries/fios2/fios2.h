@@ -11,12 +11,17 @@ class SymbolsResolver;
 
 namespace Libraries::Fios2 {
 
+constexpr u32 ORBIS_FIOS_PATH_MAX = 1024;
+
 typedef s32 OrbisFiosHandle;
 typedef OrbisFiosHandle OrbisFiosFH; // file handle
 typedef OrbisFiosHandle OrbisFiosDH; // directory handle
 typedef OrbisFiosHandle OrbisFiosOp;
 
 typedef u8 OrbisFiosOpEvent;
+
+typedef enum OrbisFiosOpEvents { COMPLETE = 1, DELETE = 2, START = 3 } OrbisFiosOpEvents;
+typedef enum OrbisFiosWhence { SET = 0, CUR = 1, END = 2 } SceFiosWhence;
 
 typedef s64 OrbisFiosSize;
 typedef s64 OrbisFiosOffset;
@@ -36,6 +41,16 @@ typedef struct OrbisFiosStat {
     s64 ino;
     s64 mode;
 } OrbisFiosStat;
+
+typedef struct OrbisFiosDirEntry {
+    OrbisFiosOffset fileSize;
+    uint32_t statFlags;
+    uint16_t nameLength;
+    uint16_t fullPathLength;
+    uint16_t offsetToName;
+    uint16_t reserved[3];
+    char fullPath[ORBIS_FIOS_PATH_MAX];
+} SceFiosDirEntry;
 
 typedef struct OrbisFiosBuffer {
     void* pPtr;
