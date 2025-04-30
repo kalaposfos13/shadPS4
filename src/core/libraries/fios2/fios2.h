@@ -64,7 +64,7 @@ typedef struct OrbisFiosOpenParams {
     OrbisFiosBuffer buffer;
 } OrbisFiosOpenParams;
 
-typedef int (*OrbisFiosOpCallback)(void* pContext, OrbisFiosOp op, OrbisFiosOpEvent event, int err);
+typedef int PS4_SYSV_ABI (*OrbisFiosOpCallback)(void* pContext, OrbisFiosOp op, OrbisFiosOpEvent event, int err);
 
 typedef struct OrbisFiosOpAttr {
     OrbisFiosTime deadline;
