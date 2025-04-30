@@ -257,7 +257,7 @@ s32 PS4_SYSV_ABI sceFiosDHClose(const OrbisFiosOpAttr* pAttr, OrbisFiosDH dh) {
     dh_path_map.erase(dh);
     OrbisFiosOp op = ++op_count;
     op_return_codes_map.emplace(op, dh);
-    CallFiosCallback(const_cast<OrbisFiosOpAttr*>(pAttr), op, OrbisFiosOpEvents::COMPLETE, ret);
+    CallFiosCallback(const_cast<OrbisFiosOpAttr*>(pAttr), op, OrbisFiosOpEvents::Complete, ret);
     return op;
 }
 
@@ -285,7 +285,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosDHOpen(const OrbisFiosOpAttr* pAttr, OrbisFiosDH
 
     OrbisFiosOp op = ++op_count;
     op_return_codes_map.emplace(op, dh);
-    CallFiosCallback(const_cast<OrbisFiosOpAttr*>(pAttr), op, OrbisFiosOpEvents::COMPLETE, dh);
+    CallFiosCallback(const_cast<OrbisFiosOpAttr*>(pAttr), op, OrbisFiosOpEvents::Complete, dh);
     return op;
 }
 
@@ -304,7 +304,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosDHRead(const OrbisFiosOpAttr* pAttr, OrbisFiosDH
 
     OrbisFiosOp op = ++op_count;
     op_return_codes_map.emplace(op, ORBIS_OK);
-    CallFiosCallback(const_cast<OrbisFiosOpAttr*>(pAttr), op, OrbisFiosOpEvents::COMPLETE,
+    CallFiosCallback(const_cast<OrbisFiosOpAttr*>(pAttr), op, OrbisFiosOpEvents::Complete,
                      ORBIS_OK);
     return op;
 }
@@ -377,7 +377,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosExists(const OrbisFiosOpAttr* pAttr, const char*
     }
     OrbisFiosOp op = ++op_count;
     op_return_codes_map.emplace(op, exists ? 1 : 0);
-    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::COMPLETE, exists ? 1 : 0);
+    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, exists ? 1 : 0);
     return op;
 }
 
@@ -454,7 +454,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFHOpenWithMode(const OrbisFiosOpAttr* pAttr, Orb
     OrbisFiosOp op = ++op_count;
     s32 ret = std::min(fh, ORBIS_OK);
     op_return_codes_map.emplace(op, ret);
-    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::COMPLETE, ret);
+    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
     return op;
 }
 
@@ -531,7 +531,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFHRead(const OrbisFiosOpAttr* pAttr, OrbisFiosFH
     OrbisFiosSize ret = Kernel::sceKernelRead(fh, pBuf, length);
     OrbisFiosOp op = ++op_count;
     op_io_return_codes_map.emplace(op, ret);
-    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::COMPLETE, ret);
+    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
     return op;
 }
 
@@ -556,7 +556,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFHReadv(const OrbisFiosOpAttr* pAttr, OrbisFiosF
 
     OrbisFiosOp op = ++op_count;
     op_io_return_codes_map.emplace(op, ret);
-    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::COMPLETE, ret);
+    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
     return op;
 }
 
@@ -663,7 +663,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFileGetSize(const OrbisFiosOpAttr* pAttr, const 
     LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {} path: {} size: {}", (void*)pAttr, pPath,
                 stat.st_size);
     op_io_return_codes_map.emplace(op, stat.st_size);
-    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::COMPLETE, static_cast<s32>(stat.st_size));
+    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, static_cast<s32>(stat.st_size));
     return op;
 }
 
@@ -693,7 +693,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFileRead(const OrbisFiosOpAttr* pAttr, const cha
     }
 
     op_io_return_codes_map.emplace(op, ret >= 0 ? ret : ORBIS_FIOS_ERROR_BAD_PATH);
-    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::COMPLETE, static_cast<int>(ret));
+    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, static_cast<int>(ret));
 
     return op;
 }
@@ -1040,7 +1040,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosStat(const OrbisFiosOpAttr* pAttr, const char* p
     s32 ret = Kernel::posix_stat(ToApp0(pPath), &kstat);
     if (ret < 0) {
         op_return_codes_map.emplace(op, ORBIS_FIOS_ERROR_BAD_PATH);
-        CallFiosCallback(pAttr, op, OrbisFiosOpEvents::COMPLETE, ORBIS_FIOS_ERROR_BAD_PATH);
+        CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ORBIS_FIOS_ERROR_BAD_PATH);
         return op;
     }
 
@@ -1057,7 +1057,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosStat(const OrbisFiosOpAttr* pAttr, const char* p
     pOutStatus->mode = kstat.st_mode;
 
     op_return_codes_map.emplace(op, ORBIS_OK);
-    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::COMPLETE, ret);
+    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
     return op;
 }
 

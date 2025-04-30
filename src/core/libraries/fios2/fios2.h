@@ -20,8 +20,8 @@ typedef OrbisFiosHandle OrbisFiosOp;
 
 typedef u8 OrbisFiosOpEvent;
 
-typedef enum OrbisFiosOpEvents { COMPLETE = 1, DELETE = 2, START = 3 } OrbisFiosOpEvents;
-typedef enum OrbisFiosWhence { SET = 0, CUR = 1, END = 2 } SceFiosWhence;
+typedef enum OrbisFiosOpEvents { Complete = 1, Delete = 2, Start = 3 } OrbisFiosOpEvents;
+typedef enum OrbisFiosWhence { Set = 0, Current = 1, End = 2 } SceFiosWhence;
 
 typedef s64 OrbisFiosSize;
 typedef s64 OrbisFiosOffset;
