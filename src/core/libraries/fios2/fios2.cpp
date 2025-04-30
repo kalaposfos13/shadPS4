@@ -818,7 +818,7 @@ s32 PS4_SYSV_ABI sceFiosOpCancel() {
 }
 
 s32 PS4_SYSV_ABI sceFiosOpDelete(OrbisFiosOp op) {
-    LOG_WARNING(Lib_Fios2, "(DUMMY) called");
+    LOG_WARNING(Lib_Fios2, "(DUMMY) called, op: {}", op);
     op_return_codes_map.erase(op);
     op_io_return_codes_map.erase(op);
     return ORBIS_OK;
