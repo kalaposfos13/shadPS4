@@ -3,6 +3,7 @@
 
 #include <mutex>
 #include <string>
+#include <thread>
 
 #include "common/assert.h"
 #include "common/logging/log.h"
@@ -39,9 +40,10 @@ const char* ToApp0(const char* _arc) {
 void CallFiosCallback(const OrbisFiosOpAttr* pAttr, OrbisFiosOp op, OrbisFiosOpEvent event,
                       s32 err) {
     if (pAttr && pAttr->pCallback) {
-        LOG_INFO(Lib_Fios2, "Calling callback at {}", (void*)pAttr->pCallback);
+        LOG_INFO(Lib_Fios2, "Calling callback at {}, for op: {}", (void*)pAttr->pCallback, op);
         Core::ExecuteGuest(pAttr->pCallback, pAttr->pCallbackContext, op, event, err);
         // LOG_DEBUG(Lib_Fios2, "Callback returned");
+        // std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
 }
 
@@ -374,20 +376,25 @@ s32 PS4_SYSV_ABI sceFiosDLLTerminate() {
 OrbisFiosOp PS4_SYSV_ABI sceFiosExists(const OrbisFiosOpAttr* pAttr, const char* pPath,
                                        bool* pOutExists) {
     LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {} path: {}", (void*)pAttr, pPath);
+    OrbisFiosOp op = ++op_count;
 
     Kernel::OrbisKernelStat st;
     bool exists = (Kernel::posix_stat(ToApp0(pPath), &st) == ORBIS_OK);
     if (pOutExists) {
         *pOutExists = exists;
     }
-    OrbisFiosOp op = ++op_count;
-    op_return_codes_map.emplace(op, exists ? 1 : 0);
-    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, exists ? 1 : 0);
+    s32 ret = exists ? 1 : 0;
+    op_return_codes_map.emplace(op, ret);
+    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
+    LOG_DEBUG(Lib_Fios2, "ret: {}, op: {}", ret, op);
     return op;
 }
 
 bool PS4_SYSV_ABI sceFiosExistsSync(const OrbisFiosOpAttr* pAttr, const char* pPath) {
     LOG_DEBUG(Lib_Fios2, "(DUMMY) called");
+    if (pAttr && pAttr->pCallback) {
+        LOG_WARNING(Lib_Fios2, "There is a callback to a sync function!");
+    }
     OrbisFiosOp op = sceFiosExists(pAttr, pPath, nullptr);
     return static_cast<bool>(sceFiosOpSyncWait(op));
 }
@@ -404,6 +411,9 @@ s32 PS4_SYSV_ABI sceFiosFHClose(const OrbisFiosOpAttr* pAttr, OrbisFiosFH fh) {
 
 s32 PS4_SYSV_ABI sceFiosFHCloseSync(const OrbisFiosOpAttr* pAttr, OrbisFiosFH fh) {
     LOG_WARNING(Lib_Fios2, "(DUMMY) called");
+    if (pAttr && pAttr->pCallback) {
+        LOG_WARNING(Lib_Fios2, "There is a callback to a sync function!");
+    }
     OrbisFiosOp op = sceFiosFHClose(pAttr, fh);
     return sceFiosOpSyncWait(op);
 }
@@ -461,8 +471,8 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFHOpenWithMode(const OrbisFiosOpAttr* pAttr, Orb
     OrbisFiosOp op = ++op_count;
     s32 ret = std::min(fh, ORBIS_OK);
     op_return_codes_map.emplace(op, ret);
-    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
     LOG_DEBUG(Lib_Fios2, "ret: {}, op: {}, fh: {}", ret, op, fh);
+    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
     return op;
 }
 
@@ -470,6 +480,9 @@ s32 PS4_SYSV_ABI sceFiosFHOpenWithModeSync(const OrbisFiosOpAttr* pAttr, OrbisFi
                                            const char* pPath,
                                            const OrbisFiosOpenParams* pOpenParams, s32 nativeMode) {
     LOG_DEBUG(Lib_Fios2, "(DUMMY) called");
+    if (pAttr && pAttr->pCallback) {
+        LOG_WARNING(Lib_Fios2, "There is a callback to a sync function!");
+    }
     OrbisFiosOp op = sceFiosFHOpenWithMode(pAttr, pOutFH, pPath, pOpenParams, nativeMode);
     return sceFiosOpSyncWait(op);
 }
@@ -483,6 +496,9 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFHOpen(const OrbisFiosOpAttr* pAttr, OrbisFiosFH
 s32 PS4_SYSV_ABI sceFiosFHOpenSync(const OrbisFiosOpAttr* pAttr, OrbisFiosFH* pOutFH,
                                    const char* pPath, const OrbisFiosOpenParams* pOpenParams) {
     LOG_DEBUG(Lib_Fios2, "(DUMMY) called");
+    if (pAttr && pAttr->pCallback) {
+        LOG_WARNING(Lib_Fios2, "There is a callback to a sync function!");
+    }
     OrbisFiosOp op = sceFiosFHOpen(pAttr, pOutFH, pPath, pOpenParams);
     return sceFiosOpSyncWait(op);
 }
@@ -494,14 +510,17 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFHPread(const OrbisFiosOpAttr* pAttr, OrbisFiosF
     OrbisFiosSize ret = Kernel::sceKernelPread(fh, pBuf, length, offset);
     OrbisFiosOp op = ++op_count;
     op_io_return_codes_map.emplace(op, ret);
-    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
     LOG_DEBUG(Lib_Fios2, "ret: {}, op: {}", ret, op);
+    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
     return op;
 }
 
 s32 PS4_SYSV_ABI sceFiosFHPreadSync(const OrbisFiosOpAttr* pAttr, OrbisFiosFH fh, void* pBuf,
                                     OrbisFiosSize length, OrbisFiosOffset offset) {
     LOG_DEBUG(Lib_Fios2, "(DUMMY) called");
+    if (pAttr && pAttr->pCallback) {
+        LOG_WARNING(Lib_Fios2, "There is a callback to a sync function!");
+    }
     OrbisFiosOp op = sceFiosFHPread(pAttr, fh, pBuf, length, offset);
     return sceFiosOpSyncWaitForIO(op);
 }
@@ -538,24 +557,29 @@ s32 PS4_SYSV_ABI sceFiosFHPwritevSync() {
 
 OrbisFiosOp PS4_SYSV_ABI sceFiosFHRead(const OrbisFiosOpAttr* pAttr, OrbisFiosFH fh, void* pBuf,
                                        OrbisFiosSize length) {
+    std::scoped_lock l{m};
     LOG_WARNING(Lib_Fios2, "(DUMMY) called, fh: {}, length: {:#x}", fh, (u64)length);
     OrbisFiosSize ret = Kernel::sceKernelRead(fh, pBuf, length);
     OrbisFiosOp op = ++op_count;
     op_io_return_codes_map.emplace(op, ret);
-    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
     LOG_DEBUG(Lib_Fios2, "ret: {}, op: {}", ret, op);
+    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
     return op;
 }
 
 OrbisFiosSize PS4_SYSV_ABI sceFiosFHReadSync(const OrbisFiosOpAttr* pAttr, OrbisFiosFH fh,
                                              void* pBuf, OrbisFiosSize length) {
     LOG_DEBUG(Lib_Fios2, "(DUMMY) called");
+    if (pAttr && pAttr->pCallback) {
+        LOG_WARNING(Lib_Fios2, "There is a callback to a sync function!");
+    }
     OrbisFiosOp op = sceFiosFHRead(pAttr, fh, pBuf, length);
     return sceFiosOpSyncWaitForIO(op);
 }
 
 OrbisFiosOp PS4_SYSV_ABI sceFiosFHReadv(const OrbisFiosOpAttr* pAttr, OrbisFiosFH fh,
                                         const OrbisFiosBuffer iov[], int iovcnt) {
+    std::scoped_lock l{m};
     LOG_WARNING(Lib_Fios2, "(DUMMY) called");
 
     std::vector<Kernel::SceKernelIovec> kernel_iov(iovcnt);
@@ -575,6 +599,9 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFHReadv(const OrbisFiosOpAttr* pAttr, OrbisFiosF
 OrbisFiosSize PS4_SYSV_ABI sceFiosFHReadvSync(const OrbisFiosOpAttr* pAttr, OrbisFiosFH fh,
                                               const OrbisFiosBuffer iov[], int iovcnt) {
     LOG_DEBUG(Lib_Fios2, "(DUMMY) called");
+    if (pAttr && pAttr->pCallback) {
+        LOG_WARNING(Lib_Fios2, "There is a callback to a sync function!");
+    }
     OrbisFiosOp op = sceFiosFHReadv(pAttr, fh, iov, iovcnt);
     return sceFiosOpSyncWaitForIO(op);
 }
@@ -661,19 +688,23 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFileExists(const OrbisFiosOpAttr* pAttr, const c
 
 bool PS4_SYSV_ABI sceFiosFileExistsSync(const OrbisFiosOpAttr* pAttr, const char* pPath) {
     LOG_DEBUG(Lib_Fios2, "(DUMMY) called");
+    if (pAttr && pAttr->pCallback) {
+        LOG_WARNING(Lib_Fios2, "There is a callback to a sync function!");
+    }
     OrbisFiosOp op = sceFiosFileExists(pAttr, pPath);
     return sceFiosOpSyncWaitForIO(op);
 }
 
 OrbisFiosOp PS4_SYSV_ABI sceFiosFileGetSize(const OrbisFiosOpAttr* pAttr, const char* pPath) {
+    std::scoped_lock l{m};
     OrbisFiosOp op = ++op_count;
     Kernel::OrbisKernelStat stat{};
     if (Kernel::sceKernelStat(ToApp0(pPath), &stat) < 0) {
         op_io_return_codes_map.emplace(op, ORBIS_FIOS_ERROR_BAD_PATH);
         return op;
     }
-    LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {} path: {} size: {}", (void*)pAttr, pPath,
-                stat.st_size);
+    LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {} path: {} size: {}, op: {}", (void*)pAttr,
+                pPath, stat.st_size, op);
     op_io_return_codes_map.emplace(op, stat.st_size);
     CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, static_cast<s32>(stat.st_size));
     return op;
@@ -694,20 +725,53 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFileRead(const OrbisFiosOpAttr* pAttr, const cha
                                          void* pBuf, OrbisFiosSize length, OrbisFiosOffset offset) {
     LOG_WARNING(Lib_Fios2, "(DUMMY) called, path: {}, length: {}, offset: {}", pPath, length,
                 offset);
-
     OrbisFiosOp op = ++op_count;
-    s32 fd = Kernel::sceKernelOpen(ToApp0(pPath), Kernel::ORBIS_KERNEL_O_RDONLY, 0);
-    s64 ret = -1;
-
-    if (fd >= 0) {
-        ret = Kernel::sceKernelPread(fd, pBuf, length, offset);
-        Kernel::sceKernelClose(fd);
-    }
+    s64 ret = 1;
 
     op_io_return_codes_map.emplace(op, ret >= 0 ? ret : ORBIS_FIOS_ERROR_BAD_PATH);
-    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, static_cast<int>(ret));
     LOG_DEBUG(Lib_Fios2, "ret: {}, op: {}", ret, op);
+    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, static_cast<int>(ret));
     return op;
+
+    OrbisFiosFH fh;
+    OrbisFiosOp op1;
+    op1 = sceFiosFHOpen(nullptr, &fh, pPath, nullptr);
+    if (sceFiosOpSyncWait(op1) != 0) {
+        // return error
+        UNREACHABLE();
+    }
+    op1 = sceFiosFHPread(nullptr, fh, pBuf, length, offset);
+    ret = sceFiosOpSyncWaitForIO(op1);
+    if (ret < 0) {
+        // return error
+        UNREACHABLE();
+    }
+    op1 = sceFiosFHClose(nullptr, fh);
+    if (sceFiosOpSyncWait(op1) != 0) {
+        // return error
+        UNREACHABLE();
+    }
+    std::scoped_lock l{m};
+
+    op_io_return_codes_map.emplace(op, ret >= 0 ? ret : ORBIS_FIOS_ERROR_BAD_PATH);
+    LOG_DEBUG(Lib_Fios2, "ret: {}, op: {}", ret, op);
+    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, static_cast<int>(ret));
+    return op;
+
+    // std::scoped_lock l{m};
+
+    // s32 fd = Kernel::sceKernelOpen(ToApp0(pPath), Kernel::ORBIS_KERNEL_O_RDONLY, 0);
+    // s64 ret = -1;
+
+    // if (fd >= 0) {
+    //     ret = Kernel::sceKernelPread(fd, pBuf, length, offset);
+    //     Kernel::sceKernelClose(fd);
+    // }
+
+    // op_io_return_codes_map.emplace(op, ret >= 0 ? ret : ORBIS_FIOS_ERROR_BAD_PATH);
+    // LOG_DEBUG(Lib_Fios2, "ret: {}, op: {}", ret, op);
+    // CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, static_cast<int>(ret));
+    // return op;
 }
 
 OrbisFiosSize PS4_SYSV_ABI sceFiosFileReadSync(const OrbisFiosOpAttr* pAttr, const char* pPath,
@@ -829,6 +893,7 @@ s32 PS4_SYSV_ABI sceFiosOpCancel() {
 }
 
 s32 PS4_SYSV_ABI sceFiosOpDelete(OrbisFiosOp op) {
+    std::scoped_lock l{m};
     LOG_DEBUG(Lib_Fios2, "(DUMMY) called, op: {}", op);
     op_return_codes_map.erase(op);
     op_io_return_codes_map.erase(op);
