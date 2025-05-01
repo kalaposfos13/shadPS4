@@ -12,6 +12,7 @@
 #include "core/libraries/fios2/fios2_error.h"
 #include "core/libraries/kernel/file_system.h"
 #include "core/libraries/libs.h"
+#include "core/signals.h"
 #include "core/tls.h"
 
 namespace Libraries::Fios2 {
@@ -375,7 +376,8 @@ s32 PS4_SYSV_ABI sceFiosDLLTerminate() {
 
 OrbisFiosOp PS4_SYSV_ABI sceFiosExists(const OrbisFiosOpAttr* pAttr, const char* pPath,
                                        bool* pOutExists) {
-    LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {} path: {}", (void*)pAttr, pPath);
+    LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {} path: {}, thread: {}", (void*)pAttr, pPath,
+                Core::GetThreadName());
     OrbisFiosOp op = ++op_count;
 
     Kernel::OrbisKernelStat st;
@@ -506,7 +508,8 @@ s32 PS4_SYSV_ABI sceFiosFHOpenSync(const OrbisFiosOpAttr* pAttr, OrbisFiosFH* pO
 OrbisFiosOp PS4_SYSV_ABI sceFiosFHPread(const OrbisFiosOpAttr* pAttr, OrbisFiosFH fh, void* pBuf,
                                         OrbisFiosSize length, OrbisFiosOffset offset) {
     std::scoped_lock l{m};
-    LOG_WARNING(Lib_Fios2, "(DUMMY) called, fh: {}, length: {}, offset: {}", fh, length, offset);
+    LOG_WARNING(Lib_Fios2, "(DUMMY) called, fh: {}, length: {}, offset: {}, thread: {}", fh, length,
+                offset, Core::GetThreadName());
     OrbisFiosSize ret = Kernel::sceKernelPread(fh, pBuf, length, offset);
     OrbisFiosOp op = ++op_count;
     op_io_return_codes_map.emplace(op, ret);
@@ -723,55 +726,24 @@ s32 PS4_SYSV_ABI sceFiosFilenoToFH() {
 
 OrbisFiosOp PS4_SYSV_ABI sceFiosFileRead(const OrbisFiosOpAttr* pAttr, const char* pPath,
                                          void* pBuf, OrbisFiosSize length, OrbisFiosOffset offset) {
-    LOG_WARNING(Lib_Fios2, "(DUMMY) called, path: {}, length: {}, offset: {}", pPath, length,
-                offset);
-    OrbisFiosOp op = ++op_count;
-    s64 ret = 1;
+    LOG_WARNING(Lib_Fios2, "(DUMMY) called, path: {}, length: {}, offset: {}, thread: {}", pPath,
+                length, offset, Core::GetThreadName());
 
-    op_io_return_codes_map.emplace(op, ret >= 0 ? ret : ORBIS_FIOS_ERROR_BAD_PATH);
-    LOG_DEBUG(Lib_Fios2, "ret: {}, op: {}", ret, op);
-    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, static_cast<int>(ret));
-    return op;
-
-    OrbisFiosFH fh;
-    OrbisFiosOp op1;
-    op1 = sceFiosFHOpen(nullptr, &fh, pPath, nullptr);
-    if (sceFiosOpSyncWait(op1) != 0) {
-        // return error
-        UNREACHABLE();
-    }
-    op1 = sceFiosFHPread(nullptr, fh, pBuf, length, offset);
-    ret = sceFiosOpSyncWaitForIO(op1);
-    if (ret < 0) {
-        // return error
-        UNREACHABLE();
-    }
-    op1 = sceFiosFHClose(nullptr, fh);
-    if (sceFiosOpSyncWait(op1) != 0) {
-        // return error
-        UNREACHABLE();
-    }
     std::scoped_lock l{m};
+    OrbisFiosOp op = ++op_count;
+    s64 ret = -1;
+
+    s32 fd = Kernel::sceKernelOpen(ToApp0(pPath), Kernel::ORBIS_KERNEL_O_RDONLY, 0);
+
+    if (fd >= 0) {
+        ret = Kernel::sceKernelPread(fd, pBuf, length, offset);
+        Kernel::sceKernelClose(fd);
+    }
 
     op_io_return_codes_map.emplace(op, ret >= 0 ? ret : ORBIS_FIOS_ERROR_BAD_PATH);
     LOG_DEBUG(Lib_Fios2, "ret: {}, op: {}", ret, op);
     CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, static_cast<int>(ret));
     return op;
-
-    // std::scoped_lock l{m};
-
-    // s32 fd = Kernel::sceKernelOpen(ToApp0(pPath), Kernel::ORBIS_KERNEL_O_RDONLY, 0);
-    // s64 ret = -1;
-
-    // if (fd >= 0) {
-    //     ret = Kernel::sceKernelPread(fd, pBuf, length, offset);
-    //     Kernel::sceKernelClose(fd);
-    // }
-
-    // op_io_return_codes_map.emplace(op, ret >= 0 ? ret : ORBIS_FIOS_ERROR_BAD_PATH);
-    // LOG_DEBUG(Lib_Fios2, "ret: {}, op: {}", ret, op);
-    // CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, static_cast<int>(ret));
-    // return op;
 }
 
 OrbisFiosSize PS4_SYSV_ABI sceFiosFileReadSync(const OrbisFiosOpAttr* pAttr, const char* pPath,
@@ -894,7 +866,7 @@ s32 PS4_SYSV_ABI sceFiosOpCancel() {
 
 s32 PS4_SYSV_ABI sceFiosOpDelete(OrbisFiosOp op) {
     std::scoped_lock l{m};
-    LOG_DEBUG(Lib_Fios2, "(DUMMY) called, op: {}", op);
+    LOG_DEBUG(Lib_Fios2, "(DUMMY) called, op: {}, thread: {}", op, Core::GetThreadName());
     op_return_codes_map.erase(op);
     op_io_return_codes_map.erase(op);
     return ORBIS_OK;
