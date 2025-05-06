@@ -41,7 +41,7 @@ const char* ToApp0(const char* _arc) {
 void CallFiosCallback(const OrbisFiosOpAttr* pAttr, OrbisFiosOp op, OrbisFiosOpEvent event,
                       s32 err) {
     if (pAttr && pAttr->pCallback) {
-        LOG_INFO(Lib_Fios2, "Calling callback at {}, for op: {}", (void*)pAttr->pCallback, op);
+        // LOG_INFO(Lib_Fios2, "Calling callback at {}, for op: {}", (void*)pAttr->pCallback, op);
         Core::ExecuteGuest(pAttr->pCallback, pAttr->pCallbackContext, op, event, err);
         // LOG_DEBUG(Lib_Fios2, "Callback returned");
         // std::this_thread::sleep_for(std::chrono::milliseconds(5));
@@ -376,17 +376,21 @@ s32 PS4_SYSV_ABI sceFiosDLLTerminate() {
 
 OrbisFiosOp PS4_SYSV_ABI sceFiosExists(const OrbisFiosOpAttr* pAttr, const char* pPath,
                                        bool* pOutExists) {
-    LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {} path: {}, thread: {}", (void*)pAttr, pPath,
-                Core::GetThreadName());
     OrbisFiosOp op = ++op_count;
+    s32 ret;
+    {
+        std::scoped_lock l{m};
+        LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {} path: {}, thread: {}", (void*)pAttr, pPath,
+                    Core::GetThreadName());
 
-    Kernel::OrbisKernelStat st;
-    bool exists = (Kernel::posix_stat(ToApp0(pPath), &st) == ORBIS_OK);
-    if (pOutExists) {
-        *pOutExists = exists;
+        Kernel::OrbisKernelStat st;
+        bool exists = (Kernel::posix_stat(ToApp0(pPath), &st) == ORBIS_OK);
+        if (pOutExists) {
+            *pOutExists = exists;
+        }
+        ret = exists ? 1 : 0;
+        op_return_codes_map.emplace(op, ret);
     }
-    s32 ret = exists ? 1 : 0;
-    op_return_codes_map.emplace(op, ret);
     CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
     LOG_DEBUG(Lib_Fios2, "ret: {}, op: {}", ret, op);
     return op;
@@ -513,7 +517,10 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFHPread(const OrbisFiosOpAttr* pAttr, OrbisFiosF
     OrbisFiosSize ret = Kernel::sceKernelPread(fh, pBuf, length, offset);
     OrbisFiosOp op = ++op_count;
     op_io_return_codes_map.emplace(op, ret);
-    LOG_DEBUG(Lib_Fios2, "ret: {}, op: {}", ret, op);
+    LOG_DEBUG(Lib_Fios2, "fh: {}, ret: {}, op: {}", fh, ret, op);
+    if (ret!=length) {
+        LOG_WARNING(Lib_Fios2, "len: {}, ret: {}", length, ret);
+    }
     CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
     return op;
 }
@@ -742,7 +749,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFileRead(const OrbisFiosOpAttr* pAttr, const cha
 
     op_io_return_codes_map.emplace(op, ret >= 0 ? ret : ORBIS_FIOS_ERROR_BAD_PATH);
     LOG_DEBUG(Lib_Fios2, "ret: {}, op: {}", ret, op);
-    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, static_cast<int>(ret));
+    CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, static_cast<s32>(ret));
     return op;
 }
 
@@ -866,7 +873,7 @@ s32 PS4_SYSV_ABI sceFiosOpCancel() {
 
 s32 PS4_SYSV_ABI sceFiosOpDelete(OrbisFiosOp op) {
     std::scoped_lock l{m};
-    LOG_DEBUG(Lib_Fios2, "(DUMMY) called, op: {}, thread: {}", op, Core::GetThreadName());
+    // LOG_DEBUG(Lib_Fios2, "(DUMMY) called, op: {}, thread: {}", op, Core::GetThreadName());
     op_return_codes_map.erase(op);
     op_io_return_codes_map.erase(op);
     return ORBIS_OK;
@@ -1160,7 +1167,7 @@ s32 PS4_SYSV_ABI sceFiosVprintf() {
 void RegisterlibSceFios2(Core::Loader::SymbolsResolver* sym) {
     const char* f = "libSceFios2";
 
-    // return;
+    return;
 
     // common
     LIB_FUNCTION("LHqFYb+U52E", f, 1, f, 1, 1, sceFiosExists);
