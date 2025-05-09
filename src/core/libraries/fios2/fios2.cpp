@@ -476,7 +476,10 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFHOpenWithMode(const OrbisFiosOpAttr* pAttr, Orb
 
     OrbisFiosOp op = ++op_count;
     s32 ret = std::min(fh, ORBIS_OK);
-    op_return_codes_map.emplace(op, ret);
+    {
+        std::scoped_lock l{m};
+        op_return_codes_map.emplace(op, ret);
+    }
     LOG_DEBUG(Lib_Fios2, "ret: {}, op: {}, fh: {}", ret, op, fh);
     CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
     return op;
@@ -518,8 +521,8 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFHPread(const OrbisFiosOpAttr* pAttr, OrbisFiosF
     OrbisFiosOp op = ++op_count;
     op_io_return_codes_map.emplace(op, ret);
     LOG_DEBUG(Lib_Fios2, "fh: {}, ret: {}, op: {}", fh, ret, op);
-    if (ret!=length) {
-        LOG_WARNING(Lib_Fios2, "len: {}, ret: {}", length, ret);
+    if (ret != length) {
+        LOG_ERROR(Lib_Fios2, "len: {}, ret: {}", length, ret);
     }
     CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
     return op;
@@ -571,6 +574,9 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFHRead(const OrbisFiosOpAttr* pAttr, OrbisFiosFH
     LOG_WARNING(Lib_Fios2, "(DUMMY) called, fh: {}, length: {:#x}", fh, (u64)length);
     OrbisFiosSize ret = Kernel::sceKernelRead(fh, pBuf, length);
     OrbisFiosOp op = ++op_count;
+    if (ret != length) {
+        LOG_ERROR(Lib_Fios2, "len: {}, ret: {}", length, ret);
+    }
     op_io_return_codes_map.emplace(op, ret);
     LOG_DEBUG(Lib_Fios2, "ret: {}, op: {}", ret, op);
     CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
@@ -748,6 +754,9 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFileRead(const OrbisFiosOpAttr* pAttr, const cha
     }
 
     op_io_return_codes_map.emplace(op, ret >= 0 ? ret : ORBIS_FIOS_ERROR_BAD_PATH);
+    if(ret != length) {
+        LOG_ERROR(Lib_Fios2, "ret: {}, len: {}", ret, length);
+    }
     LOG_DEBUG(Lib_Fios2, "ret: {}, op: {}", ret, op);
     CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, static_cast<s32>(ret));
     return op;
@@ -1167,7 +1176,7 @@ s32 PS4_SYSV_ABI sceFiosVprintf() {
 void RegisterlibSceFios2(Core::Loader::SymbolsResolver* sym) {
     const char* f = "libSceFios2";
 
-    return;
+    // return;
 
     // common
     LIB_FUNCTION("LHqFYb+U52E", f, 1, f, 1, 1, sceFiosExists);
