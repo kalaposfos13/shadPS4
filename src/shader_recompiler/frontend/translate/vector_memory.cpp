@@ -135,18 +135,45 @@ void Translator::EmitVectorMemory(const GcnInst& inst) {
         return IMAGE_ATOMIC(AtomicOp::Dec, inst);
 
     case Opcode::IMAGE_SAMPLE:
+    case Opcode::IMAGE_SAMPLE_CL:
     case Opcode::IMAGE_SAMPLE_D:
+    case Opcode::IMAGE_SAMPLE_D_CL:
     case Opcode::IMAGE_SAMPLE_L:
     case Opcode::IMAGE_SAMPLE_B:
+    case Opcode::IMAGE_SAMPLE_B_CL:
     case Opcode::IMAGE_SAMPLE_LZ:
     case Opcode::IMAGE_SAMPLE_C:
+    case Opcode::IMAGE_SAMPLE_C_CL:
+    case Opcode::IMAGE_SAMPLE_C_D:
+    case Opcode::IMAGE_SAMPLE_C_D_CL:
+    case Opcode::IMAGE_SAMPLE_C_L:
+    case Opcode::IMAGE_SAMPLE_C_B:
+    case Opcode::IMAGE_SAMPLE_C_B_CL:
     case Opcode::IMAGE_SAMPLE_C_LZ:
     case Opcode::IMAGE_SAMPLE_O:
+    case Opcode::IMAGE_SAMPLE_CL_O:
+    case Opcode::IMAGE_SAMPLE_D_O:
+    case Opcode::IMAGE_SAMPLE_D_CL_O:
     case Opcode::IMAGE_SAMPLE_L_O:
+    case Opcode::IMAGE_SAMPLE_B_O:
+    case Opcode::IMAGE_SAMPLE_B_CL_O:
     case Opcode::IMAGE_SAMPLE_LZ_O:
     case Opcode::IMAGE_SAMPLE_C_O:
+    case Opcode::IMAGE_SAMPLE_C_CL_O:
+    case Opcode::IMAGE_SAMPLE_C_D_O:
+    case Opcode::IMAGE_SAMPLE_C_D_CL_O:
+    case Opcode::IMAGE_SAMPLE_C_L_O:
+    case Opcode::IMAGE_SAMPLE_C_B_O:
+    case Opcode::IMAGE_SAMPLE_C_B_CL_O:
     case Opcode::IMAGE_SAMPLE_C_LZ_O:
     case Opcode::IMAGE_SAMPLE_CD:
+    case Opcode::IMAGE_SAMPLE_CD_CL:
+    case Opcode::IMAGE_SAMPLE_C_CD:
+    case Opcode::IMAGE_SAMPLE_C_CD_CL:
+    case Opcode::IMAGE_SAMPLE_CD_O:
+    case Opcode::IMAGE_SAMPLE_CD_CL_O:
+    case Opcode::IMAGE_SAMPLE_C_CD_O:
+    case Opcode::IMAGE_SAMPLE_C_CD_CL_O:
         return IMAGE_SAMPLE(inst);
 
         // Image gather operations
