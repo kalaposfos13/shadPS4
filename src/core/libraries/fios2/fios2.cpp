@@ -436,6 +436,7 @@ const char* PS4_SYSV_ABI sceFiosFHGetPath(OrbisFiosFH fh) {
     if (it != fh_path_map.end()) {
         return it->second.c_str();
     }
+    LOG_ERROR(Lib_Fios2, "Invalid FH: {}", fh);
     return nullptr;
 }
 
@@ -889,6 +890,7 @@ s32 PS4_SYSV_ABI sceFiosOpDelete(OrbisFiosOp op) {
 }
 
 OrbisFiosSize PS4_SYSV_ABI sceFiosOpGetActualCount(OrbisFiosOp op) {
+    std::scoped_lock l{m};
     LOG_DEBUG(Lib_Fios2, "(DUMMY) called, op: {}", op);
     if (op_io_return_codes_map.find(op) == op_io_return_codes_map.end()) {
         LOG_WARNING(Lib_Fios2, "Bad op handle: {}", op);
@@ -963,6 +965,7 @@ s32 PS4_SYSV_ABI sceFiosOpSetBuffer() {
 }
 
 s32 PS4_SYSV_ABI sceFiosOpSyncWait(OrbisFiosOp op) {
+    std::scoped_lock l{m};
     LOG_DEBUG(Lib_Fios2, "called, op: {}", op);
     auto it = op_return_codes_map.find(op);
     if (it == op_return_codes_map.end()) {
@@ -975,6 +978,7 @@ s32 PS4_SYSV_ABI sceFiosOpSyncWait(OrbisFiosOp op) {
 }
 
 OrbisFiosSize PS4_SYSV_ABI sceFiosOpSyncWaitForIO(OrbisFiosOp op) {
+    std::scoped_lock l{m};
     LOG_DEBUG(Lib_Fios2, "called, op: {}", op);
     auto it = op_io_return_codes_map.find(op);
     if (it == op_io_return_codes_map.end()) {
