@@ -26,7 +26,10 @@ typedef enum OrbisFiosWhence { Set = 0, Current = 1, End = 2 } SceFiosWhence;
 typedef s64 OrbisFiosSize;
 typedef s64 OrbisFiosOffset;
 typedef s64 OrbisFiosDate;
-typedef s64 OrbisFiosTime;
+typedef s64 OrbisFiosTime; // in nanoseconds
+
+
+typedef OrbisFiosTime OrbisFiosTimeInterval;
 
 typedef struct OrbisFiosStat {
     OrbisFiosOffset fileSize;
