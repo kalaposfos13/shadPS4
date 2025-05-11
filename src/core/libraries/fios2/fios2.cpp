@@ -205,19 +205,21 @@ s32 PS4_SYSV_ABI sceFiosCloseAllFiles() {
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI sceFiosDateFromComponents() {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+tm* PS4_SYSV_ABI sceFiosDateFromComponents(OrbisFiosDate date, tm* pOutComponents) {
+    LOG_INFO(Lib_Fios2, "called");
+    time_t t = date / 1000000000;
+    pOutComponents = gmtime(&t);
+    return pOutComponents;
 }
 
-s32 PS4_SYSV_ABI sceFiosDateGetCurrent() {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+OrbisFiosDate PS4_SYSV_ABI sceFiosDateGetCurrent() {
+    LOG_INFO(Lib_Fios2, "called");
+    return time(nullptr) * 1000000000;
 }
 
-s32 PS4_SYSV_ABI sceFiosDateToComponents() {
-    LOG_ERROR(Lib_Fios2, "(STUBBED) called");
-    return ORBIS_OK;
+OrbisFiosDate PS4_SYSV_ABI sceFiosDateToComponents(tm* pComponents) {
+    LOG_INFO(Lib_Fios2, "called");
+    return mktime(pComponents) * 1000000000;
 }
 
 s32 PS4_SYSV_ABI sceFiosDeallocatePassthruFH() {
@@ -1302,15 +1304,15 @@ void RegisterlibSceFios2(Core::Loader::SymbolsResolver* sym) {
     // LIB_FUNCTION("wAKZ-det+yo", f, 1, f, 1, 1, sceFiosInitialize);
 
     // date + time
-    // LIB_FUNCTION("DCfnYVX6xBo", f, 1, f, 1, 1, sceFiosPrintTimeStamps);
-    // LIB_FUNCTION("NUkBGOZARi4", f, 1, f, 1, 1, sceFiosTimeGetCurrent);
-    // LIB_FUNCTION("F1dCP7qkqok", f, 1, f, 1, 1, sceFiosTimeIntervalFromNanoseconds);
-    // LIB_FUNCTION("vZNIcB3n+bg", f, 1, f, 1, 1, sceFiosTimeIntervalToNanoseconds);
-    // LIB_FUNCTION("m96WzIHunT8", f, 1, f, 1, 1, sceFiosTraceTimestamp);
-    // LIB_FUNCTION("92xCv12VJIA", f, 1, f, 1, 1, sceFiosSaveTimeStamp);
-    // LIB_FUNCTION("axVqO-tslwo", f, 1, f, 1, 1, sceFiosDateFromComponents);
-    // LIB_FUNCTION("tQ6zNr0O6GA", f, 1, f, 1, 1, sceFiosDateGetCurrent);
-    // LIB_FUNCTION("Rm+hiwvSnxw", f, 1, f, 1, 1, sceFiosDateToComponents);
+    LIB_FUNCTION("DCfnYVX6xBo", f, 1, f, 1, 1, sceFiosPrintTimeStamps);
+    LIB_FUNCTION("NUkBGOZARi4", f, 1, f, 1, 1, sceFiosTimeGetCurrent);
+    LIB_FUNCTION("F1dCP7qkqok", f, 1, f, 1, 1, sceFiosTimeIntervalFromNanoseconds);
+    LIB_FUNCTION("vZNIcB3n+bg", f, 1, f, 1, 1, sceFiosTimeIntervalToNanoseconds);
+    LIB_FUNCTION("m96WzIHunT8", f, 1, f, 1, 1, sceFiosTraceTimestamp);
+    LIB_FUNCTION("92xCv12VJIA", f, 1, f, 1, 1, sceFiosSaveTimeStamp);
+    LIB_FUNCTION("axVqO-tslwo", f, 1, f, 1, 1, sceFiosDateFromComponents);
+    LIB_FUNCTION("tQ6zNr0O6GA", f, 1, f, 1, 1, sceFiosDateGetCurrent);
+    LIB_FUNCTION("Rm+hiwvSnxw", f, 1, f, 1, 1, sceFiosDateToComponents);
 
     // io filter
     LIB_FUNCTION("lgITuBsRo2o", f, 1, f, 1, 1, sceFiosIOFilterAdd);
