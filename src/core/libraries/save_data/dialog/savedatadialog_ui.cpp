@@ -95,10 +95,10 @@ SaveDialogState::SaveDialogState(const OrbisSaveDataDialogParam& param) {
             PSF param_sfo;
             param_sfo.Open(param_sfo_path);
 
-            auto last_write = param_sfo.GetLastWrite();
+            auto last_write = std::chrono::system_clock::to_time_t(param_sfo.GetLastWrite());
+            std::tm tm_buf;
             std::string date_str =
-                fmt::format("{:%d %b, %Y %R}",
-                            fmt::localtime(std::chrono::system_clock::to_time_t(last_write)));
+                fmt::format("{:%d %b, %Y %R}", *localtime_r(&last_write, &tm_buf));
 
             size_t size = Common::FS::GetDirectorySize(dir_path);
             std::string size_str = SpaceSizeToString(size);
