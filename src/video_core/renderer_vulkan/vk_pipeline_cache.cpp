@@ -372,7 +372,12 @@ bool PipelineCache::RefreshGraphicsKey() {
             infos[stage_out_idx] = nullptr;
             return false;
         }
-
+#ifdef SHADER_SKIPPING
+        if (Config::ShouldSkipShader(bininfo.shader_hash)) {
+            LOG_WARNING(Render_Vulkan, "Skipped graphics shader hash {:#x}.", bininfo.shader_hash);
+            return false;
+        }
+#endif
         auto params = Liverpool::GetParams(*pgm);
         std::optional<Shader::Gcn::FetchShaderData> fetch_shader_;
         std::tie(infos[stage_out_idx], modules[stage_out_idx], fetch_shader_,
@@ -481,6 +486,12 @@ bool PipelineCache::RefreshComputeKey() {
     Shader::Backend::Bindings binding{};
     const auto& cs_pgm = liverpool->GetCsRegs();
     const auto cs_params = Liverpool::GetParams(cs_pgm);
+#ifdef SHADER_SKIPPING
+    if (Config::ShouldSkipShader(cs_params.hash)) {
+        LOG_WARNING(Render_Vulkan, "Skipped compute shader hash {:#x}.", cs_params.hash);
+        return false;
+    }
+#endif
     std::tie(infos[0], modules[0], fetch_shader, compute_key.value) =
         GetProgram(Shader::Stage::Compute, LogicalStage::Compute, cs_params, binding);
     return true;

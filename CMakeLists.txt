@@ -34,6 +34,11 @@ endif()
 option(ENABLE_QT_GUI "Enable the Qt GUI. If not selected then the emulator uses a minimal SDL-based UI instead" OFF)
 option(ENABLE_DISCORD_RPC "Enable the Discord RPC integration" ON)
 option(ENABLE_UPDATER "Enables the options to updater" ON)
+option(SHADER_SKIPPING "Enable shader skipping. Only use it for debugging purposes!" OFF)
+
+if(SHADER_SKIPPING)
+    add_definitions(-DSHADER_SKIPPING)
+endif()
 
 # First, determine whether to use CMAKE_OSX_ARCHITECTURES or CMAKE_SYSTEM_PROCESSOR.
 if (APPLE AND CMAKE_OSX_ARCHITECTURES)

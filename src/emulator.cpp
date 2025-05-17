@@ -174,6 +174,10 @@ void Emulator::Run(const std::filesystem::path& file, const std::vector<std::str
         }
     }
 
+#ifdef SHADER_SKIPPING
+    Config::SetSkippedShaderHashes(id);
+#endif
+
     auto& game_info = Common::ElfInfo::Instance();
     game_info.initialized = true;
     game_info.game_serial = id;

@@ -7,6 +7,7 @@
 #include <fmt/xchar.h> // for wstring support
 #include <toml.hpp>
 
+#include "common/logging/log.h"
 #include "common/config.h"
 #include "common/logging/formatter.h"
 #include "common/path_util.h"
@@ -78,6 +79,11 @@ static int controllerCustomColorRGB[3] = {0, 0, 255};
 static bool compatibilityData = false;
 static bool checkCompatibilityOnStartup = false;
 static std::string trophyKey;
+
+#ifdef SHADER_SKIPPING
+std::unordered_map<std::string, std::vector<std::string>> all_skipped_shader_hashes = {};
+std::vector<u64> current_skipped_shader_hashes = {};
+#endif
 
 // Gui
 static bool load_game_size = true;
@@ -378,6 +384,29 @@ void setDebugDump(bool enable) {
 void setCollectShaderForDebug(bool enable) {
     isShaderDebug = enable;
 }
+
+#ifdef SHADER_SKIPPING
+bool ShouldSkipShader(const u64& hash) {
+    return std::find(current_skipped_shader_hashes.begin(), current_skipped_shader_hashes.end(),
+                     hash) != current_skipped_shader_hashes.end();
+}
+
+void SetSkippedShaderHashes(const std::string& game_id) {
+    current_skipped_shader_hashes.clear();
+    current_skipped_shader_hashes.reserve(all_skipped_shader_hashes.size());
+    auto it = all_skipped_shader_hashes.find(game_id);
+    if (it != all_skipped_shader_hashes.end()) {
+        const auto& hashes = it->second;
+        for (auto& hash : hashes) {
+            try {
+                current_skipped_shader_hashes.push_back((u64)std::stoull(hash, nullptr, 16));
+            } catch (std::invalid_argument const& ex) {
+                LOG_ERROR(Config, "Invalid shader hash found: {}", hash);
+            }
+        }
+    }
+}
+#endif
 
 void setShowSplash(bool enable) {
     isShowSplash = enable;
@@ -885,6 +914,20 @@ void load(const std::filesystem::path& path) {
         trophyKey = toml::find_or<std::string>(keys, "TrophyKey", "");
     }
 
+#ifdef SHADER_SKIPPING
+    if (data.contains("ShaderSkip")) {
+        const toml::value& shader_skip_data = data.at("ShaderSkip");
+        all_skipped_shader_hashes.clear();
+        for (const auto& [game_id, hash_list] : shader_skip_data.as_table()) {
+            std::vector<std::string> hashes;
+            for (const auto& hash : hash_list.as_array()) {
+                hashes.push_back(hash.as_string());
+            }
+            all_skipped_shader_hashes[game_id] = hashes;
+        }
+    }
+#endif
+
     // Check if the loaded language is in the allowed list
     const std::vector<std::string> allowed_languages = {
         "ar_SA", "da_DK", "de_DE", "el_GR", "en_US", "es_ES", "fa_IR", "fi_FI", "fr_FR", "hu_HU",
@@ -902,6 +945,9 @@ void sortTomlSections(toml::ordered_value& data) {
     toml::ordered_value ordered_data;
     std::vector<std::string> section_order = {"General", "Input", "GPU", "Vulkan",
                                               "Debug",   "Keys",  "GUI", "Settings"};
+#ifdef SHADER_SKIPPING
+    section_order.insert(section_order.begin() + 5, "ShaderSkip");        
+#endif
 
     for (const auto& section : section_order) {
         if (data.contains(section)) {
@@ -1039,6 +1085,19 @@ void save(const std::filesystem::path& path) {
     data["GUI"]["showBackgroundImage"] = showBackgroundImage;
     data["Settings"]["consoleLanguage"] = m_language;
 
+#ifdef SHADER_SKIPPING
+    if (!all_skipped_shader_hashes.empty()) {
+        toml::value shader_skip_data;
+        for (const auto& [game_id, hashes] : all_skipped_shader_hashes) {
+            std::vector<toml::value> hash_values;
+            for (const auto& hash : hashes) {
+                hash_values.emplace_back(hash);
+            }
+            shader_skip_data[game_id] = hash_values;
+        }
+        data["ShaderSkip"] = shader_skip_data;
+    }
+#endif
     // Sorting of TOML sections
     sortTomlSections(data);
 
