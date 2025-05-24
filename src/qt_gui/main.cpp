@@ -36,6 +36,7 @@ int main(int argc, char* argv[]) {
     bool show_gui = false, has_game_argument = false;
     std::string game_path;
     std::vector<std::string> game_args{};
+    std::optional<std::filesystem::path> base_folder = std::nullopt;
 
     // Map of argument strings to lambda functions
     std::unordered_map<std::string, std::function<void(int&)>> arg_map = {
@@ -73,6 +74,17 @@ int main(int argc, char* argv[]) {
              }
          }},
         {"--game", [&](int& i) { arg_map["-g"](i); }},
+
+        {"-b",
+         [&](int& i) {
+             if (i + 1 < argc) {
+                 base_folder = argv[++i];
+             } else {
+                 std::cerr << "Error: Missing argument for -b/--base_folder\n";
+                 exit(1);
+             }
+         }},
+        {"--base_folder", [&](int& i) { arg_map["-g"](i); }},
 
         {"-p",
          [&](int& i) {
@@ -201,7 +213,7 @@ int main(int argc, char* argv[]) {
 
         // Run the emulator with the resolved game path
         Core::Emulator emulator;
-        emulator.Run(game_file_path.string(), game_args);
+        emulator.Run(game_file_path.string(), game_args, base_folder);
         if (!show_gui) {
             return 0; // Exit after running the emulator without showing the GUI
         }

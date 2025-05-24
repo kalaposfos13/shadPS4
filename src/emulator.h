@@ -25,7 +25,8 @@ public:
     Emulator();
     ~Emulator();
 
-    void Run(const std::filesystem::path& file, const std::vector<std::string> args = {});
+    void Run(const std::filesystem::path& file, const std::vector<std::string> args = {},
+             const std::optional<std::filesystem::path> game_working_dir = std::nullopt);
     void UpdatePlayTime(const std::string& serial);
 
 private:

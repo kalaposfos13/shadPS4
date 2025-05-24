@@ -30,6 +30,7 @@ int main(int argc, char* argv[]) {
     bool has_game_argument = false;
     std::string game_path;
     std::vector<std::string> game_args{};
+    std::optional<std::filesystem::path> base_folder = std::nullopt;
 
     // Map of argument strings to lambda functions
     std::unordered_map<std::string, std::function<void(int&)>> arg_map = {
@@ -61,6 +62,17 @@ int main(int argc, char* argv[]) {
              }
          }},
         {"--game", [&](int& i) { arg_map["-g"](i); }},
+
+        {"-b",
+         [&](int& i) {
+             if (i + 1 < argc) {
+                 base_folder = argv[++i];
+             } else {
+                 std::cerr << "Error: Missing argument for -b/--base_folder\n";
+                 exit(1);
+             }
+         }},
+        {"--base_folder", [&](int& i) { arg_map["-g"](i); }},
 
         {"-p",
          [&](int& i) {
@@ -185,7 +197,7 @@ int main(int argc, char* argv[]) {
 
     // Run the emulator with the resolved eboot path
     Core::Emulator emulator;
-    emulator.Run(eboot_path, game_args);
+    emulator.Run(eboot_path, game_args, base_folder);
 
     return 0;
 }

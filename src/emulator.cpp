@@ -61,9 +61,10 @@ Emulator::~Emulator() {
     Config::saveMainWindow(config_dir / "config.toml");
 }
 
-void Emulator::Run(const std::filesystem::path& file, const std::vector<std::string> args) {
+void Emulator::Run(const std::filesystem::path& file, const std::vector<std::string> args,
+                   const std::optional<std::filesystem::path> game_working_dir) {
     const auto eboot_name = file.filename().string();
-    auto game_folder = file.parent_path();
+    auto game_folder = game_working_dir.value_or(file.parent_path());
     if (const auto game_folder_name = game_folder.filename().string();
         game_folder_name.ends_with("-UPDATE") || game_folder_name.ends_with("-patch")) {
         // If an executable was launched from a separate update directory,
