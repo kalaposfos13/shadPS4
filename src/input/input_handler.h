@@ -102,6 +102,10 @@ const std::map<std::string, u32> string_to_cbutton_map = {
 
     // this is only for input
     {"back", SDL_GAMEPAD_BUTTON_BACK},
+    {"lpaddle_high", SDL_GAMEPAD_BUTTON_LEFT_PADDLE1},
+    {"lpaddle_low", SDL_GAMEPAD_BUTTON_LEFT_PADDLE2},
+    {"rpaddle_high", SDL_GAMEPAD_BUTTON_RIGHT_PADDLE1},
+    {"rpaddle_low", SDL_GAMEPAD_BUTTON_RIGHT_PADDLE2},
 };
 
 const std::map<std::string, AxisMapping> string_to_axis_map = {
