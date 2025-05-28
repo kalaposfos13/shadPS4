@@ -4,6 +4,7 @@
 #include <mutex>
 #include <string>
 #include <thread>
+#include <unordered_map>
 
 #include "common/assert.h"
 #include "common/logging/log.h"
@@ -878,7 +879,7 @@ s32 PS4_SYSV_ABI sceFiosIsSuspended() {
 
 bool PS4_SYSV_ABI sceFiosIsValidHandle(OrbisFiosHandle h) {
     LOG_WARNING(Lib_Fios2, "(DUMMY) called, handle: {}", h);
-    return h > 0;
+    return h > 2;
 }
 
 s32 PS4_SYSV_ABI sceFiosOpCancel() {
@@ -1197,7 +1198,7 @@ s32 PS4_SYSV_ABI sceFiosVprintf() {
 void RegisterlibSceFios2(Core::Loader::SymbolsResolver* sym) {
     const char* f = "libSceFios2";
 
-    return;
+    // return;
 
     // common
     LIB_FUNCTION("LHqFYb+U52E", f, 1, f, 1, 1, sceFiosExists);
