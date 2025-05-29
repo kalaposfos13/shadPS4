@@ -39,6 +39,10 @@ static LONG WINAPI SignalHandler(EXCEPTION_POINTERS* pExp) noexcept {
     return handled ? EXCEPTION_CONTINUE_EXECUTION : EXCEPTION_CONTINUE_SEARCH;
 }
 
+std::string GetThreadName() {
+    return "No Windows thread names";
+}
+
 #else
 
 std::string GetThreadName() {

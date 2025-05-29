@@ -43,7 +43,10 @@ void CallFiosCallback(const OrbisFiosOpAttr* pAttr, OrbisFiosOp op, OrbisFiosOpE
                       s32 err) {
     if (pAttr && pAttr->pCallback) {
         // LOG_INFO(Lib_Fios2, "Calling callback at {}, for op: {}", (void*)pAttr->pCallback, op);
-        Core::ExecuteGuest(pAttr->pCallback, pAttr->pCallbackContext, op, event, err);
+        int ret = Core::ExecuteGuest(pAttr->pCallback, pAttr->pCallbackContext, op, event, err);
+        if (ret != 0) {
+            LOG_WARNING(Lib_Fios2, "Callback returned {}", ret);
+        }
         // LOG_DEBUG(Lib_Fios2, "Callback returned");
         // std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
@@ -397,12 +400,12 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosExists(const OrbisFiosOpAttr* pAttr, const char*
         op_return_codes_map.emplace(op, ret);
     }
     CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
-    LOG_DEBUG(Lib_Fios2, "ret: {}, op: {}", ret, op);
+    // LOG_DEBUG(Lib_Fios2, "ret: {}, op: {}", ret, op);
     return op;
 }
 
 bool PS4_SYSV_ABI sceFiosExistsSync(const OrbisFiosOpAttr* pAttr, const char* pPath) {
-    LOG_DEBUG(Lib_Fios2, "(DUMMY) called");
+    // LOG_DEBUG(Lib_Fios2, "(DUMMY) called");
     if (pAttr && pAttr->pCallback) {
         LOG_WARNING(Lib_Fios2, "There is a callback to a sync function!");
     }
@@ -522,12 +525,12 @@ s32 PS4_SYSV_ABI sceFiosFHOpenSync(const OrbisFiosOpAttr* pAttr, OrbisFiosFH* pO
 OrbisFiosOp PS4_SYSV_ABI sceFiosFHPread(const OrbisFiosOpAttr* pAttr, OrbisFiosFH fh, void* pBuf,
                                         OrbisFiosSize length, OrbisFiosOffset offset) {
     std::scoped_lock l{m};
-    LOG_WARNING(Lib_Fios2, "(DUMMY) called, fh: {}, length: {}, offset: {}, thread: {}", fh, length,
-                offset, Core::GetThreadName());
+    // LOG_WARNING(Lib_Fios2, "(DUMMY) called, fh: {}, length: {}, offset: {}, thread: {}", fh, length,
+    //             offset, Core::GetThreadName());
     OrbisFiosSize ret = Kernel::sceKernelPread(fh, pBuf, length, offset);
     OrbisFiosOp op = ++op_count;
     op_io_return_codes_map.emplace(op, ret);
-    LOG_DEBUG(Lib_Fios2, "fh: {}, ret: {}, op: {}", fh, ret, op);
+    // LOG_DEBUG(Lib_Fios2, "fh: {}, ret: {}, op: {}", fh, ret, op);
     if (ret != length) {
         LOG_ERROR(Lib_Fios2, "len: {}, ret: {}", length, ret);
     }
@@ -537,7 +540,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFHPread(const OrbisFiosOpAttr* pAttr, OrbisFiosF
 
 s32 PS4_SYSV_ABI sceFiosFHPreadSync(const OrbisFiosOpAttr* pAttr, OrbisFiosFH fh, void* pBuf,
                                     OrbisFiosSize length, OrbisFiosOffset offset) {
-    LOG_DEBUG(Lib_Fios2, "(DUMMY) called");
+    // LOG_DEBUG(Lib_Fios2, "(DUMMY) called");
     if (pAttr && pAttr->pCallback) {
         LOG_WARNING(Lib_Fios2, "There is a callback to a sync function!");
     }
@@ -578,21 +581,21 @@ s32 PS4_SYSV_ABI sceFiosFHPwritevSync() {
 OrbisFiosOp PS4_SYSV_ABI sceFiosFHRead(const OrbisFiosOpAttr* pAttr, OrbisFiosFH fh, void* pBuf,
                                        OrbisFiosSize length) {
     std::scoped_lock l{m};
-    LOG_WARNING(Lib_Fios2, "(DUMMY) called, fh: {}, length: {:#x}", fh, (u64)length);
+    // LOG_WARNING(Lib_Fios2, "(DUMMY) called, fh: {}, length: {:#x}", fh, (u64)length);
     OrbisFiosSize ret = Kernel::sceKernelRead(fh, pBuf, length);
     OrbisFiosOp op = ++op_count;
     if (ret != length) {
         LOG_ERROR(Lib_Fios2, "len: {}, ret: {}", length, ret);
     }
     op_io_return_codes_map.emplace(op, ret);
-    LOG_DEBUG(Lib_Fios2, "ret: {}, op: {}", ret, op);
+    // LOG_DEBUG(Lib_Fios2, "ret: {}, op: {}", ret, op);
     CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
     return op;
 }
 
 OrbisFiosSize PS4_SYSV_ABI sceFiosFHReadSync(const OrbisFiosOpAttr* pAttr, OrbisFiosFH fh,
                                              void* pBuf, OrbisFiosSize length) {
-    LOG_DEBUG(Lib_Fios2, "(DUMMY) called");
+    // LOG_DEBUG(Lib_Fios2, "(DUMMY) called");
     if (pAttr && pAttr->pCallback) {
         LOG_WARNING(Lib_Fios2, "There is a callback to a sync function!");
     }
@@ -705,12 +708,12 @@ s32 PS4_SYSV_ABI sceFiosFileDeleteSync() {
 }
 
 OrbisFiosOp PS4_SYSV_ABI sceFiosFileExists(const OrbisFiosOpAttr* pAttr, const char* pPath) {
-    LOG_WARNING(Lib_Fios2, "(DUMMY) called");
+    // LOG_WARNING(Lib_Fios2, "(DUMMY) called");
     return sceFiosExists(pAttr, pPath, nullptr);
 }
 
 bool PS4_SYSV_ABI sceFiosFileExistsSync(const OrbisFiosOpAttr* pAttr, const char* pPath) {
-    LOG_DEBUG(Lib_Fios2, "(DUMMY) called");
+    // LOG_DEBUG(Lib_Fios2, "(DUMMY) called");
     if (pAttr && pAttr->pCallback) {
         LOG_WARNING(Lib_Fios2, "There is a callback to a sync function!");
     }
@@ -757,11 +760,12 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFileRead(const OrbisFiosOpAttr* pAttr, const cha
 
     if (fd >= 0) {
         ret = Kernel::sceKernelPread(fd, pBuf, length, offset);
+        ret = std::min(ret, (s64)0);
         Kernel::sceKernelClose(fd);
     }
 
     op_io_return_codes_map.emplace(op, ret >= 0 ? ret : ORBIS_FIOS_ERROR_BAD_PATH);
-    if (ret != length) {
+    if (ret != 0) {
         LOG_ERROR(Lib_Fios2, "ret: {}, len: {}", ret, length);
     }
     LOG_DEBUG(Lib_Fios2, "ret: {}, op: {}", ret, op);
@@ -772,9 +776,24 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFileRead(const OrbisFiosOpAttr* pAttr, const cha
 OrbisFiosSize PS4_SYSV_ABI sceFiosFileReadSync(const OrbisFiosOpAttr* pAttr, const char* pPath,
                                                void* pBuf, OrbisFiosSize length,
                                                OrbisFiosOffset offset) {
-    LOG_DEBUG(Lib_Fios2, "(DUMMY) called");
-    OrbisFiosOp op = sceFiosFileRead(pAttr, pPath, pBuf, length, offset);
-    return sceFiosOpSyncWaitForIO(op);
+    LOG_WARNING(Lib_Fios2, "(DUMMY) called, path: {}, length: {}, offset: {}, thread: {}", pPath,
+                length, offset, Core::GetThreadName());
+    std::scoped_lock l{m};
+    s64 ret = -1;
+
+    s32 fd = Kernel::sceKernelOpen(ToApp0(pPath), Kernel::ORBIS_KERNEL_O_RDONLY, 0);
+
+    if (fd >= 0) {
+        ret = Kernel::sceKernelPread(fd, pBuf, length, offset);
+        // ret = std::min(ret, (s64)0);
+        Kernel::sceKernelClose(fd);
+    }
+
+    if (ret != length) {
+        LOG_ERROR(Lib_Fios2, "ret: {}, len: {}", ret, length);
+    }
+    LOG_DEBUG(Lib_Fios2, "ret: {}", ret);
+    return ret;
 }
 
 s32 PS4_SYSV_ABI sceFiosFileTruncate() {
@@ -918,7 +937,7 @@ s32 PS4_SYSV_ABI sceFiosOpGetBuffer() {
 s32 PS4_SYSV_ABI sceFiosOpGetError(OrbisFiosOp op) {
     LOG_DEBUG(Lib_Fios2, "(DUMMY) called, op: {}", op);
     if (op_return_codes_map.find(op) == op_return_codes_map.end()) {
-        LOG_WARNING(Lib_Fios2, "Bad op handle: {}", op);
+        LOG_DEBUG(Lib_Fios2, "Bad or old op handle: {}", op);
         return ORBIS_FIOS_ERROR_BAD_OP;
     }
     return op_return_codes_map.find(op)->second;
@@ -1009,8 +1028,22 @@ OrbisFiosSize PS4_SYSV_ABI sceFiosOpSyncWaitForIO(OrbisFiosOp op) {
 }
 
 s32 PS4_SYSV_ABI sceFiosOpWait(OrbisFiosOp op) {
-    LOG_WARNING(Lib_Fios2, "(DUMMY) called, op: {}", op);
-    return ORBIS_OK;
+    std::scoped_lock l{m};
+    LOG_DEBUG(Lib_Fios2, "called, op: {}", op);
+    auto it = op_return_codes_map.find(op);
+    if (it == op_return_codes_map.end()) {
+        auto it1 = op_io_return_codes_map.find(op);
+        if (it1 == op_io_return_codes_map.end()) {
+            LOG_ERROR(Lib_Fios2, "Bad op handle: {}", op);
+            return ORBIS_FIOS_ERROR_BAD_OP;
+        }
+        OrbisFiosSize ret = it1->second;
+        op_io_return_codes_map.erase(it1);
+        return ret;
+    }
+    s32 ret = it->second;
+    op_return_codes_map.erase(it);
+    return ret;
 }
 
 s32 PS4_SYSV_ABI sceFiosOpWaitUntil() {
@@ -1286,24 +1319,24 @@ void RegisterlibSceFios2(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("8IGjwtnvYwI", f, 1, f, 1, 1, sceFiosIsValidHandle);
 
     // // misc + init + shutdown
-    // LIB_FUNCTION("-q4M5WX0Jrs", f, 1, f, 1, 1, sceFiosCancelAllOps);
-    // LIB_FUNCTION("wb8H3F+T6Ew", f, 1, f, 1, 1, sceFiosClearTimeStamps);
-    // LIB_FUNCTION("aKxpgAMSJ04", f, 1, f, 1, 1, sceFiosCloseAllFiles);
-    // LIB_FUNCTION("l4OVTpJCyQI", f, 1, f, 1, 1, sceFiosUpdateParameters);
-    // LIB_FUNCTION("fJTrPsXNsBY", f, 1, f, 1, 1, sceFiosDebugDumpDate);
-    // LIB_FUNCTION("FyuoXPzv780", f, 1, f, 1, 1, sceFiosDebugDumpDH);
-    // LIB_FUNCTION("8BLW2WiSIuI", f, 1, f, 1, 1, sceFiosDebugDumpError);
-    // LIB_FUNCTION("Sj5lbc4Y0mI", f, 1, f, 1, 1, sceFiosDebugDumpFH);
-    // LIB_FUNCTION("4-yhZ7aj3VE", f, 1, f, 1, 1, sceFiosDebugDumpOp);
-    // LIB_FUNCTION("tMYHEVj4j+o", f, 1, f, 1, 1, sceFiosSuspend);
-    // LIB_FUNCTION("3HAgZPl1v+4", f, 1, f, 1, 1, sceFiosTerminate);
-    // LIB_FUNCTION("vKL406KPJRs", f, 1, f, 1, 1, sceFiosResume);
-    // LIB_FUNCTION("ZPm4ROwjxi4", f, 1, f, 1, 1, sceFiosShutdownAndCancelOps);
-    // LIB_FUNCTION("YkayyuR6HvI", f, 1, f, 1, 1, sceFiosIsIdle);
-    // LIB_FUNCTION("aKWnlLIobGA", f, 1, f, 1, 1, sceFiosIsInitialized);
-    // LIB_FUNCTION("F7whoytBofE", f, 1, f, 1, 1, sceFiosIsSuspended);
-    // LIB_FUNCTION("Lxgze5-E3uQ", f, 1, f, 1, 1, sceFiosGetSuspendCount);
-    // LIB_FUNCTION("wAKZ-det+yo", f, 1, f, 1, 1, sceFiosInitialize);
+    LIB_FUNCTION("-q4M5WX0Jrs", f, 1, f, 1, 1, sceFiosCancelAllOps);
+    LIB_FUNCTION("wb8H3F+T6Ew", f, 1, f, 1, 1, sceFiosClearTimeStamps);
+    LIB_FUNCTION("aKxpgAMSJ04", f, 1, f, 1, 1, sceFiosCloseAllFiles);
+    LIB_FUNCTION("l4OVTpJCyQI", f, 1, f, 1, 1, sceFiosUpdateParameters);
+    LIB_FUNCTION("fJTrPsXNsBY", f, 1, f, 1, 1, sceFiosDebugDumpDate);
+    LIB_FUNCTION("FyuoXPzv780", f, 1, f, 1, 1, sceFiosDebugDumpDH);
+    LIB_FUNCTION("8BLW2WiSIuI", f, 1, f, 1, 1, sceFiosDebugDumpError);
+    LIB_FUNCTION("Sj5lbc4Y0mI", f, 1, f, 1, 1, sceFiosDebugDumpFH);
+    LIB_FUNCTION("4-yhZ7aj3VE", f, 1, f, 1, 1, sceFiosDebugDumpOp);
+    LIB_FUNCTION("tMYHEVj4j+o", f, 1, f, 1, 1, sceFiosSuspend);
+    LIB_FUNCTION("3HAgZPl1v+4", f, 1, f, 1, 1, sceFiosTerminate);
+    LIB_FUNCTION("vKL406KPJRs", f, 1, f, 1, 1, sceFiosResume);
+    LIB_FUNCTION("ZPm4ROwjxi4", f, 1, f, 1, 1, sceFiosShutdownAndCancelOps);
+    LIB_FUNCTION("YkayyuR6HvI", f, 1, f, 1, 1, sceFiosIsIdle);
+    LIB_FUNCTION("aKWnlLIobGA", f, 1, f, 1, 1, sceFiosIsInitialized);
+    LIB_FUNCTION("F7whoytBofE", f, 1, f, 1, 1, sceFiosIsSuspended);
+    LIB_FUNCTION("Lxgze5-E3uQ", f, 1, f, 1, 1, sceFiosGetSuspendCount);
+    LIB_FUNCTION("wAKZ-det+yo", f, 1, f, 1, 1, sceFiosInitialize);
 
     // date + time
     LIB_FUNCTION("DCfnYVX6xBo", f, 1, f, 1, 1, sceFiosPrintTimeStamps);
@@ -1317,11 +1350,11 @@ void RegisterlibSceFios2(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("Rm+hiwvSnxw", f, 1, f, 1, 1, sceFiosDateToComponents);
 
     // io filter
-    // LIB_FUNCTION("lgITuBsRo2o", f, 1, f, 1, 1, sceFiosIOFilterAdd);
-    // LIB_FUNCTION("lAikj8EfcJg", f, 1, f, 1, 1, sceFiosIOFilterCache);
-    // LIB_FUNCTION("gHxxOQxKW3E", f, 1, f, 1, 1, sceFiosIOFilterGetInfo);
-    // LIB_FUNCTION("OIGbkgGOu6E", f, 1, f, 1, 1, sceFiosIOFilterPsarcDearchiver);
-    // LIB_FUNCTION("ahIXyuwF0-o", f, 1, f, 1, 1, sceFiosIOFilterRemove);
+    LIB_FUNCTION("lgITuBsRo2o", f, 1, f, 1, 1, sceFiosIOFilterAdd);
+    LIB_FUNCTION("lAikj8EfcJg", f, 1, f, 1, 1, sceFiosIOFilterCache);
+    LIB_FUNCTION("gHxxOQxKW3E", f, 1, f, 1, 1, sceFiosIOFilterGetInfo);
+    LIB_FUNCTION("OIGbkgGOu6E", f, 1, f, 1, 1, sceFiosIOFilterPsarcDearchiver);
+    LIB_FUNCTION("ahIXyuwF0-o", f, 1, f, 1, 1, sceFiosIOFilterRemove);
 
     // operations
     LIB_FUNCTION("FA7dUleeGik", f, 1, f, 1, 1, sceFiosOpCancel);
@@ -1350,43 +1383,43 @@ void RegisterlibSceFios2(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("4Ml2G-TSCho", f, 1, f, 1, 1, sceFiosSetThreadDefaultOpAttr);
 
     // cache
-    // LIB_FUNCTION("7CXAnIwFY3U", f, 1, f, 1, 1, sceFiosCacheContainsFileRangeSync);
-    // LIB_FUNCTION("H6wju6uvjmA", f, 1, f, 1, 1, sceFiosCacheContainsFileSync);
-    // LIB_FUNCTION("8e4TgQd155k", f, 1, f, 1, 1, sceFiosCacheFlushFileRangeSync);
-    // LIB_FUNCTION("R4YQI0YpbB0", f, 1, f, 1, 1, sceFiosCacheFlushFileSync);
-    // LIB_FUNCTION("NRe2Dtymlmk", f, 1, f, 1, 1, sceFiosCacheFlushSync);
-    // LIB_FUNCTION("iGpuaBFQroQ", f, 1, f, 1, 1, sceFiosCachePrefetchFH);
-    // LIB_FUNCTION("uT4EBfl284o", f, 1, f, 1, 1, sceFiosCachePrefetchFHRange);
-    // LIB_FUNCTION("tm3Hb4s0et8", f, 1, f, 1, 1, sceFiosCachePrefetchFHRangeSync);
-    // LIB_FUNCTION("zIx-FcuPXVM", f, 1, f, 1, 1, sceFiosCachePrefetchFHSync);
-    // LIB_FUNCTION("T8upMyvUPz0", f, 1, f, 1, 1, sceFiosCachePrefetchFile);
-    // LIB_FUNCTION("FYGZ0F5ZglA", f, 1, f, 1, 1, sceFiosCachePrefetchFileRange);
-    // LIB_FUNCTION("ZzE6WN+QBbE", f, 1, f, 1, 1, sceFiosCachePrefetchFileRangeSync);
-    // LIB_FUNCTION("bC0WTypscWg", f, 1, f, 1, 1, sceFiosCachePrefetchFileSync);
+    LIB_FUNCTION("7CXAnIwFY3U", f, 1, f, 1, 1, sceFiosCacheContainsFileRangeSync);
+    LIB_FUNCTION("H6wju6uvjmA", f, 1, f, 1, 1, sceFiosCacheContainsFileSync);
+    LIB_FUNCTION("8e4TgQd155k", f, 1, f, 1, 1, sceFiosCacheFlushFileRangeSync);
+    LIB_FUNCTION("R4YQI0YpbB0", f, 1, f, 1, 1, sceFiosCacheFlushFileSync);
+    LIB_FUNCTION("NRe2Dtymlmk", f, 1, f, 1, 1, sceFiosCacheFlushSync);
+    LIB_FUNCTION("iGpuaBFQroQ", f, 1, f, 1, 1, sceFiosCachePrefetchFH);
+    LIB_FUNCTION("uT4EBfl284o", f, 1, f, 1, 1, sceFiosCachePrefetchFHRange);
+    LIB_FUNCTION("tm3Hb4s0et8", f, 1, f, 1, 1, sceFiosCachePrefetchFHRangeSync);
+    LIB_FUNCTION("zIx-FcuPXVM", f, 1, f, 1, 1, sceFiosCachePrefetchFHSync);
+    LIB_FUNCTION("T8upMyvUPz0", f, 1, f, 1, 1, sceFiosCachePrefetchFile);
+    LIB_FUNCTION("FYGZ0F5ZglA", f, 1, f, 1, 1, sceFiosCachePrefetchFileRange);
+    LIB_FUNCTION("ZzE6WN+QBbE", f, 1, f, 1, 1, sceFiosCachePrefetchFileRangeSync);
+    LIB_FUNCTION("bC0WTypscWg", f, 1, f, 1, 1, sceFiosCachePrefetchFileSync);
 
     // archive
-    // LIB_FUNCTION("GxAF6y9l98M", f, 1, f, 1, 1, sceFiosArchiveGetDecompressorThreadCount);
-    // LIB_FUNCTION("ERmiOK9VT0g", f, 1, f, 1, 1, sceFiosArchiveGetMountBufferSize);
-    // LIB_FUNCTION("UUriaXy7G90", f, 1, f, 1, 1, sceFiosArchiveGetMountBufferSizeSync);
-    // LIB_FUNCTION("pIU8u6VsLM8", f, 1, f, 1, 1, sceFiosArchiveMount);
-    // LIB_FUNCTION("xutLbQdqyb4", f, 1, f, 1, 1, sceFiosArchiveMountSync);
-    // LIB_FUNCTION("VKQ8pi4466g", f, 1, f, 1, 1, sceFiosArchiveMountWithOrder);
-    // LIB_FUNCTION("GEAzhWJM1mY", f, 1, f, 1, 1, sceFiosArchiveMountWithOrderSync);
-    // LIB_FUNCTION("Dfwp-U1OfRI", f, 1, f, 1, 1, sceFiosArchiveSetDecompressorThreadCount);
-    // LIB_FUNCTION("YfTBBU5nONQ", f, 1, f, 1, 1, sceFiosArchiveUnmount);
-    // LIB_FUNCTION("yy6C7k7FPZY", f, 1, f, 1, 1, sceFiosArchiveUnmountSync);
+    LIB_FUNCTION("GxAF6y9l98M", f, 1, f, 1, 1, sceFiosArchiveGetDecompressorThreadCount);
+    LIB_FUNCTION("ERmiOK9VT0g", f, 1, f, 1, 1, sceFiosArchiveGetMountBufferSize);
+    LIB_FUNCTION("UUriaXy7G90", f, 1, f, 1, 1, sceFiosArchiveGetMountBufferSizeSync);
+    LIB_FUNCTION("pIU8u6VsLM8", f, 1, f, 1, 1, sceFiosArchiveMount);
+    LIB_FUNCTION("xutLbQdqyb4", f, 1, f, 1, 1, sceFiosArchiveMountSync);
+    LIB_FUNCTION("VKQ8pi4466g", f, 1, f, 1, 1, sceFiosArchiveMountWithOrder);
+    LIB_FUNCTION("GEAzhWJM1mY", f, 1, f, 1, 1, sceFiosArchiveMountWithOrderSync);
+    LIB_FUNCTION("Dfwp-U1OfRI", f, 1, f, 1, 1, sceFiosArchiveSetDecompressorThreadCount);
+    LIB_FUNCTION("YfTBBU5nONQ", f, 1, f, 1, 1, sceFiosArchiveUnmount);
+    LIB_FUNCTION("yy6C7k7FPZY", f, 1, f, 1, 1, sceFiosArchiveUnmountSync);
 
     // print
     LIB_FUNCTION("z0zd9JqbxYs", f, 1, f, 1, 1, sceFiosPrintf);
     LIB_FUNCTION("FOEUXzOE0ow", f, 1, f, 1, 1, sceFiosVprintf);
 
     // overlay
-    // LIB_FUNCTION("TXABsmiiqto", f, 1, f, 1, 1, sceFiosOverlayAdd);
-    // LIB_FUNCTION("lFVNuWYTTFs", f, 1, f, 1, 1, sceFiosOverlayGetInfo);
-    // LIB_FUNCTION("qcZZ8FqdT8c", f, 1, f, 1, 1, sceFiosOverlayGetList);
-    // LIB_FUNCTION("qD5Su6YGVWM", f, 1, f, 1, 1, sceFiosOverlayModify);
-    // LIB_FUNCTION("MuMnDaXBTm0", f, 1, f, 1, 1, sceFiosOverlayRemove);
-    // LIB_FUNCTION("8inAOixHSQw", f, 1, f, 1, 1, sceFiosOverlayResolveSync);
+    LIB_FUNCTION("TXABsmiiqto", f, 1, f, 1, 1, sceFiosOverlayAdd);
+    LIB_FUNCTION("lFVNuWYTTFs", f, 1, f, 1, 1, sceFiosOverlayGetInfo);
+    LIB_FUNCTION("qcZZ8FqdT8c", f, 1, f, 1, 1, sceFiosOverlayGetList);
+    LIB_FUNCTION("qD5Su6YGVWM", f, 1, f, 1, 1, sceFiosOverlayModify);
+    LIB_FUNCTION("MuMnDaXBTm0", f, 1, f, 1, 1, sceFiosOverlayRemove);
+    LIB_FUNCTION("8inAOixHSQw", f, 1, f, 1, 1, sceFiosOverlayResolveSync);
 
     // dll
     LIB_FUNCTION("PIw2ZEh6JyI", f, 1, f, 1, 1, sceFiosDLLInitialize);
