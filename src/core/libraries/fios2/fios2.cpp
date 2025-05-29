@@ -388,7 +388,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosExists(const OrbisFiosOpAttr* pAttr, const char*
     s32 ret;
     {
         std::scoped_lock l{m};
-        LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {} path: {}", (void*)pAttr, pPath);
+        // LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {} path: {}", (void*)pAttr, pPath);
 
         Kernel::OrbisKernelStat st;
         bool exists = (Kernel::posix_stat(ToApp0(pPath), &st) == ORBIS_OK);
@@ -990,7 +990,7 @@ s32 PS4_SYSV_ABI sceFiosOpSetBuffer() {
 
 s32 PS4_SYSV_ABI sceFiosOpSyncWait(OrbisFiosOp op) {
     std::scoped_lock l{m};
-    LOG_DEBUG(Lib_Fios2, "called, op: {}", op);
+    // LOG_DEBUG(Lib_Fios2, "called, op: {}", op);
     auto it = op_return_codes_map.find(op);
     if (it == op_return_codes_map.end()) {
         auto it1 = op_io_return_codes_map.find(op);
@@ -1009,7 +1009,7 @@ s32 PS4_SYSV_ABI sceFiosOpSyncWait(OrbisFiosOp op) {
 
 OrbisFiosSize PS4_SYSV_ABI sceFiosOpSyncWaitForIO(OrbisFiosOp op) {
     std::scoped_lock l{m};
-    LOG_DEBUG(Lib_Fios2, "called, op: {}", op);
+    // LOG_DEBUG(Lib_Fios2, "called, op: {}", op);
     auto it = op_io_return_codes_map.find(op);
     if (it == op_io_return_codes_map.end()) {
         auto it1 = op_return_codes_map.find(op);
