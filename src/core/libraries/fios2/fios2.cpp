@@ -28,6 +28,8 @@ std::unordered_map<OrbisFiosOp, OrbisFiosSize> op_io_return_codes_map{};
 std::unordered_map<OrbisFiosFH, std::string> fh_path_map;
 std::unordered_map<OrbisFiosDH, std::string> dh_path_map;
 
+std::unordered_map<std::string, bool> file_stat_map;
+
 const char* ToApp0(const char* _arc) {
     static thread_local std::string result;
     std::string arc(_arc);
@@ -388,15 +390,26 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosExists(const OrbisFiosOpAttr* pAttr, const char*
     s32 ret;
     {
         std::scoped_lock l{m};
-        // LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {} path: {}", (void*)pAttr, pPath);
-
-        Kernel::OrbisKernelStat st;
-        bool exists = (Kernel::posix_stat(ToApp0(pPath), &st) == ORBIS_OK);
-        if (pOutExists) {
-            *pOutExists = exists;
+        LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {} path: {}", (void*)pAttr, pPath);
+        std::string path_str = std::string(pPath);
+        auto cache_it = file_stat_map.find(path_str);
+        if (cache_it == file_stat_map.end()) { // no cache hit
+            Kernel::OrbisKernelStat st;
+            bool exists = (Kernel::posix_stat(ToApp0(pPath), &st) == ORBIS_OK);
+            if (pOutExists) {
+                *pOutExists = exists;
+            }
+            ret = exists ? 1 : 0;
+            op_return_codes_map.emplace(op, ret);
+            file_stat_map[path_str] = exists; // add to cache
+        } else { //cache hit
+            bool exists = cache_it->second;
+            if (pOutExists) {
+                *pOutExists = exists;
+            }
+            ret = exists ? 1 : 0;
+            op_return_codes_map.emplace(op, ret);
         }
-        ret = exists ? 1 : 0;
-        op_return_codes_map.emplace(op, ret);
     }
     CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
     // LOG_DEBUG(Lib_Fios2, "ret: {}, op: {}", ret, op);
