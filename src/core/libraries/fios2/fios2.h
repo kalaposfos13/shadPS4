@@ -28,7 +28,6 @@ typedef s64 OrbisFiosOffset;
 typedef s64 OrbisFiosDate;
 typedef s64 OrbisFiosTime; // in nanoseconds
 
-
 typedef OrbisFiosTime OrbisFiosTimeInterval;
 
 typedef struct OrbisFiosStat {

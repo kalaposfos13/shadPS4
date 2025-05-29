@@ -748,8 +748,8 @@ s32 PS4_SYSV_ABI sceFiosFilenoToFH() {
 
 OrbisFiosOp PS4_SYSV_ABI sceFiosFileRead(const OrbisFiosOpAttr* pAttr, const char* pPath,
                                          void* pBuf, OrbisFiosSize length, OrbisFiosOffset offset) {
-    LOG_WARNING(Lib_Fios2, "(DUMMY) called, path: {}, length: {}, offset: {}", pPath,
-                length, offset);
+    LOG_WARNING(Lib_Fios2, "(DUMMY) called, path: {}, length: {}, offset: {}", pPath, length,
+                offset);
 
     std::scoped_lock l{m};
     OrbisFiosOp op = ++op_count;
@@ -775,8 +775,8 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFileRead(const OrbisFiosOpAttr* pAttr, const cha
 OrbisFiosSize PS4_SYSV_ABI sceFiosFileReadSync(const OrbisFiosOpAttr* pAttr, const char* pPath,
                                                void* pBuf, OrbisFiosSize length,
                                                OrbisFiosOffset offset) {
-    LOG_WARNING(Lib_Fios2, "(DUMMY) called, path: {}, length: {}, offset: {}", pPath,
-                length, offset);
+    LOG_WARNING(Lib_Fios2, "(DUMMY) called, path: {}, length: {}, offset: {}", pPath, length,
+                offset);
     std::scoped_lock l{m};
     s64 ret = -1;
 
