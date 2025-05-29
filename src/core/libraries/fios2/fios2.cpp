@@ -390,10 +390,10 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosExists(const OrbisFiosOpAttr* pAttr, const char*
     s32 ret;
     {
         std::scoped_lock l{m};
-        LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {} path: {}", (void*)pAttr, pPath);
-        std::string path_str = std::string(pPath);
+        std::string path_str = std::string(ToApp0(pPath));
         auto cache_it = file_stat_map.find(path_str);
         if (cache_it == file_stat_map.end()) { // no cache hit
+            // LOG_INFO(Lib_Fios2, "(DUMMY) called pAttr: {} path: {}", (void*)pAttr, pPath);
             Kernel::OrbisKernelStat st;
             bool exists = (Kernel::posix_stat(ToApp0(pPath), &st) == ORBIS_OK);
             if (pOutExists) {
