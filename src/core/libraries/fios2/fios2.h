@@ -82,6 +82,7 @@ typedef struct OrbisFiosOpAttr {
 
 s32 PS4_SYSV_ABI sceFiosOpSyncWait(OrbisFiosOp op);
 OrbisFiosSize PS4_SYSV_ABI sceFiosOpSyncWaitForIO(OrbisFiosOp op);
+bool PS4_SYSV_ABI sceFiosIsValidHandle(OrbisFiosHandle h);
 
 void RegisterlibSceFios2(Core::Loader::SymbolsResolver* sym);
 } // namespace Libraries::Fios2
