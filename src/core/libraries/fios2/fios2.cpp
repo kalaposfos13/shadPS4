@@ -22,13 +22,13 @@ std::mutex m;
 
 OrbisFiosOp op_count = 0;
 
-std::unordered_map<OrbisFiosOp, s32> op_return_codes_map{};
-std::unordered_map<OrbisFiosOp, OrbisFiosSize> op_io_return_codes_map{};
+std::unordered_map<OrbisFiosOp, s32>* op_return_codes_map = nullptr;
+std::unordered_map<OrbisFiosOp, OrbisFiosSize>* op_io_return_codes_map = nullptr;
 
-std::unordered_map<OrbisFiosFH, std::string> fh_path_map;
-std::unordered_map<OrbisFiosDH, std::string> dh_path_map;
+std::unordered_map<OrbisFiosFH, std::string>* fh_path_map = nullptr;
+std::unordered_map<OrbisFiosDH, std::string>* dh_path_map = nullptr;
 
-std::unordered_map<std::string, Kernel::OrbisKernelStat> file_stat_map;
+std::unordered_map<std::string, Kernel::OrbisKernelStat>* file_stat_map = nullptr;
 
 const char* ToApp0(const char* _arc) {
     static thread_local std::string result;
@@ -39,6 +39,16 @@ const char* ToApp0(const char* _arc) {
     }
     result = "/app0" + arc.substr(first_slash);
     return result.c_str();
+}
+
+void EnsureMapsInitialized() {
+    if (op_return_codes_map == nullptr) [[unlikely]] {
+        op_return_codes_map = new std::unordered_map<OrbisFiosOp, s32>();
+        op_io_return_codes_map = new std::unordered_map<OrbisFiosOp, OrbisFiosSize>();
+        fh_path_map = new std::unordered_map<OrbisFiosFH, std::string>();
+        dh_path_map = new std::unordered_map<OrbisFiosDH, std::string>();
+        file_stat_map = new std::unordered_map<std::string, Kernel::OrbisKernelStat>();
+    }
 }
 
 void CallFiosCallback(const OrbisFiosOpAttr* pAttr, OrbisFiosOp op, OrbisFiosOpEvent event,
@@ -65,7 +75,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosArchiveGetMountBufferSize(const OrbisFiosOpAttr*
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
     // code
     OrbisFiosOp op = ++op_count;
-    op_return_codes_map.emplace(op, ORBIS_OK);
+    op_return_codes_map->emplace(op, ORBIS_OK);
     CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ORBIS_OK);
     return op;
 }
@@ -84,7 +94,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosArchiveMount(const OrbisFiosOpAttr* pAttr, Orbis
                                              const OrbisFiosOpenParams* pOpenParams) {
     LOG_ERROR(Lib_Fios2, "(STUBBED) called");
     OrbisFiosOp op = ++op_count;
-    op_return_codes_map.emplace(op, ORBIS_OK);
+    op_return_codes_map->emplace(op, ORBIS_OK);
     CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ORBIS_OK);
     return op;
 }
@@ -270,11 +280,12 @@ s32 PS4_SYSV_ABI sceFiosDeleteSync() {
 
 s32 PS4_SYSV_ABI sceFiosDHClose(const OrbisFiosOpAttr* pAttr, OrbisFiosDH dh) {
     LOG_WARNING(Lib_Fios2, "(STUBBED) called, dh: {}", dh);
+    EnsureMapsInitialized();
     std::scoped_lock l{m};
     s32 ret = Kernel::sceKernelClose(dh);
-    dh_path_map.erase(dh);
+    dh_path_map->erase(dh);
     OrbisFiosOp op = ++op_count;
-    op_return_codes_map.emplace(op, dh);
+    op_return_codes_map->emplace(op, dh);
     CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
     return op;
 }
@@ -293,17 +304,18 @@ s32 PS4_SYSV_ABI sceFiosDHGetPath() {
 OrbisFiosOp PS4_SYSV_ABI sceFiosDHOpen(const OrbisFiosOpAttr* pAttr, OrbisFiosDH* pOutDH,
                                        const char* pPath, OrbisFiosBuffer buf) {
     LOG_WARNING(Lib_Fios2, "(DUMMY) called, path: {}", pPath);
+    EnsureMapsInitialized();
     std::scoped_lock l{m};
 
     s32 dh = Kernel::sceKernelOpen(ToApp0(pPath), Kernel::ORBIS_KERNEL_O_DIRECTORY, 0);
-    dh_path_map[dh] = pPath;
+    dh_path_map->emplace(dh, pPath);
 
     if (pOutDH) {
         *pOutDH = dh;
     }
 
     OrbisFiosOp op = ++op_count;
-    op_return_codes_map.emplace(op, dh);
+    op_return_codes_map->emplace(op, dh);
     CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, dh);
     return op;
 }
@@ -322,7 +334,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosDHRead(const OrbisFiosOpAttr* pAttr, OrbisFiosDH
     UNREACHABLE_MSG("todo");
 
     OrbisFiosOp op = ++op_count;
-    op_return_codes_map.emplace(op, ORBIS_OK);
+    op_return_codes_map->emplace(op, ORBIS_OK);
     CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ORBIS_OK);
     return op;
 }
@@ -390,9 +402,10 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosExists(const OrbisFiosOpAttr* pAttr, const char*
     s32 ret;
     {
         std::scoped_lock l{m};
+        EnsureMapsInitialized();
         std::string path_str = std::string(ToApp0(pPath));
-        auto cache_it = file_stat_map.find(path_str);
-        if (cache_it == file_stat_map.end()) /* no cache hit */ {
+        auto cache_it = file_stat_map->find(path_str);
+        if (cache_it == file_stat_map->end()) /* no cache hit */ {
             // LOG_INFO(Lib_Fios2, "(DUMMY) called pAttr: {} path: {}", (void*)pAttr, pPath);
             Kernel::OrbisKernelStat stat;
             bool exists = (Kernel::posix_stat(ToApp0(pPath), &stat) == ORBIS_OK);
@@ -400,15 +413,15 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosExists(const OrbisFiosOpAttr* pAttr, const char*
                 *pOutExists = exists;
             }
             ret = exists ? 1 : 0;
-            op_return_codes_map.emplace(op, ret);
-            file_stat_map[path_str] = stat; // add to cache
+            op_return_codes_map->emplace(op, ret);
+            file_stat_map->emplace(path_str, stat); // add to cache
         } else /* cache hit */ {
             bool exists = cache_it->second.st_mode != 0;
             if (pOutExists) {
                 *pOutExists = exists;
             }
             ret = exists ? 1 : 0;
-            op_return_codes_map.emplace(op, ret);
+            op_return_codes_map->emplace(op, ret);
         }
     }
     CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
@@ -427,11 +440,12 @@ bool PS4_SYSV_ABI sceFiosExistsSync(const OrbisFiosOpAttr* pAttr, const char* pP
 
 s32 PS4_SYSV_ABI sceFiosFHClose(const OrbisFiosOpAttr* pAttr, OrbisFiosFH fh) {
     LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {} fh: {}", (void*)pAttr, fh);
+    EnsureMapsInitialized();
     std::scoped_lock l{m};
     OrbisFiosOp op = ++op_count;
     s32 ret = Kernel::sceKernelClose(fh);
-    op_return_codes_map.emplace(op, ret);
-    fh_path_map.erase(fh);
+    op_return_codes_map->emplace(op, ret);
+    fh_path_map->erase(fh);
     CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
     return op;
 }
@@ -451,11 +465,12 @@ s32 PS4_SYSV_ABI sceFiosFHGetOpenParams() {
 }
 
 const char* PS4_SYSV_ABI sceFiosFHGetPath(OrbisFiosFH fh) {
+    EnsureMapsInitialized();
     std::scoped_lock l{m};
     LOG_WARNING(Lib_Fios2, "(DUMMY) called");
 
-    auto it = fh_path_map.find(fh);
-    if (it != fh_path_map.end()) {
+    auto it = fh_path_map->find(fh);
+    if (it != fh_path_map->end()) {
         return it->second.c_str();
     }
     LOG_ERROR(Lib_Fios2, "Invalid FH: {}", fh);
@@ -464,6 +479,7 @@ const char* PS4_SYSV_ABI sceFiosFHGetPath(OrbisFiosFH fh) {
 
 OrbisFiosSize PS4_SYSV_ABI sceFiosFHGetSize(OrbisFiosFH fh) {
     LOG_WARNING(Lib_Fios2, "(DUMMY) called, fh: {}", (u32)fh);
+    EnsureMapsInitialized();
     std::scoped_lock l{m};
     if (!sceFiosIsValidHandle(fh)) {
         return -1;
@@ -478,6 +494,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFHOpenWithMode(const OrbisFiosOpAttr* pAttr, Orb
                                                const OrbisFiosOpenParams* pOpenParams,
                                                s32 nativeMode) {
     LOG_DEBUG(Lib_Fios2, "(DUMMY) called, path: {}", pPath);
+    EnsureMapsInitialized();
     std::scoped_lock l{m};
     s32 open_params = pOpenParams ? pOpenParams->openFlags : 1;
     u32 open_param = 1;
@@ -498,14 +515,14 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFHOpenWithMode(const OrbisFiosOpAttr* pAttr, Orb
                               (open_params & 0x1000) << 4 | (open_params << 6) & 0x400 |
                                   (open_params << 6) & 0x200 | (open_params << 1) & 8 | open_param,
                               mode);
-    fh_path_map[fh] = pPath;
+    fh_path_map->emplace(fh, pPath);
     if (pOutFH) {
         *pOutFH = fh;
     }
     OrbisFiosOp op = ++op_count;
     s32 ret = std::min(fh, ORBIS_OK);
 
-    op_return_codes_map.emplace(op, ret);
+    op_return_codes_map->emplace(op, ret);
 
     LOG_INFO(Lib_Fios2, "ret: {}, op: {}, fh: {}", ret, op, fh);
     CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
@@ -544,12 +561,13 @@ s32 PS4_SYSV_ABI sceFiosFHOpenSync(const OrbisFiosOpAttr* pAttr, OrbisFiosFH* pO
 
 OrbisFiosOp PS4_SYSV_ABI sceFiosFHPread(const OrbisFiosOpAttr* pAttr, OrbisFiosFH fh, void* pBuf,
                                         OrbisFiosSize length, OrbisFiosOffset offset) {
+    EnsureMapsInitialized();
     std::scoped_lock l{m};
     // LOG_WARNING(Lib_Fios2, "(DUMMY) called, fh: {}, length: {}, offset: {}", fh,
     // length);
     OrbisFiosSize ret = Kernel::sceKernelPread(fh, pBuf, length, offset);
     OrbisFiosOp op = ++op_count;
-    op_io_return_codes_map.emplace(op, ret);
+    op_io_return_codes_map->emplace(op, ret);
     // LOG_DEBUG(Lib_Fios2, "fh: {}, ret: {}, op: {}", fh, ret, op);
     if (ret != length) {
         LOG_ERROR(Lib_Fios2, "len: {}, ret: {}", length, ret);
@@ -600,6 +618,7 @@ s32 PS4_SYSV_ABI sceFiosFHPwritevSync() {
 
 OrbisFiosOp PS4_SYSV_ABI sceFiosFHRead(const OrbisFiosOpAttr* pAttr, OrbisFiosFH fh, void* pBuf,
                                        OrbisFiosSize length) {
+    EnsureMapsInitialized();
     std::scoped_lock l{m};
     // LOG_WARNING(Lib_Fios2, "(DUMMY) called, fh: {}, length: {:#x}", fh, (u64)length);
     OrbisFiosSize ret = Kernel::sceKernelRead(fh, pBuf, length);
@@ -607,7 +626,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFHRead(const OrbisFiosOpAttr* pAttr, OrbisFiosFH
     if (ret != length) {
         LOG_ERROR(Lib_Fios2, "len: {}, ret: {}", length, ret);
     }
-    op_io_return_codes_map.emplace(op, ret);
+    op_io_return_codes_map->emplace(op, ret);
     // LOG_DEBUG(Lib_Fios2, "ret: {}, op: {}", ret, op);
     CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
     return op;
@@ -625,6 +644,7 @@ OrbisFiosSize PS4_SYSV_ABI sceFiosFHReadSync(const OrbisFiosOpAttr* pAttr, Orbis
 
 OrbisFiosOp PS4_SYSV_ABI sceFiosFHReadv(const OrbisFiosOpAttr* pAttr, OrbisFiosFH fh,
                                         const OrbisFiosBuffer iov[], int iovcnt) {
+    EnsureMapsInitialized();
     std::scoped_lock l{m};
     LOG_WARNING(Lib_Fios2, "(DUMMY) called");
 
@@ -637,7 +657,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFHReadv(const OrbisFiosOpAttr* pAttr, OrbisFiosF
     s64 ret = Kernel::sceKernelPreadv(fh, kernel_iov.data(), iovcnt, 0);
 
     OrbisFiosOp op = ++op_count;
-    op_io_return_codes_map.emplace(op, ret);
+    op_io_return_codes_map->emplace(op, ret);
     CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
     return op;
 }
@@ -742,26 +762,27 @@ bool PS4_SYSV_ABI sceFiosFileExistsSync(const OrbisFiosOpAttr* pAttr, const char
 }
 
 OrbisFiosOp PS4_SYSV_ABI sceFiosFileGetSize(const OrbisFiosOpAttr* pAttr, const char* pPath) {
+    EnsureMapsInitialized();
     std::scoped_lock l{m};
     OrbisFiosOp op = ++op_count;
     Kernel::OrbisKernelStat stat{};
     std::string path_str = std::string(ToApp0(pPath));
     bool exists;
-    auto cache_it = file_stat_map.find(path_str);
-    if (cache_it == file_stat_map.end()) /* no cache hit */ {
+    auto cache_it = file_stat_map->find(path_str);
+    if (cache_it == file_stat_map->end()) /* no cache hit */ {
         exists = Kernel::sceKernelStat(ToApp0(pPath), &stat) >= 0;
-        file_stat_map[path_str] = stat; // add to cache
+        file_stat_map->emplace(path_str, stat); // add to cache
     } else {
         exists = cache_it->second.st_mode != 0;
         stat = cache_it->second;
     }
     if (!exists) { // here
-        op_io_return_codes_map.emplace(op, ORBIS_FIOS_ERROR_BAD_PATH);
+        op_io_return_codes_map->emplace(op, ORBIS_FIOS_ERROR_BAD_PATH);
         return op;
     }
     LOG_WARNING(Lib_Fios2, "(DUMMY) called pAttr: {} path: {} size: {}, op: {}", (void*)pAttr,
                 pPath, stat.st_size, op);
-    op_io_return_codes_map.emplace(op, stat.st_size);
+    op_io_return_codes_map->emplace(op, stat.st_size);
     CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, static_cast<s32>(stat.st_size));
     return op;
 }
@@ -782,6 +803,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFileRead(const OrbisFiosOpAttr* pAttr, const cha
     LOG_WARNING(Lib_Fios2, "(DUMMY) called, path: {}, length: {}, offset: {}", pPath, length,
                 offset);
 
+    EnsureMapsInitialized();
     std::scoped_lock l{m};
     OrbisFiosOp op = ++op_count;
     s64 ret = -1;
@@ -794,7 +816,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFileRead(const OrbisFiosOpAttr* pAttr, const cha
         Kernel::sceKernelClose(fd);
     }
 
-    op_io_return_codes_map.emplace(op, ret >= 0 ? ret : ORBIS_FIOS_ERROR_BAD_PATH);
+    op_io_return_codes_map->emplace(op, ret >= 0 ? ret : ORBIS_FIOS_ERROR_BAD_PATH);
     if (ret != 0) {
         LOG_ERROR(Lib_Fios2, "ret: {}, len: {}", ret, length);
     }
@@ -808,6 +830,7 @@ OrbisFiosSize PS4_SYSV_ABI sceFiosFileReadSync(const OrbisFiosOpAttr* pAttr, con
                                                OrbisFiosOffset offset) {
     LOG_WARNING(Lib_Fios2, "(DUMMY) called, path: {}, length: {}, offset: {}", pPath, length,
                 offset);
+    EnsureMapsInitialized();
     std::scoped_lock l{m};
     s64 ret = -1;
 
@@ -941,21 +964,23 @@ s32 PS4_SYSV_ABI sceFiosOpCancel() {
 }
 
 s32 PS4_SYSV_ABI sceFiosOpDelete(OrbisFiosOp op) {
+    EnsureMapsInitialized();
     std::scoped_lock l{m};
     // LOG_DEBUG(Lib_Fios2, "(DUMMY) called, op: {}", op);
-    op_return_codes_map.erase(op);
-    op_io_return_codes_map.erase(op);
+    op_return_codes_map->erase(op);
+    op_io_return_codes_map->erase(op);
     return ORBIS_OK;
 }
 
 OrbisFiosSize PS4_SYSV_ABI sceFiosOpGetActualCount(OrbisFiosOp op) {
+    EnsureMapsInitialized();
     std::scoped_lock l{m};
     LOG_DEBUG(Lib_Fios2, "(DUMMY) called, op: {}", op);
-    if (op_io_return_codes_map.find(op) == op_io_return_codes_map.end()) {
+    if (op_io_return_codes_map->find(op) == op_io_return_codes_map->end()) {
         LOG_WARNING(Lib_Fios2, "Bad op handle: {}", op);
         return ORBIS_FIOS_ERROR_BAD_OP;
     }
-    return op_io_return_codes_map.find(op)->second;
+    return op_io_return_codes_map->find(op)->second;
 }
 
 s32 PS4_SYSV_ABI sceFiosOpGetAttr() {
@@ -970,11 +995,11 @@ s32 PS4_SYSV_ABI sceFiosOpGetBuffer() {
 
 s32 PS4_SYSV_ABI sceFiosOpGetError(OrbisFiosOp op) {
     LOG_DEBUG(Lib_Fios2, "(DUMMY) called, op: {}", op);
-    if (op_return_codes_map.find(op) == op_return_codes_map.end()) {
+    if (op_return_codes_map->find(op) == op_return_codes_map->end()) {
         LOG_DEBUG(Lib_Fios2, "Bad or old op handle: {}", op);
         return ORBIS_FIOS_ERROR_BAD_OP;
     }
-    return op_return_codes_map.find(op)->second;
+    return op_return_codes_map->find(op)->second;
 }
 
 s32 PS4_SYSV_ABI sceFiosOpGetOffset() {
@@ -999,8 +1024,8 @@ s32 PS4_SYSV_ABI sceFiosOpIsCancelled() {
 
 bool PS4_SYSV_ABI sceFiosOpIsDone(OrbisFiosOp op) {
     LOG_DEBUG(Lib_Fios2, "(DUMMY) called, op: {}", op);
-    if (op_return_codes_map.find(op) == op_return_codes_map.end()) {
-        if (op_io_return_codes_map.find(op) == op_io_return_codes_map.end()) {
+    if (op_return_codes_map->find(op) == op_return_codes_map->end()) {
+        if (op_io_return_codes_map->find(op) == op_io_return_codes_map->end()) {
             LOG_ERROR(Lib_Fios2, "Bad op handle: {}", op);
             return false;
         }
@@ -1024,59 +1049,62 @@ s32 PS4_SYSV_ABI sceFiosOpSetBuffer() {
 }
 
 s32 PS4_SYSV_ABI sceFiosOpSyncWait(OrbisFiosOp op) {
+    EnsureMapsInitialized();
     std::scoped_lock l{m};
     // LOG_DEBUG(Lib_Fios2, "called, op: {}", op);
-    auto it = op_return_codes_map.find(op);
-    if (it == op_return_codes_map.end()) {
-        auto it1 = op_io_return_codes_map.find(op);
-        if (it1 == op_io_return_codes_map.end()) {
+    auto it = op_return_codes_map->find(op);
+    if (it == op_return_codes_map->end()) {
+        auto it1 = op_io_return_codes_map->find(op);
+        if (it1 == op_io_return_codes_map->end()) {
             LOG_ERROR(Lib_Fios2, "Bad op handle: {}", op);
             return ORBIS_FIOS_ERROR_BAD_OP;
         }
         OrbisFiosSize ret = it1->second;
-        op_io_return_codes_map.erase(it1);
+        op_io_return_codes_map->erase(it1);
         return ret;
     }
     s32 ret = it->second;
-    op_return_codes_map.erase(it);
+    op_return_codes_map->erase(it);
     return ret;
 }
 
 OrbisFiosSize PS4_SYSV_ABI sceFiosOpSyncWaitForIO(OrbisFiosOp op) {
+    EnsureMapsInitialized();
     std::scoped_lock l{m};
     // LOG_DEBUG(Lib_Fios2, "called, op: {}", op);
-    auto it = op_io_return_codes_map.find(op);
-    if (it == op_io_return_codes_map.end()) {
-        auto it1 = op_return_codes_map.find(op);
-        if (it1 == op_return_codes_map.end()) {
+    auto it = op_io_return_codes_map->find(op);
+    if (it == op_io_return_codes_map->end()) {
+        auto it1 = op_return_codes_map->find(op);
+        if (it1 == op_return_codes_map->end()) {
             LOG_ERROR(Lib_Fios2, "Bad op handle: {}", op);
             return ORBIS_FIOS_ERROR_BAD_OP;
         }
         OrbisFiosSize ret = it1->second;
-        op_return_codes_map.erase(it1);
+        op_return_codes_map->erase(it1);
         return ret;
     }
     OrbisFiosSize ret = it->second;
-    op_io_return_codes_map.erase(it);
+    op_io_return_codes_map->erase(it);
     return ret;
 }
 
 s32 PS4_SYSV_ABI sceFiosOpWait(OrbisFiosOp op) {
+    EnsureMapsInitialized();
     std::scoped_lock l{m};
     LOG_DEBUG(Lib_Fios2, "called, op: {}", op);
-    auto it = op_return_codes_map.find(op);
-    if (it == op_return_codes_map.end()) {
-        auto it1 = op_io_return_codes_map.find(op);
-        if (it1 == op_io_return_codes_map.end()) {
+    auto it = op_return_codes_map->find(op);
+    if (it == op_return_codes_map->end()) {
+        auto it1 = op_io_return_codes_map->find(op);
+        if (it1 == op_io_return_codes_map->end()) {
             LOG_ERROR(Lib_Fios2, "Bad op handle: {}", op);
             return ORBIS_FIOS_ERROR_BAD_OP;
         }
         OrbisFiosSize ret = it1->second;
-        op_io_return_codes_map.erase(it1);
+        op_io_return_codes_map->erase(it1);
         return ret;
     }
     s32 ret = it->second;
-    op_return_codes_map.erase(it);
+    op_return_codes_map->erase(it);
     return ret;
 }
 
@@ -1193,7 +1221,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosStat(const OrbisFiosOpAttr* pAttr, const char* p
     Kernel::OrbisKernelStat kstat{};
     s32 ret = Kernel::posix_stat(ToApp0(pPath), &kstat);
     if (ret < 0) {
-        op_return_codes_map.emplace(op, ORBIS_FIOS_ERROR_BAD_PATH);
+        op_return_codes_map->emplace(op, ORBIS_FIOS_ERROR_BAD_PATH);
         CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ORBIS_FIOS_ERROR_BAD_PATH);
         return op;
     }
@@ -1210,7 +1238,7 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosStat(const OrbisFiosOpAttr* pAttr, const char* p
     pOutStatus->ino = kstat.st_ino;
     pOutStatus->mode = kstat.st_mode;
 
-    op_return_codes_map.emplace(op, ORBIS_OK);
+    op_return_codes_map->emplace(op, ORBIS_OK);
     CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
     return op;
 }
