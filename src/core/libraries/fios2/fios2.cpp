@@ -509,6 +509,9 @@ OrbisFiosOp PS4_SYSV_ABI sceFiosFHOpenWithMode(const OrbisFiosOpAttr* pAttr, Orb
 
     LOG_INFO(Lib_Fios2, "ret: {}, op: {}, fh: {}", ret, op, fh);
     CallFiosCallback(pAttr, op, OrbisFiosOpEvents::Complete, ret);
+    // pros: it fixes a race condition in GRR
+    // cons: I don't know why it works
+    std::this_thread::sleep_for(std::chrono::nanoseconds(1));
     return op;
 }
 
