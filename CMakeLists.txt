@@ -139,6 +139,7 @@ if (GIT_REMOTE_RESULT OR GIT_REMOTE_NAME STREQUAL "")
     ERROR_QUIET
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
+  message("got remote: ${GIT_REMOTE_NAME}")
 endif()
 
 # If running in GitHub Actions and the above fails
@@ -182,7 +183,7 @@ if (GIT_REMOTE_RESULT OR GIT_REMOTE_NAME STREQUAL "")
     set(GIT_BRANCH "${GITHUB_BRANCH}")
   elseif ("${PR_NUMBER}" STREQUAL "" AND NOT "${GITHUB_REF}" STREQUAL "")
     set(GIT_BRANCH "${GITHUB_REF}")
-  else()
+  elseif("${GIT_BRANCH}" STREQUAL "")
     message("couldn't find branch")
     set(GIT_BRANCH "detached-head")
   endif()
@@ -191,8 +192,8 @@ else()
   string(FIND "${GIT_REMOTE_NAME}" "/" INDEX)
   if (INDEX GREATER -1)
     string(SUBSTRING "${GIT_REMOTE_NAME}" 0 "${INDEX}" GIT_REMOTE_NAME)
-  else()
-    # If no remote is present (only a branch name), default to origin
+  elseif("${GIT_REMOTE_NAME}" STREQUAL "")
+    message("reset to origin")
     set(GIT_REMOTE_NAME "origin")
   endif()
 endif()
@@ -207,7 +208,7 @@ execute_process(
 
 # Set Version
 set(EMULATOR_VERSION_MAJOR "0")
-set(EMULATOR_VERSION_MINOR "8")
+set(EMULATOR_VERSION_MINOR "9")
 set(EMULATOR_VERSION_PATCH "1")
 
 set_source_files_properties(src/shadps4.rc PROPERTIES COMPILE_DEFINITIONS "EMULATOR_VERSION_MAJOR=${EMULATOR_VERSION_MAJOR};EMULATOR_VERSION_MINOR=${EMULATOR_VERSION_MINOR};EMULATOR_VERSION_PATCH=${EMULATOR_VERSION_PATCH}")
@@ -231,7 +232,7 @@ find_package(SDL3 3.1.2 CONFIG)
 find_package(stb MODULE)
 find_package(toml11 4.2.0 CONFIG)
 find_package(tsl-robin-map 1.3.0 CONFIG)
-find_package(VulkanHeaders 1.4.309 CONFIG)
+find_package(VulkanHeaders 1.4.314 CONFIG)
 find_package(VulkanMemoryAllocator 3.1.0 CONFIG)
 find_package(xbyak 7.07 CONFIG)
 find_package(xxHash 0.8.2 MODULE)
@@ -300,6 +301,8 @@ set(AJM_LIB src/core/libraries/ajm/ajm.cpp
 
 set(AUDIO_LIB src/core/libraries/audio/audioin.cpp
               src/core/libraries/audio/audioin.h
+              src/core/libraries/voice/voice.cpp
+              src/core/libraries/voice/voice.h
               src/core/libraries/audio/audioout.cpp
               src/core/libraries/audio/audioout.h
               src/core/libraries/audio/audioout_backend.h
@@ -607,6 +610,8 @@ set(CAMERA_LIBS  src/core/libraries/camera/camera.cpp
 
 set(COMPANION_LIBS  src/core/libraries/companion/companion_httpd.cpp
                     src/core/libraries/companion/companion_httpd.h
+                    src/core/libraries/companion/companion_util.cpp
+                    src/core/libraries/companion/companion_util.h
                     src/core/libraries/companion/companion_error.h
 )
 set(DEV_TOOLS src/core/devtools/layer.cpp
@@ -626,6 +631,8 @@ set(DEV_TOOLS src/core/devtools/layer.cpp
               src/core/devtools/widget/imgui_memory_editor.h
               src/core/devtools/widget/memory_map.cpp
               src/core/devtools/widget/memory_map.h
+              src/core/devtools/widget/module_list.cpp
+              src/core/devtools/widget/module_list.h
               src/core/devtools/widget/reg_popup.cpp
               src/core/devtools/widget/reg_popup.h
               src/core/devtools/widget/reg_view.cpp
@@ -678,6 +685,8 @@ set(COMMON src/common/logging/backend.cpp
            src/common/polyfill_thread.h
            src/common/rdtsc.cpp
            src/common/rdtsc.h
+           src/common/recursive_lock.cpp
+           src/common/recursive_lock.h
            src/common/sha1.h
            src/common/signal_context.h
            src/common/signal_context.cpp
@@ -866,8 +875,10 @@ set(SHADER_RECOMPILER src/shader_recompiler/exception.h
                       src/shader_recompiler/ir/passes/ring_access_elimination.cpp
                       src/shader_recompiler/ir/passes/shader_info_collection_pass.cpp
                       src/shader_recompiler/ir/passes/shared_memory_barrier_pass.cpp
+                      src/shader_recompiler/ir/passes/shared_memory_simplify_pass.cpp
                       src/shader_recompiler/ir/passes/shared_memory_to_storage_pass.cpp
                       src/shader_recompiler/ir/passes/ssa_rewrite_pass.cpp
+                      src/shader_recompiler/ir/abstract_syntax_list.cpp
                       src/shader_recompiler/ir/abstract_syntax_list.h
                       src/shader_recompiler/ir/attribute.cpp
                       src/shader_recompiler/ir/attribute.h
@@ -946,6 +957,10 @@ set(VIDEO_CORE src/video_core/amdgpu/liverpool.cpp
                src/video_core/renderer_vulkan/host_passes/fsr_pass.h
                src/video_core/renderer_vulkan/host_passes/pp_pass.cpp
                src/video_core/renderer_vulkan/host_passes/pp_pass.h
+               src/video_core/texture_cache/blit_helper.cpp
+               src/video_core/texture_cache/blit_helper.h
+               src/video_core/texture_cache/host_compatibility.cpp
+               src/video_core/texture_cache/host_compatibility.h
                src/video_core/texture_cache/image.cpp
                src/video_core/texture_cache/image.h
                src/video_core/texture_cache/image_info.cpp
@@ -959,7 +974,6 @@ set(VIDEO_CORE src/video_core/amdgpu/liverpool.cpp
                src/video_core/texture_cache/tile_manager.cpp
                src/video_core/texture_cache/tile_manager.h
                src/video_core/texture_cache/types.h
-               src/video_core/texture_cache/host_compatibility.h
                src/video_core/page_manager.cpp
                src/video_core/page_manager.h
                src/video_core/multi_level_page_table.h
@@ -1048,6 +1062,10 @@ set(QT_GUI src/qt_gui/about_dialog.cpp
            src/qt_gui/settings_dialog.h
            src/qt_gui/settings_dialog.ui
            src/qt_gui/main.cpp
+           src/qt_gui/gui_settings.cpp
+           src/qt_gui/gui_settings.h
+           src/qt_gui/settings.cpp
+           src/qt_gui/settings.h
            ${EMULATOR}
            ${RESOURCE_FILES}
            ${TRANSLATIONS}
@@ -1113,6 +1131,10 @@ if (APPLE)
         set(MVK_BUNDLE_PATH "Resources/vulkan/icd.d")
         set_property(TARGET shadps4 APPEND PROPERTY BUILD_RPATH "@executable_path/../${MVK_BUNDLE_PATH}")
         set(MVK_DST ${CMAKE_CURRENT_BINARY_DIR}/shadps4.app/Contents/${MVK_BUNDLE_PATH})
+
+        add_custom_command(
+            OUTPUT ${MVK_DST}
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${MVK_DST})
     else()
         set_property(TARGET shadps4 APPEND PROPERTY BUILD_RPATH "@executable_path")
         set(MVK_DST ${CMAKE_CURRENT_BINARY_DIR})
@@ -1123,9 +1145,6 @@ if (APPLE)
     set(MVK_ICD_SRC ${CMAKE_CURRENT_SOURCE_DIR}/externals/MoltenVK/MoltenVK/MoltenVK/icd/MoltenVK_icd.json)
     set(MVK_ICD_DST ${MVK_DST}/MoltenVK_icd.json)
 
-    add_custom_command(
-        OUTPUT ${MVK_DST}
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${MVK_DST})
     add_custom_command(
         OUTPUT ${MVK_ICD_DST}
         DEPENDS ${MVK_ICD_SRC} ${MVK_DST}
@@ -1140,15 +1159,11 @@ if (APPLE)
 
     if (ARCHITECTURE STREQUAL "x86_64")
         # Reserve system-managed memory space.
-        target_link_options(shadps4 PRIVATE -Wl,-no_pie,-no_fixup_chains,-no_huge,-pagezero_size,0x4000,-segaddr,TCB_SPACE,0x4000,-segaddr,SYSTEM_MANAGED,0x400000,-segaddr,SYSTEM_RESERVED,0x7FFFFC000,-image_base,0x20000000000)
+        target_link_options(shadps4 PRIVATE -Wl,-ld_classic,-no_pie,-no_fixup_chains,-no_huge,-pagezero_size,0x4000,-segaddr,TCB_SPACE,0x4000,-segaddr,SYSTEM_MANAGED,0x400000,-segaddr,SYSTEM_RESERVED,0x7FFFFC000,-image_base,0x20000000000)
     endif()
 
     # Replacement for std::chrono::time_zone
     target_link_libraries(shadps4 PRIVATE date::date-tz)
-endif()
-
-if (NOT ENABLE_QT_GUI)
-  target_link_libraries(shadps4 PRIVATE SDL3::SDL3)
 endif()
 
 if (ENABLE_QT_GUI)

@@ -1153,10 +1153,6 @@
       <translation>Не удаётся сохранить</translation>
     </message>
     <message>
-      <source>Cannot bind any unique input more than once</source>
-      <translation>Невозможно привязать уникальный ввод более одного раза</translation>
-    </message>
-    <message>
       <source>Press a key</source>
       <translation>Нажмите кнопку</translation>
     </message>
@@ -1183,6 +1179,14 @@
     <message>
       <source>Cancel</source>
       <translation>Отмена</translation>
+    </message>
+    <message>
+      <source>Cannot bind any unique input more than once. Duplicate inputs mapped to the following buttons:
+
+%1</source>
+      <translation type="unfinished">Cannot bind any unique input more than once. Duplicate inputs mapped to the following buttons:
+
+%1</translation>
     </message>
   </context>
   <context>
@@ -1346,10 +1350,6 @@
     <message>
       <source>Game List</source>
       <translation>Список игр</translation>
-    </message>
-    <message>
-      <source> * Unsupported Vulkan Version</source>
-      <translation> * Неподдерживаемая версия Vulkan</translation>
     </message>
     <message>
       <source>Download Cheats For All Installed Games</source>
@@ -2049,6 +2049,10 @@
     <message>
       <source>Open the custom trophy images/sounds folder:\nYou can add custom images to the trophies and an audio.\nAdd the files to custom_trophy with the following names:\ntrophy.wav OR trophy.mp3, bronze.png, gold.png, platinum.png, silver.png\nNote: The sound will only work in QT versions.</source>
       <translation>Открыть папку с пользовательскими изображениями/звуками трофеев:\nВы можете добавить пользовательские изображения к трофеям и аудио.\nДобавьте файлы в custom_trophy со следующими именами:\ntrophy.wav ИЛИ trophy.mp3, bronze.png, gold.png, platinum.png, silver.png\nПримечание: звук будет работать только в QT-версии.</translation>
+    </message>
+    <message>
+      <source> * Unsupported Vulkan Version</source>
+      <translation> * Неподдерживаемая версия Vulkan</translation>
     </message>
   </context>
   <context>

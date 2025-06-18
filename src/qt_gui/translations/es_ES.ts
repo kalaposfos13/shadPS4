@@ -26,7 +26,7 @@
     </message>
     <message>
       <source>Cheats/Patches are experimental.\nUse with caution.\n\nDownload cheats individually by selecting the repository and clicking the download button.\nIn the Patches tab, you can download all patches at once, choose which ones you want to use, and save your selection.\n\nSince we do not develop the Cheats/Patches,\nplease report issues to the cheat author.\n\nCreated a new cheat? Visit:\n</source>
-      <translation>Los cheats/patches son experimentales.\nÚselos con precaución.\n\nDescargue los cheats individualmente seleccionando el repositorio y haciendo clic en el botón de descarga.\nEn la pestaña Patches, puede descargar todos los patches a la vez, elegir cuáles desea usar y guardar la selección.\n\nComo no desarrollamos los Cheats/Patches,\npor favor informe los problemas al autor del cheat.\n\n¿Creaste un nuevo cheat? Visita:\n</translation>
+      <translation>Los trucos/parches son experimentales.\nÚselos con precaución.\n\nPuede descargar cada truco seleccionando el repositorio y haciendo clic en el botón de descarga.\nEn la pestaña Parches podrá descargar todos los parches a la vez, elegir cuáles desea usar y guardar la selección.\n\nComo no desarrollamos los trucos/parches,\ndebe informar de cualquier problema a sus autores correspondientes.\n\n¿Creaste un truco nuevo? Visita:\n</translation>
     </message>
     <message>
       <source>No Image Available</source>
@@ -1153,10 +1153,6 @@
       <translation>No se Pudo Guardar</translation>
     </message>
     <message>
-      <source>Cannot bind any unique input more than once</source>
-      <translation>No se puede vincular ninguna entrada única más de una vez</translation>
-    </message>
-    <message>
       <source>Press a key</source>
       <translation>Pulsa una tecla</translation>
     </message>
@@ -1183,6 +1179,14 @@
     <message>
       <source>Cancel</source>
       <translation>Cancelar</translation>
+    </message>
+    <message>
+      <source>Cannot bind any unique input more than once. Duplicate inputs mapped to the following buttons:
+
+%1</source>
+      <translation type="unfinished">Cannot bind any unique input more than once. Duplicate inputs mapped to the following buttons:
+
+%1</translation>
     </message>
   </context>
   <context>
@@ -1346,10 +1350,6 @@
     <message>
       <source>Game List</source>
       <translation>Lista de Juegos</translation>
-    </message>
-    <message>
-      <source> * Unsupported Vulkan Version</source>
-      <translation> * Versión de Vulkan no soportada</translation>
     </message>
     <message>
       <source>Download Cheats For All Installed Games</source>
@@ -2049,6 +2049,10 @@
     <message>
       <source>Open the custom trophy images/sounds folder:\nYou can add custom images to the trophies and an audio.\nAdd the files to custom_trophy with the following names:\ntrophy.wav OR trophy.mp3, bronze.png, gold.png, platinum.png, silver.png\nNote: The sound will only work in QT versions.</source>
       <translation>Abre la carpeta de trofeos/sonidos personalizados:\nPuedes añadir imágenes y un audio personalizados a los trofeos.\nAñade los archivos a custom_trophy con los siguientes nombres:\ntrophy.wav o trophy.mp3, bronze.png, gold.png, platinum.png, silver.png\nNota: El sonido sólo funcionará en versiones QT.</translation>
+    </message>
+    <message>
+      <source> * Unsupported Vulkan Version</source>
+      <translation> * Versión de Vulkan no soportada</translation>
     </message>
   </context>
   <context>

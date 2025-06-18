@@ -1153,10 +1153,6 @@
       <translation>Speichern nicht möglich</translation>
     </message>
     <message>
-      <source>Cannot bind any unique input more than once</source>
-      <translation>Kann keine eindeutige Eingabe mehr als einmal zuordnen</translation>
-    </message>
-    <message>
       <source>Press a key</source>
       <translation>Drücken Sie eine Taste</translation>
     </message>
@@ -1183,6 +1179,14 @@
     <message>
       <source>Cancel</source>
       <translation>Abbrechen</translation>
+    </message>
+    <message>
+      <source>Cannot bind any unique input more than once. Duplicate inputs mapped to the following buttons:
+
+%1</source>
+      <translation type="unfinished">Cannot bind any unique input more than once. Duplicate inputs mapped to the following buttons:
+
+%1</translation>
     </message>
   </context>
   <context>
@@ -1346,10 +1350,6 @@
     <message>
       <source>Game List</source>
       <translation>Spieleliste</translation>
-    </message>
-    <message>
-      <source> * Unsupported Vulkan Version</source>
-      <translation> * Nicht unterstützte Vulkan-Version</translation>
     </message>
     <message>
       <source>Download Cheats For All Installed Games</source>
@@ -2053,6 +2053,10 @@ Sie können benutzerdefinierte Bilder zu den Trophäen hinzufügen und einen Ton
 Fügen Sie die Dateien dem Ordner custom_trophy mit folgenden Namen hinzu:\n
 trophy.wav ODER trophy.mp3, bronze.png, gold.png, platinum.png, silver.png\n
 Hinweis: Der Sound funktioniert nur in Qt-Versionen.</translation>
+    </message>
+    <message>
+      <source> * Unsupported Vulkan Version</source>
+      <translation type="unfinished"> * Unsupported Vulkan Version</translation>
     </message>
   </context>
   <context>

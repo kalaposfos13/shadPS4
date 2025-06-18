@@ -1153,10 +1153,6 @@
       <translation>Impossible de sauvegarder</translation>
     </message>
     <message>
-      <source>Cannot bind any unique input more than once</source>
-      <translation>Impossible de lier une entrée unique plus d'une fois</translation>
-    </message>
-    <message>
       <source>Press a key</source>
       <translation>Appuyez sur un bouton</translation>
     </message>
@@ -1183,6 +1179,14 @@
     <message>
       <source>Cancel</source>
       <translation>Annuler</translation>
+    </message>
+    <message>
+      <source>Cannot bind any unique input more than once. Duplicate inputs mapped to the following buttons:
+
+%1</source>
+      <translation type="unfinished">Cannot bind any unique input more than once. Duplicate inputs mapped to the following buttons:
+
+%1</translation>
     </message>
   </context>
   <context>
@@ -1346,10 +1350,6 @@
     <message>
       <source>Game List</source>
       <translation>Liste de jeux</translation>
-    </message>
-    <message>
-      <source> * Unsupported Vulkan Version</source>
-      <translation> * Version de Vulkan non prise en charge</translation>
     </message>
     <message>
       <source>Download Cheats For All Installed Games</source>
@@ -2049,6 +2049,10 @@
     <message>
       <source>Open the custom trophy images/sounds folder:\nYou can add custom images to the trophies and an audio.\nAdd the files to custom_trophy with the following names:\ntrophy.wav OR trophy.mp3, bronze.png, gold.png, platinum.png, silver.png\nNote: The sound will only work in QT versions.</source>
       <translation>Ouvrez le dossier des images/sons des trophées personnalisés:\nVous pouvez ajouter des images personnalisées aux trophées et aux sons.\nAjoutez les fichiers à custom_trophy avec les noms suivants:\ntrophy.wav OU trophy.mp3, bronze.png, gold.png, platinum.png, silver.png\nNote : Le son ne fonctionnera que dans les versions QT.</translation>
+    </message>
+    <message>
+      <source> * Unsupported Vulkan Version</source>
+      <translation> * Version de Vulkan non prise en charge</translation>
     </message>
   </context>
   <context>

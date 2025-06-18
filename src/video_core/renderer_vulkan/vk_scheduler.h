@@ -307,6 +307,10 @@ public:
     /// and increments the scheduler timeline semaphore.
     void Flush(SubmitInfo& info);
 
+    /// Sends the current execution context to the GPU
+    /// and increments the scheduler timeline semaphore.
+    void Flush();
+
     /// Sends the current execution context to the GPU and waits for it to complete.
     void Finish();
 
@@ -324,6 +328,7 @@ public:
         return render_state;
     }
 
+    /// Returns the current pipeline dynamic state tracking.
     DynamicState& GetDynamicState() {
         return dynamic_state;
     }

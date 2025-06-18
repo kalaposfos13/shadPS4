@@ -1153,10 +1153,6 @@
       <translation>Ruajtja Dështoi</translation>
     </message>
     <message>
-      <source>Cannot bind any unique input more than once</source>
-      <translation>Asnjë hyrje unike nuk mund të caktohet më shumë se një herë</translation>
-    </message>
-    <message>
       <source>Press a key</source>
       <translation>Shtyp një tast</translation>
     </message>
@@ -1183,6 +1179,14 @@
     <message>
       <source>Cancel</source>
       <translation>Anulo</translation>
+    </message>
+    <message>
+      <source>Cannot bind any unique input more than once. Duplicate inputs mapped to the following buttons:
+
+%1</source>
+      <translation type="unfinished">Cannot bind any unique input more than once. Duplicate inputs mapped to the following buttons:
+
+%1</translation>
     </message>
   </context>
   <context>
@@ -1346,10 +1350,6 @@
     <message>
       <source>Game List</source>
       <translation>Lista e lojërave</translation>
-    </message>
-    <message>
-      <source> * Unsupported Vulkan Version</source>
-      <translation> * Version i pambështetur i Vulkan</translation>
     </message>
     <message>
       <source>Download Cheats For All Installed Games</source>
@@ -2049,6 +2049,10 @@
     <message>
       <source>Open the custom trophy images/sounds folder:\nYou can add custom images to the trophies and an audio.\nAdd the files to custom_trophy with the following names:\ntrophy.wav OR trophy.mp3, bronze.png, gold.png, platinum.png, silver.png\nNote: The sound will only work in QT versions.</source>
       <translation>Hap dosjen e imazheve/tingujve të trofeve të personalizuar:\nMund të shtosh imazhe të personalizuara për trofetë dhe një audio.\nShto skedarët në dosjen custom_trophy me emrat që vijojnë:\ntrophy.wav ose trophy.mp3, bronze.png, gold.png, platinum.png, silver.png\nShënim: Tingulli do të punojë vetëm në versionet QT.</translation>
+    </message>
+    <message>
+      <source> * Unsupported Vulkan Version</source>
+      <translation> * Version i pambështetur i Vulkan</translation>
     </message>
   </context>
   <context>

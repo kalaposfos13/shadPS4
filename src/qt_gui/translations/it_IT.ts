@@ -1153,10 +1153,6 @@
       <translation>Impossibile Salvare</translation>
     </message>
     <message>
-      <source>Cannot bind any unique input more than once</source>
-      <translation>Non è possibile associare qualsiasi input univoco più di una volta</translation>
-    </message>
-    <message>
       <source>Press a key</source>
       <translation>Premi un tasto</translation>
     </message>
@@ -1183,6 +1179,14 @@
     <message>
       <source>Cancel</source>
       <translation>Annulla</translation>
+    </message>
+    <message>
+      <source>Cannot bind any unique input more than once. Duplicate inputs mapped to the following buttons:
+
+%1</source>
+      <translation type="unfinished">Cannot bind any unique input more than once. Duplicate inputs mapped to the following buttons:
+
+%1</translation>
     </message>
   </context>
   <context>
@@ -1346,10 +1350,6 @@
     <message>
       <source>Game List</source>
       <translation>Elenco giochi</translation>
-    </message>
-    <message>
-      <source> * Unsupported Vulkan Version</source>
-      <translation> * Versione Vulkan non supportata</translation>
     </message>
     <message>
       <source>Download Cheats For All Installed Games</source>
@@ -2049,6 +2049,10 @@
     <message>
       <source>Open the custom trophy images/sounds folder:\nYou can add custom images to the trophies and an audio.\nAdd the files to custom_trophy with the following names:\ntrophy.wav OR trophy.mp3, bronze.png, gold.png, platinum.png, silver.png\nNote: The sound will only work in QT versions.</source>
       <translation>Apri la cartella personalizzata delle immagini/suoni trofei:\nÈ possibile aggiungere immagini personalizzate ai trofei e un audio.\nAggiungi i file a custom_trophy con i seguenti nomi:\ntrophy.wav OPPURE trophy.mp3, bronze.png, gold.png, platinum.png, silver.png\nNota: Il suono funzionerà solo nelle versioni QT.</translation>
+    </message>
+    <message>
+      <source> * Unsupported Vulkan Version</source>
+      <translation> * Versione Vulkan non supportata</translation>
     </message>
   </context>
   <context>

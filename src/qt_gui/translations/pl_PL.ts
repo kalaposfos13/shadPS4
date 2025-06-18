@@ -1153,10 +1153,6 @@
       <translation>Zapisywanie nie powiodło się</translation>
     </message>
     <message>
-      <source>Cannot bind any unique input more than once</source>
-      <translation>Nie można powiązać żadnych unikalnych danych wejściowych więcej niż raz</translation>
-    </message>
-    <message>
       <source>Press a key</source>
       <translation>Naciśnij klawisz</translation>
     </message>
@@ -1183,6 +1179,14 @@
     <message>
       <source>Cancel</source>
       <translation>Anuluj</translation>
+    </message>
+    <message>
+      <source>Cannot bind any unique input more than once. Duplicate inputs mapped to the following buttons:
+
+%1</source>
+      <translation type="unfinished">Cannot bind any unique input more than once. Duplicate inputs mapped to the following buttons:
+
+%1</translation>
     </message>
   </context>
   <context>
@@ -1346,10 +1350,6 @@
     <message>
       <source>Game List</source>
       <translation>Lista gier</translation>
-    </message>
-    <message>
-      <source> * Unsupported Vulkan Version</source>
-      <translation> * Nieobsługiwana wersja Vulkan</translation>
     </message>
     <message>
       <source>Download Cheats For All Installed Games</source>
@@ -2049,6 +2049,10 @@
     <message>
       <source>Open the custom trophy images/sounds folder:\nYou can add custom images to the trophies and an audio.\nAdd the files to custom_trophy with the following names:\ntrophy.wav OR trophy.mp3, bronze.png, gold.png, platinum.png, silver.png\nNote: The sound will only work in QT versions.</source>
       <translation>Otwórz niestandardowy folder obrazów/dźwięków:\nMożesz dodać własne obrazy dla trofeów i ich dźwięki.\nDodaj pliki do custom_trophy o następujących nazwach:\ntrophy.wav LUB trophy.mp3, bronze.png, gold.png, platinum.png, silver.png\nUwaga: Dźwięki działają tylko w wersji QT.</translation>
+    </message>
+    <message>
+      <source> * Unsupported Vulkan Version</source>
+      <translation type="unfinished"> * Unsupported Vulkan Version</translation>
     </message>
   </context>
   <context>
