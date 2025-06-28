@@ -19,15 +19,15 @@ constexpr u64 GHIDRA_OFFSET_ADJUSTMENT = 0x00400000;
 constexpr auto DC_DebugLog = 0x0126f1f0;
 static HookInformation _DebugLog_hook = {};
 
-constexpr auto DC_SearchAndDoSomethingToMemoryByName = 0x00968a30;
-static HookInformation _SearchAndDoSomethingToMemoryByName_hook = {};
+constexpr auto DC_QueryHeapInfo = 0x00968a30;
+static HookInformation _QueryHeapInfo_hook = {};
 
 void SHAD_NO_INLINE PS4_SYSV_ABI HOOK_DebugLog(void* a1) {
 
     LOG_INFO(Core_Hooking, "test for hooking");
 }
 
-u64 SHAD_NO_INLINE PS4_SYSV_ABI HOOK_QueryHeapSize(u8* searched_array_struct, char* name) {
+u64 SHAD_NO_INLINE PS4_SYSV_ABI HOOK_QueryHeapInfo(u8* searched_array_struct, char* name) {
     LOG_INFO(Core_Hooking, "struct ptr: {}, searched name: {}, flags: {}",
              fmt::ptr(searched_array_struct), name, *(searched_array_struct + 4));
     if (strcmp(name, "editor") == 0 || strcmp(name, "extraEditorMemForGameHeap") == 0 ||
@@ -92,23 +92,22 @@ u64 SHAD_NO_INLINE PS4_SYSV_ABI HOOK_QueryHeapSize(u8* searched_array_struct, ch
             ret = element_ptr->base_size;
             u8 flags = *(searched_array_struct + 4);
             if ((flags & 1) != 0) {
-                ret = ret + element_ptr->size_mod_1;
+                ret += element_ptr->size_mod_1;
             }
             if ((flags & 2) != 0) {
-                ret = ret + element_ptr->size_mod_2;
+                ret += element_ptr->size_mod_2;
             }
             if ((flags & 4) != 0) {
-                ret = ret + element_ptr->size_mod_3;
+                ret += element_ptr->size_mod_3;
             }
             if ((flags & 8) != 0) {
-                ret = ret + element_ptr->size_mod_4;
+                ret += element_ptr->size_mod_4;
             }
         }
     }
     // LOG_INFO(Core_Hooking, "Predicted return: {:#x}", ret);
 
-    auto orig =
-        (u64 PS4_SYSV_ABI (*)(u8*, char*))_SearchAndDoSomethingToMemoryByName_hook.Trampoline;
+    auto orig = (u64 PS4_SYSV_ABI (*)(u8*, char*))_QueryHeapInfo_hook.Trampoline;
     ret = orig(searched_array_struct, name);
     LOG_INFO(Core_Hooking, "Return: {:#x}", ret);
     return ret;
@@ -124,11 +123,10 @@ void Initialize(Core::Module* mainModule) {
     // _DebugLog_hook = CreateHook(reinterpret_cast<void*>(EBOOT_MODULE_BASE -
     // GHIDRA_OFFSET_ADJUSTMENT + DC_DebugLog), (void*)&HOOK_DebugLog);
     // EnableHook(&_DebugLog_hook);
-    _SearchAndDoSomethingToMemoryByName_hook =
-        CreateHook(reinterpret_cast<void*>(EBOOT_MODULE_BASE - GHIDRA_OFFSET_ADJUSTMENT +
-                                           DC_SearchAndDoSomethingToMemoryByName),
-                   (void*)&HOOK_QueryHeapSize);
-    EnableHook(&_SearchAndDoSomethingToMemoryByName_hook);
+    _QueryHeapInfo_hook = CreateHook(
+        reinterpret_cast<void*>(EBOOT_MODULE_BASE - GHIDRA_OFFSET_ADJUSTMENT + DC_QueryHeapInfo),
+        (void*)&HOOK_QueryHeapInfo);
+    EnableHook(&_QueryHeapInfo_hook);
 
     initted = true;
 }
