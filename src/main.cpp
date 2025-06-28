@@ -35,17 +35,20 @@ int main(int argc, char* argv[]) {
     std::unordered_map<std::string, std::function<void(int&)>> arg_map = {
         {"-h",
          [&](int&) {
-             std::cout << "Usage: shadps4 [options] <elf or eboot.bin path>\n"
-                          "Options:\n"
-                          "  -g, --game <path|ID>          Specify game path to launch\n"
-                          " -- ...                         Parameters passed to the game ELF. "
-                          "Needs to be at the end of the line, and everything after \"--\" is a "
-                          "game argument.\n"
-                          "  -p, --patch <patch_file>      Apply specified patch file\n"
-                          "  -f, --fullscreen <true|false> Specify window initial fullscreen "
-                          "state. Does not overwrite the config file.\n"
-                          "  --add-game-folder <folder>    Adds a new game folder to the config.\n"
-                          "  -h, --help                    Display this help message\n";
+             std::cout
+                 << "Usage: shadps4 [options] <elf or eboot.bin path>\n"
+                    "Options:\n"
+                    "  -g, --game <path|ID>          Specify game path to launch\n"
+                    " -- ...                         Parameters passed to the game ELF. "
+                    "Needs to be at the end of the line, and everything after \"--\" is a "
+                    "game argument.\n"
+                    "  -p, --patch <patch_file>      Apply specified patch file\n"
+                    "  -i, --ignore-game-patch       Disable automatic loading of game patch\n"
+                    "  -f, --fullscreen <true|false> Specify window initial fullscreen "
+                    "state. Does not overwrite the config file.\n"
+                    "  --add-game-folder <folder>    Adds a new game folder to the config.\n"
+                    "  --set-addon-folder <folder>   Sets the addon folder to the config.\n"
+                    "  -h, --help                    Display this help message\n";
              exit(0);
          }},
         {"--help", [&](int& i) { arg_map["-h"](i); }},
@@ -72,6 +75,8 @@ int main(int argc, char* argv[]) {
              }
          }},
         {"--patch", [&](int& i) { arg_map["-p"](i); }},
+        {"-i", [&](int&) { Core::FileSys::MntPoints::ignore_game_patches = true; }},
+        {"--ignore-game-patch", [&](int& i) { arg_map["-i"](i); }},
         {"-f",
          [&](int& i) {
              if (++i >= argc) {
@@ -112,7 +117,24 @@ int main(int argc, char* argv[]) {
              std::cout << "Game folder successfully saved.\n";
              exit(0);
          }},
-    };
+        {"--set-addon-folder", [&](int& i) {
+             if (++i >= argc) {
+                 std::cerr << "Error: Missing argument for --add-addon-folder\n";
+                 exit(1);
+             }
+             std::string config_dir(argv[i]);
+             std::filesystem::path config_path = std::filesystem::path(config_dir);
+             std::error_code discard;
+             if (!std::filesystem::exists(config_path, discard)) {
+                 std::cerr << "Error: File does not exist: " << config_path << "\n";
+                 exit(1);
+             }
+
+             Config::setAddonInstallDir(config_path);
+             Config::save(Common::FS::GetUserPath(Common::FS::PathType::UserDir) / "config.toml");
+             std::cout << "Addon folder successfully saved.\n";
+             exit(0);
+         }}};
 
     if (argc == 1) {
         int dummy = 0; // one does not simply pass 0 directly
@@ -154,7 +176,7 @@ int main(int argc, char* argv[]) {
     // If no game directory is set and no command line argument, prompt for it
     if (Config::getGameInstallDirs().empty()) {
         std::cout << "Warning: No game folder set, please set it by calling shadps4"
-                     " with the --add-game-folder <folder_name> argument";
+                     " with the --add-game-folder <folder_name> argument\n";
     }
 
     if (!has_game_argument) {
@@ -167,12 +189,12 @@ int main(int argc, char* argv[]) {
 
     // Check if the provided path is a valid file
     if (!std::filesystem::exists(eboot_path)) {
-        // If not a file, treat it as a game ID and search in install directories
+        // If not a file, treat it as a game ID and search in install directories recursively
         bool game_found = false;
+        const int max_depth = 5;
         for (const auto& install_dir : Config::getGameInstallDirs()) {
-            const auto candidate_path = install_dir / game_path / "eboot.bin";
-            if (std::filesystem::exists(candidate_path)) {
-                eboot_path = candidate_path;
+            if (auto found_path = Common::FS::FindGameByID(install_dir, game_path, max_depth)) {
+                eboot_path = *found_path;
                 game_found = true;
                 break;
             }

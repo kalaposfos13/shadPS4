@@ -112,10 +112,16 @@ void Initialize(const ::Vulkan::Instance& instance, const Frontend::WindowSDL& w
     if (const auto dpi = SDL_GetWindowDisplayScale(window.GetSDLWindow()); dpi > 0.0f) {
         GetIO().FontGlobalScale = dpi;
     }
+
+    std::at_quick_exit([] { SaveIniSettingsToDisk(GetIO().IniFilename); });
 }
 
 void OnResize() {
     Sdl::OnResize();
+}
+
+void OnSurfaceFormatChange(vk::Format surface_format) {
+    Vulkan::OnSurfaceFormatChange(surface_format);
 }
 
 void Shutdown(const vk::Device& device) {
@@ -148,7 +154,7 @@ bool ProcessEvent(SDL_Event* event) {
     case SDL_EVENT_MOUSE_BUTTON_DOWN: {
         const auto& io = GetIO();
         return io.WantCaptureMouse && io.Ctx->NavWindow != nullptr &&
-               io.Ctx->NavWindow->ID != dock_id;
+               (io.Ctx->NavWindow->Flags & ImGuiWindowFlags_NoNav) == 0;
     }
     case SDL_EVENT_TEXT_INPUT:
     case SDL_EVENT_KEY_DOWN: {
@@ -208,7 +214,7 @@ void Render(const vk::CommandBuffer& cmdbuf, const vk::ImageView& image_view,
         return;
     }
 
-    if (Config::vkHostMarkersEnabled()) {
+    if (Config::getVkHostMarkersEnabled()) {
         cmdbuf.beginDebugUtilsLabelEXT(vk::DebugUtilsLabelEXT{
             .pLabelName = "ImGui Render",
         });
@@ -233,7 +239,7 @@ void Render(const vk::CommandBuffer& cmdbuf, const vk::ImageView& image_view,
     cmdbuf.beginRendering(render_info);
     Vulkan::RenderDrawData(*draw_data, cmdbuf);
     cmdbuf.endRendering();
-    if (Config::vkHostMarkersEnabled()) {
+    if (Config::getVkHostMarkersEnabled()) {
         cmdbuf.endDebugUtilsLabelEXT();
     }
 }

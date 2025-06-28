@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <shared_mutex>
+#include "common/recursive_lock.h"
 #include "video_core/buffer_cache/buffer_cache.h"
 #include "video_core/page_manager.h"
 #include "video_core/renderer_vulkan/vk_pipeline_cache.h"
@@ -63,9 +65,19 @@ public:
     void CpSync();
     u64 Flush();
     void Finish();
+    void ProcessFaults();
 
     PipelineCache& GetPipelineCache() {
         return pipeline_cache;
+    }
+
+    template <typename Func>
+    void ForEachMappedRangeInRange(VAddr addr, u64 size, Func&& func) {
+        const auto range = decltype(mapped_ranges)::interval_type::right_open(addr, addr + size);
+        Common::RecursiveSharedLock lock{mapped_ranges_mutex};
+        for (const auto& mapped_range : (mapped_ranges & range)) {
+            func(mapped_range);
+        }
     }
 
 private:
@@ -75,17 +87,17 @@ private:
     void DepthStencilCopy(bool is_depth, bool is_stencil);
     void EliminateFastClear();
 
-    void UpdateDynamicState(const GraphicsPipeline& pipeline);
-    void UpdateViewportScissorState(const GraphicsPipeline& pipeline);
+    void UpdateDynamicState(const GraphicsPipeline& pipeline) const;
+    void UpdateViewportScissorState() const;
+    void UpdateDepthStencilState() const;
+    void UpdatePrimitiveState() const;
 
     bool FilterDraw();
 
     void BindBuffers(const Shader::Info& stage, Shader::Backend::Bindings& binding,
-                     Shader::PushData& push_data, Pipeline::DescriptorWrites& set_writes,
-                     Pipeline::BufferBarriers& buffer_barriers);
+                     Shader::PushData& push_data);
 
-    void BindTextures(const Shader::Info& stage, Shader::Backend::Bindings& binding,
-                      Pipeline::DescriptorWrites& set_writes);
+    void BindTextures(const Shader::Info& stage, Shader::Backend::Bindings& binding);
 
     bool BindResources(const Pipeline* pipeline);
     void ResetBindings() {
@@ -95,7 +107,11 @@ private:
         bound_images.clear();
     }
 
+    bool IsComputeMetaClear(const Pipeline* pipeline);
+
 private:
+    friend class VideoCore::BufferCache;
+
     const Instance& instance;
     Scheduler& scheduler;
     VideoCore::PageManager page_manager;
@@ -104,26 +120,25 @@ private:
     AmdGpu::Liverpool* liverpool;
     Core::MemoryManager* memory;
     boost::icl::interval_set<VAddr> mapped_ranges;
+    std::shared_mutex mapped_ranges_mutex;
     PipelineCache pipeline_cache;
 
     boost::container::static_vector<
         std::pair<VideoCore::ImageId, VideoCore::TextureCache::RenderTargetDesc>, 8>
         cb_descs;
     std::optional<std::pair<VideoCore::ImageId, VideoCore::TextureCache::DepthTargetDesc>> db_desc;
-    boost::container::static_vector<vk::DescriptorImageInfo, 64> image_infos;
-    boost::container::static_vector<vk::BufferView, 8> buffer_views;
-    boost::container::static_vector<vk::DescriptorBufferInfo, 32> buffer_infos;
-    boost::container::static_vector<VideoCore::ImageId, 64> bound_images;
+    boost::container::static_vector<vk::DescriptorImageInfo, Shader::NumImages> image_infos;
+    boost::container::static_vector<vk::DescriptorBufferInfo, Shader::NumBuffers> buffer_infos;
+    boost::container::static_vector<VideoCore::ImageId, Shader::NumImages> bound_images;
 
     Pipeline::DescriptorWrites set_writes;
     Pipeline::BufferBarriers buffer_barriers;
 
-    using BufferBindingInfo = std::pair<VideoCore::BufferId, AmdGpu::Buffer>;
-    boost::container::static_vector<BufferBindingInfo, 32> buffer_bindings;
-    using TexBufferBindingInfo = std::pair<VideoCore::BufferId, AmdGpu::Buffer>;
-    boost::container::static_vector<TexBufferBindingInfo, 32> texbuffer_bindings;
+    using BufferBindingInfo = std::tuple<VideoCore::BufferId, AmdGpu::Buffer, u64>;
+    boost::container::static_vector<BufferBindingInfo, Shader::NumBuffers> buffer_bindings;
     using ImageBindingInfo = std::pair<VideoCore::ImageId, VideoCore::TextureCache::TextureDesc>;
-    boost::container::static_vector<ImageBindingInfo, 64> image_bindings;
+    boost::container::static_vector<ImageBindingInfo, Shader::NumImages> image_bindings;
+    bool fault_process_pending{false};
 };
 
 } // namespace Vulkan

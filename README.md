@@ -13,7 +13,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
 
 <h1 align="center">
  <a href="https://discord.gg/bFJxfftGW6">
-        <img src="https://img.shields.io/discord/1080089157554155590?color=5865F2&label=shadPS4 Discord&logo=Discord&logoColor=white" width="240">
+        <img src="https://img.shields.io/discord/1080089157554155590?color=5865F2&label=shadPS4%20Discord&logo=Discord&logoColor=white" width="275">
  <a href="https://github.com/shadps4-emu/shadPS4/releases/latest">
         <img src="https://img.shields.io/github/downloads/shadps4-emu/shadPS4/total.svg" width="140">
  <a href="https://shadps4.net/">
@@ -36,7 +36,7 @@ SPDX-License-Identifier: GPL-2.0-or-later
 
 **shadPS4** is an early **PlayStation 4** emulator for **Windows**, **Linux** and **macOS** written in C++.
 
-If you encounter problems or have doubts, do not hesitate to look at the [**Quickstart**](https://github.com/shadps4-emu/shadPS4/blob/main/documents/Quickstart/Quickstart.md).\
+If you encounter problems or have doubts, do not hesitate to look at the [**Quickstart**](https://github.com/shadps4-emu/shadPS4/wiki/I.-Quick-start-%5BUsers%5D).\
 To verify that a game works, you can look at [**shadPS4 Game Compatibility**](https://github.com/shadps4-emu/shadps4-game-compatibility).\
 To discuss shadPS4 development, suggest ideas or to ask for help, join our [**Discord server**](https://discord.gg/bFJxfftGW6).\
 To get the latest news, go to our [**X (Twitter)**](https://x.com/shadps4) or our [**website**](https://shadps4.net/).\
@@ -55,6 +55,9 @@ This project began as a fun project. Given our limited free time, it may take so
 
 # Building
 
+> [!IMPORTANT]
+> If you want to use shadPS4 to play your games, you don't have to follow the build instructions, you can simply download the emulator from either the [**release tab**](https://github.com/shadps4-emu/shadPS4/releases) or the [**action tab**](https://github.com/shadps4-emu/shadPS4/actions).
+
 ## Windows
 
 Check the build instructions for [**Windows**](https://github.com/shadps4-emu/shadPS4/blob/main/documents/building-windows.md).
@@ -68,13 +71,16 @@ Check the build instructions for [**Linux**](https://github.com/shadps4-emu/shad
 Check the build instructions for [**macOS**](https://github.com/shadps4-emu/shadPS4/blob/main/documents/building-macos.md).
 
 > [!IMPORTANT]
-> macOS users need at least macOS 15 on Apple Silicon-based Mac devices and at least macOS 14 on Intel-based Mac devices.
+> macOS users need at least macOS 15.4 to run shadPS4. Due to GPU issues there are currently heavy bugs on Intel Macs.
 
 # Debugging and reporting issues
 
 For more information on how to test, debug and report issues with the emulator or games, read the [**Debugging documentation**](https://github.com/shadps4-emu/shadPS4/blob/main/documents/Debugging/Debugging.md).
 
-# Keyboard mapping
+# Keyboard and Mouse Mappings
+
+> [!NOTE]
+> Some keyboards may also require you to hold the Fn key to use the F\* keys. Mac users should use the Command key instead of Control, and need to use Command+F11 for full screen to avoid conflicting with system key bindings.
 
 | Button | Function |
 |-------------|-------------|
@@ -86,58 +92,81 @@ F12 | Trigger RenderDoc Capture
 > [!NOTE]
 > Xbox and DualShock controllers work out of the box.
 
-| Controller button | Keyboard equivelant | Mac alternative |
-|-------------|-------------|--------------|
-LEFT AXIS UP | W | |
-LEFT AXIS DOWN | S | |
-LEFT AXIS LEFT | A | |
-LEFT AXIS RIGHT | D | |
-RIGHT AXIS UP | I | |
-RIGHT AXIS DOWN | K | |
-RIGHT AXIS LEFT | J | |
-RIGHT AXIS RIGHT | L | |
-TRIANGLE | Numpad 8 | C |
-CIRCLE | Numpad 6 | B |
-CROSS | Numpad 2 | N |
-SQUARE | Numpad 4 | V |
-PAD UP | UP | |
-PAD DOWN | DOWN | |
-PAD LEFT | LEFT | |
-PAD RIGHT | RIGHT | |
-OPTIONS | RETURN | |
-BACK BUTTON / TOUCH PAD | SPACE | |
-L1 | Q | |
-R1 | U | |
-L2 | E | |
-R2 | O | |
-L3 | X | |
-R3 | M | |
+| Controller button | Keyboard equivalent |
+|-------------|-------------|
+LEFT AXIS UP | W |
+LEFT AXIS DOWN | S |
+LEFT AXIS LEFT | A |
+LEFT AXIS RIGHT | D |
+RIGHT AXIS UP | I |
+RIGHT AXIS DOWN | K |
+RIGHT AXIS LEFT | J |
+RIGHT AXIS RIGHT | L |
+TRIANGLE | Numpad 8 or C |
+CIRCLE | Numpad 6 or B |
+CROSS | Numpad 2 or N |
+SQUARE | Numpad 4 or V |
+PAD UP | UP |
+PAD DOWN | DOWN |
+PAD LEFT | LEFT |
+PAD RIGHT | RIGHT |
+OPTIONS | RETURN |
+BACK BUTTON / TOUCH PAD | SPACE |
+L1 | Q |
+R1 | U |
+L2 | E |
+R2 | O |
+L3 | X |
+R3 | M |
+
+Keyboard and mouse inputs can be customized in the settings menu by clicking the Controller button, and further details and help on controls are  also found there. Custom bindings are saved per-game. Inputs support up to three keys per binding, mouse buttons, mouse movement mapped to joystick input, and more.
+
+
+# Firmware files
+
+shadPS4 can load some PlayStation 4 firmware files, these must be dumped from your legally owned PlayStation 4 console.
+The following firmware modules are supported and must be placed in shadPS4's `sys_modules` folder.
+
+<div align="center">
+
+| Modules                 | Modules                 | Modules                 | Modules                 |  
+|-------------------------|-------------------------|-------------------------|-------------------------|  
+| libSceCesCs.sprx        | libSceFont.sprx         | libSceFontFt.sprx       | libSceFreeTypeOt.sprx   |
+| libSceJson.sprx         | libSceJson2.sprx        | libSceLibcInternal.sprx | libSceNgs2.sprx         |  
+| libSceRtc.sprx          | libSceUlt.sprx          |                         |                         |
+
+</div>
+
+> [!Caution]
+> The above modules are required to run the games properly and must be extracted from your PlayStation 4.
+
+
 
 # Main team
 
 - [**georgemoralis**](https://github.com/georgemoralis)
-- [**raphaelthegreat**](https://github.com/raphaelthegreat)
 - [**psucien**](https://github.com/psucien)
-- [**skmp**](https://github.com/skmp)
-- [**wheremyfoodat**](https://github.com/wheremyfoodat)
-- [**raziel1000**](https://github.com/raziel1000)
 - [**viniciuslrangel**](https://github.com/viniciuslrangel)
-- [**roamic**](https://github.com/vladmikhalin)
-- [**poly**](https://github.com/polybiusproxy)
+- [**roamic**](https://github.com/roamic)
 - [**squidbus**](https://github.com/squidbus)
 - [**frodo**](https://github.com/baggins183)
+- [**Stephen Miller**](https://github.com/StevenMiller123)
+- [**kalaposfos13**](https://github.com/kalaposfos13)
 
 Logo is done by [**Xphalnos**](https://github.com/Xphalnos)
 
 # Contributing
 
-If you want to contribute, please look the [**CONTRIBUTING.md**](https://github.com/shadps4-emu/shadPS4/blob/main/CONTRIBUTING.md) file.\
+If you want to contribute, please read the [**CONTRIBUTING.md**](https://github.com/shadps4-emu/shadPS4/blob/main/CONTRIBUTING.md) file.\
 Open a PR and we'll check it :)
 
+# Translations
+
+If you want to translate shadPS4 to your language we use [**Crowdin**](https://crowdin.com/project/shadps4-emulator).
 # Contributors
 
 <a href="https://github.com/shadps4-emu/shadPS4/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=shadps4-emu/shadPS4&max=15">
+  <img src="https://contrib.rocks/image?repo=shadps4-emu/shadPS4&max=24">
 </a>
 
 
@@ -151,7 +180,7 @@ A few noteworthy teams/projects who've helped us along the way are:
 
 - **yuzu**: Our shader compiler has been designed with yuzu's Hades compiler as a blueprint. This allowed us to focus on the challenges of emulating a modern AMD GPU while having a high-quality optimizing shader compiler implementation as a base.
 
-- [**hydra**](https://github.com/hydra-emu/hydra): A multisystem, multiplatform emulator (chip-8, GB, NES, N64) from Paris.
+- [**felix86**](https://github.com/OFFTKP/felix86): A new x86-64 → RISC-V Linux userspace emulator
 
 # License
 

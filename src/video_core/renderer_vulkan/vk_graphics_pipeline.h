@@ -35,31 +35,14 @@ struct GraphicsPipelineKey {
     std::array<size_t, MaxShaderStages> stage_hashes;
     u32 num_color_attachments;
     std::array<vk::Format, Liverpool::NumColorBuffers> color_formats;
-    std::array<Shader::FragmentRuntimeInfo::PsColorBuffer, Liverpool::NumColorBuffers>
-        color_buffers;
+    std::array<Shader::PsColorBuffer, Liverpool::NumColorBuffers> color_buffers;
     vk::Format depth_format;
     vk::Format stencil_format;
-
-    struct {
-        bool clip_disable : 1;
-        bool depth_test_enable : 1;
-        bool depth_write_enable : 1;
-        bool depth_bounds_test_enable : 1;
-        bool depth_bias_enable : 1;
-        bool stencil_test_enable : 1;
-        // Must be named to be zero-initialized.
-        u8 _unused : 2;
-    };
-    vk::CompareOp depth_compare_op;
 
     u32 num_samples;
     u32 mrt_mask;
     AmdGpu::PrimitiveType prim_type;
-    u32 enable_primitive_restart;
-    u32 primitive_restart_index;
     Liverpool::PolygonMode polygon_mode;
-    Liverpool::CullMode cull_mode;
-    Liverpool::FrontFace front_face;
     Liverpool::ClipSpace clip_space;
     Liverpool::ColorBufferMask cb_shader_mask;
     std::array<Liverpool::BlendControl, Liverpool::NumColorBuffers> blend_controls;
@@ -75,7 +58,8 @@ struct GraphicsPipelineKey {
 class GraphicsPipeline : public Pipeline {
 public:
     GraphicsPipeline(const Instance& instance, Scheduler& scheduler, DescriptorHeap& desc_heap,
-                     const GraphicsPipelineKey& key, vk::PipelineCache pipeline_cache,
+                     const Shader::Profile& profile, const GraphicsPipelineKey& key,
+                     vk::PipelineCache pipeline_cache,
                      std::span<const Shader::Info*, MaxShaderStages> stages,
                      std::span<const Shader::RuntimeInfo, MaxShaderStages> runtime_infos,
                      std::optional<const Shader::Gcn::FetchShaderData> fetch_shader,
@@ -92,20 +76,6 @@ public:
 
     auto GetMrtMask() const {
         return key.mrt_mask;
-    }
-
-    auto IsClipDisabled() const {
-        return key.clip_disable;
-    }
-
-    [[nodiscard]] bool IsPrimitiveListTopology() const {
-        return key.prim_type == AmdGpu::PrimitiveType::PointList ||
-               key.prim_type == AmdGpu::PrimitiveType::LineList ||
-               key.prim_type == AmdGpu::PrimitiveType::TriangleList ||
-               key.prim_type == AmdGpu::PrimitiveType::AdjLineList ||
-               key.prim_type == AmdGpu::PrimitiveType::AdjTriangleList ||
-               key.prim_type == AmdGpu::PrimitiveType::RectList ||
-               key.prim_type == AmdGpu::PrimitiveType::QuadList;
     }
 
     /// Gets the attributes and bindings for vertex inputs.

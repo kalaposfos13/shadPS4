@@ -9,6 +9,7 @@
 #include "common/slot_vector.h"
 #include "video_core/amdgpu/resource.h"
 #include "video_core/multi_level_page_table.h"
+#include "video_core/texture_cache/blit_helper.h"
 #include "video_core/texture_cache/image.h"
 #include "video_core/texture_cache/image_view.h"
 #include "video_core/texture_cache/sampler.h"
@@ -139,7 +140,9 @@ public:
     void RefreshImage(Image& image, Vulkan::Scheduler* custom_scheduler = nullptr);
 
     /// Retrieves the sampler that matches the provided S# descriptor.
-    [[nodiscard]] vk::Sampler GetSampler(const AmdGpu::Sampler& sampler);
+    [[nodiscard]] vk::Sampler GetSampler(
+        const AmdGpu::Sampler& sampler,
+        const AmdGpu::Liverpool::BorderColorBufferBase& border_color_base);
 
     /// Retrieves the image with the specified id.
     [[nodiscard]] Image& GetImage(ImageId id) {
@@ -246,6 +249,9 @@ private:
         }
     }
 
+    /// Gets or creates a null image for a particular format.
+    ImageId GetNullImage(vk::Format format);
+
     /// Create an image from the given parameters
     [[nodiscard]] ImageId InsertImage(const ImageInfo& info, VAddr cpu_addr);
 
@@ -281,10 +287,12 @@ private:
     Vulkan::Scheduler& scheduler;
     BufferCache& buffer_cache;
     PageManager& tracker;
+    BlitHelper blit_helper;
     TileManager tile_manager;
     Common::SlotVector<Image> slot_images;
     Common::SlotVector<ImageView> slot_image_views;
     tsl::robin_map<u64, Sampler> samplers;
+    tsl::robin_map<vk::Format, ImageId> null_images;
     PageTable page_table;
     std::mutex mutex;
 

@@ -149,6 +149,7 @@ struct GeometryRuntimeInfo {
     u32 out_vertex_data_size{};
     AmdGpu::PrimitiveType in_primitive;
     GsOutputPrimTypes out_primitive;
+    AmdGpu::Liverpool::GsMode::Mode mode;
     std::span<const u32> vs_copy;
     u64 vs_copy_hash;
 
@@ -167,6 +168,17 @@ enum class MrtSwizzle : u8 {
 };
 static constexpr u32 MaxColorBuffers = 8;
 
+struct PsColorBuffer {
+    AmdGpu::NumberFormat num_format : 4;
+    AmdGpu::NumberConversion num_conversion : 3;
+    AmdGpu::Liverpool::ShaderExportFormat export_format : 4;
+    u32 needs_unorm_fixup : 1;
+    u32 pad : 20;
+    AmdGpu::CompMapping swizzle;
+
+    auto operator<=>(const PsColorBuffer&) const noexcept = default;
+};
+
 struct FragmentRuntimeInfo {
     struct PsInput {
         u8 param_index;
@@ -174,26 +186,24 @@ struct FragmentRuntimeInfo {
         bool is_flat;
         u8 default_value;
 
+        [[nodiscard]] bool IsDefault() const {
+            return is_default && !is_flat;
+        }
+
         auto operator<=>(const PsInput&) const noexcept = default;
     };
     AmdGpu::Liverpool::PsInput en_flags;
     AmdGpu::Liverpool::PsInput addr_flags;
     u32 num_inputs;
     std::array<PsInput, 32> inputs;
-    struct PsColorBuffer {
-        AmdGpu::NumberFormat num_format;
-        AmdGpu::NumberConversion num_conversion;
-        AmdGpu::CompMapping swizzle;
-        AmdGpu::Liverpool::ShaderExportFormat export_format;
-
-        auto operator<=>(const PsColorBuffer&) const noexcept = default;
-    };
     std::array<PsColorBuffer, MaxColorBuffers> color_buffers;
+    bool dual_source_blending;
 
     bool operator==(const FragmentRuntimeInfo& other) const noexcept {
         return std::ranges::equal(color_buffers, other.color_buffers) &&
                en_flags.raw == other.en_flags.raw && addr_flags.raw == other.addr_flags.raw &&
                num_inputs == other.num_inputs &&
+               dual_source_blending == other.dual_source_blending &&
                std::ranges::equal(inputs.begin(), inputs.begin() + num_inputs, other.inputs.begin(),
                                   other.inputs.begin() + num_inputs);
     }
@@ -201,7 +211,6 @@ struct FragmentRuntimeInfo {
 
 struct ComputeRuntimeInfo {
     u32 shared_memory_size;
-    u32 max_shared_memory_size;
     std::array<u32, 3> workgroup_size;
     std::array<bool, 3> tgid_enable;
 
@@ -260,3 +269,14 @@ struct RuntimeInfo {
 };
 
 } // namespace Shader
+
+template <>
+struct fmt::formatter<Shader::Stage> {
+    constexpr auto parse(format_parse_context& ctx) {
+        return ctx.begin();
+    }
+    auto format(const Shader::Stage stage, format_context& ctx) const {
+        constexpr static std::array names = {"fs", "vs", "gs", "es", "hs", "ls", "cs"};
+        return fmt::format_to(ctx.out(), "{}", names[static_cast<size_t>(stage)]);
+    }
+};

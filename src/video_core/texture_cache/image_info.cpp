@@ -16,13 +16,15 @@ using VideoOutFormat = Libraries::VideoOut::PixelFormat;
 
 static vk::Format ConvertPixelFormat(const VideoOutFormat format) {
     switch (format) {
-    case VideoOutFormat::A8R8G8B8Srgb:
-        return vk::Format::eB8G8R8A8Srgb;
     case VideoOutFormat::A8B8G8R8Srgb:
+    // Remaining formats are mapped to RGBA for internal consistency and changed to BGRA in the
+    // frame image view.
+    case VideoOutFormat::A8R8G8B8Srgb:
         return vk::Format::eR8G8B8A8Srgb;
     case VideoOutFormat::A2R10G10B10:
     case VideoOutFormat::A2R10G10B10Srgb:
-        return vk::Format::eA2R10G10B10UnormPack32;
+    case VideoOutFormat::A2R10G10B10Bt2020Pq:
+        return vk::Format::eA2B10G10R10UnormPack32;
     default:
         break;
     }
@@ -79,7 +81,7 @@ ImageInfo::ImageInfo(const AmdGpu::Liverpool::ColorBuffer& buffer,
     tiling_mode = buffer.GetTilingMode();
     pixel_format = LiverpoolToVK::SurfaceFormat(buffer.GetDataFmt(), buffer.GetNumberFmt());
     num_samples = buffer.NumSamples();
-    num_bits = NumBits(buffer.GetDataFmt());
+    num_bits = NumBitsPerBlock(buffer.GetDataFmt());
     type = vk::ImageType::e2D;
     size.width = hint.Valid() ? hint.width : buffer.Pitch();
     size.height = hint.Valid() ? hint.height : buffer.Height();
@@ -140,7 +142,7 @@ ImageInfo::ImageInfo(const AmdGpu::Image& image, const Shader::ImageResource& de
     resources.levels = image.NumLevels();
     resources.layers = image.NumLayers();
     num_samples = image.NumSamples();
-    num_bits = NumBits(image.GetDataFmt());
+    num_bits = NumBitsPerBlock(image.GetDataFmt());
 
     guest_address = image.Address();
 
@@ -148,6 +150,80 @@ ImageInfo::ImageInfo(const AmdGpu::Image& image, const Shader::ImageResource& de
     tiling_idx = image.tiling_index;
     alt_tile = Libraries::Kernel::sceKernelIsNeoMode() && image.alt_tile_mode;
     UpdateSize();
+}
+
+bool ImageInfo::IsBlockCoded() const {
+    switch (pixel_format) {
+    case vk::Format::eBc1RgbaSrgbBlock:
+    case vk::Format::eBc1RgbaUnormBlock:
+    case vk::Format::eBc1RgbSrgbBlock:
+    case vk::Format::eBc1RgbUnormBlock:
+    case vk::Format::eBc2SrgbBlock:
+    case vk::Format::eBc2UnormBlock:
+    case vk::Format::eBc3SrgbBlock:
+    case vk::Format::eBc3UnormBlock:
+    case vk::Format::eBc4SnormBlock:
+    case vk::Format::eBc4UnormBlock:
+    case vk::Format::eBc5SnormBlock:
+    case vk::Format::eBc5UnormBlock:
+    case vk::Format::eBc6HSfloatBlock:
+    case vk::Format::eBc6HUfloatBlock:
+    case vk::Format::eBc7SrgbBlock:
+    case vk::Format::eBc7UnormBlock:
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool ImageInfo::IsPacked() const {
+    switch (pixel_format) {
+    case vk::Format::eB5G5R5A1UnormPack16:
+        [[fallthrough]];
+    case vk::Format::eB5G6R5UnormPack16:
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool ImageInfo::IsDepthStencil() const {
+    switch (pixel_format) {
+    case vk::Format::eD16Unorm:
+    case vk::Format::eD16UnormS8Uint:
+    case vk::Format::eD32Sfloat:
+    case vk::Format::eD32SfloatS8Uint:
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool ImageInfo::HasStencil() const {
+    if (pixel_format == vk::Format::eD32SfloatS8Uint ||
+        pixel_format == vk::Format::eD24UnormS8Uint ||
+        pixel_format == vk::Format::eD16UnormS8Uint) {
+        return true;
+    }
+    return false;
+}
+
+bool ImageInfo::IsCompatible(const ImageInfo& info) const {
+    return (pixel_format == info.pixel_format && num_samples == info.num_samples &&
+            num_bits == info.num_bits);
+}
+
+bool ImageInfo::IsTilingCompatible(u32 lhs, u32 rhs) const {
+    if (lhs == rhs) {
+        return true;
+    }
+    if (lhs == 0x0e && rhs == 0x0d) {
+        return true;
+    }
+    if (lhs == 0x0d && rhs == 0x0e) {
+        return true;
+    }
+    return false;
 }
 
 void ImageInfo::UpdateSize() {
@@ -161,7 +237,6 @@ void ImageInfo::UpdateSize() {
         if (props.is_block) {
             mip_w = (mip_w + 3) / 4;
             mip_h = (mip_h + 3) / 4;
-            bpp *= 16;
         }
         mip_w = std::max(mip_w, 1u);
         mip_h = std::max(mip_h, 1u);
@@ -207,15 +282,14 @@ void ImageInfo::UpdateSize() {
             mip_info.pitch = std::max(mip_info.pitch * 4, 32u);
             mip_info.height = std::max(mip_info.height * 4, 32u);
         }
-        mip_info.size *= mip_d;
+        mip_info.size *= mip_d * resources.layers;
         mip_info.offset = guest_size;
         mips_layout.emplace_back(mip_info);
         guest_size += mip_info.size;
     }
-    guest_size *= resources.layers;
 }
 
-int ImageInfo::IsMipOf(const ImageInfo& info) const {
+s32 ImageInfo::MipOf(const ImageInfo& info) const {
     if (!IsCompatible(info)) {
         return -1;
     }
@@ -236,7 +310,12 @@ int ImageInfo::IsMipOf(const ImageInfo& info) const {
     // Find mip
     auto mip = -1;
     for (auto m = 0; m < info.mips_layout.size(); ++m) {
-        if (guest_address == (info.guest_address + info.mips_layout[m].offset)) {
+        const auto& [mip_size, mip_pitch, mip_height, mip_ofs] = info.mips_layout[m];
+        const VAddr mip_base = info.guest_address + mip_ofs;
+        const VAddr mip_end = mip_base + mip_size;
+        const u32 slice_size = mip_size / info.resources.layers;
+        if (guest_address >= mip_base && guest_address < mip_end &&
+            (guest_address - mip_base) % slice_size == 0) {
             mip = m;
             break;
         }
@@ -245,7 +324,6 @@ int ImageInfo::IsMipOf(const ImageInfo& info) const {
     if (mip < 0) {
         return -1;
     }
-    ASSERT(mip != 0);
 
     const auto mip_w = std::max(info.size.width >> mip, 1u);
     const auto mip_h = std::max(info.size.height >> mip, 1u);
@@ -268,7 +346,7 @@ int ImageInfo::IsMipOf(const ImageInfo& info) const {
     return mip;
 }
 
-int ImageInfo::IsSliceOf(const ImageInfo& info) const {
+s32 ImageInfo::SliceOf(const ImageInfo& info, s32 mip) const {
     if (!IsCompatible(info)) {
         return -1;
     }
@@ -279,18 +357,20 @@ int ImageInfo::IsSliceOf(const ImageInfo& info) const {
     }
 
     // 2D dimensions of both images should be the same.
-    if ((size.width != info.size.width) || (size.height != info.size.height)) {
+    const auto mip_w = std::max(info.size.width >> mip, 1u);
+    const auto mip_h = std::max(info.size.height >> mip, 1u);
+    if ((size.width != mip_w) || (size.height != mip_h)) {
         return -1;
     }
 
     // Check for size alignment.
-    const bool slice_size = info.guest_size / info.resources.layers;
+    const u32 slice_size = info.mips_layout[mip].size / info.resources.layers;
     if (guest_size % slice_size != 0) {
         return -1;
     }
 
     // Ensure that address is aligned too.
-    const auto addr_diff = guest_address - info.guest_address;
+    const auto addr_diff = guest_address - (info.guest_address + info.mips_layout[mip].offset);
     if ((addr_diff % guest_size) != 0) {
         return -1;
     }

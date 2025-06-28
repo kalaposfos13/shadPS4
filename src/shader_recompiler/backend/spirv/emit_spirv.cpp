@@ -32,6 +32,8 @@ static constexpr spv::ExecutionMode GetInputPrimitiveType(AmdGpu::PrimitiveType 
         return spv::ExecutionMode::Triangles;
     case AmdGpu::PrimitiveType::AdjTriangleList:
         return spv::ExecutionMode::InputTrianglesAdjacency;
+    case AmdGpu::PrimitiveType::AdjLineList:
+        return spv::ExecutionMode::InputLinesAdjacency;
     default:
         UNREACHABLE_MSG("Unknown input primitive type {}", u32(type));
     }
@@ -152,6 +154,7 @@ void Traverse(EmitContext& ctx, const IR::Program& program) {
             for (IR::Inst& inst : node.data.block->Instructions()) {
                 EmitInst(ctx, &inst);
             }
+            ctx.first_to_last_label_map[label.value] = ctx.last_label;
             break;
         }
         case IR::AbstractSyntaxNode::Type::If: {
@@ -242,15 +245,18 @@ void SetupCapabilities(const Info& info, const Profile& profile, EmitContext& ct
     ctx.AddCapability(spv::Capability::Image1D);
     ctx.AddCapability(spv::Capability::Sampled1D);
     ctx.AddCapability(spv::Capability::ImageQuery);
+    ctx.AddCapability(spv::Capability::Int8);
+    ctx.AddCapability(spv::Capability::Int16);
+    ctx.AddCapability(spv::Capability::Int64);
+    ctx.AddCapability(spv::Capability::UniformAndStorageBuffer8BitAccess);
+    ctx.AddCapability(spv::Capability::UniformAndStorageBuffer16BitAccess);
     if (info.uses_fp16) {
         ctx.AddCapability(spv::Capability::Float16);
-        ctx.AddCapability(spv::Capability::Int16);
     }
     if (info.uses_fp64) {
         ctx.AddCapability(spv::Capability::Float64);
     }
-    ctx.AddCapability(spv::Capability::Int64);
-    if (info.has_storage_images || info.has_image_buffers) {
+    if (info.has_storage_images) {
         ctx.AddCapability(spv::Capability::StorageImageExtendedFormats);
         ctx.AddCapability(spv::Capability::StorageImageReadWithoutFormat);
         ctx.AddCapability(spv::Capability::StorageImageWriteWithoutFormat);
@@ -259,17 +265,16 @@ void SetupCapabilities(const Info& info, const Profile& profile, EmitContext& ct
             ctx.AddCapability(spv::Capability::ImageReadWriteLodAMD);
         }
     }
-    if (info.has_texel_buffers) {
-        ctx.AddCapability(spv::Capability::SampledBuffer);
-    }
-    if (info.has_image_buffers) {
-        ctx.AddCapability(spv::Capability::ImageBuffer);
-    }
     if (info.has_image_gather) {
         ctx.AddCapability(spv::Capability::ImageGatherExtended);
     }
     if (info.has_image_query) {
         ctx.AddCapability(spv::Capability::ImageQuery);
+    }
+    if ((info.uses_image_atomic_float_min_max && profile.supports_image_fp32_atomic_min_max) ||
+        (info.uses_buffer_atomic_float_min_max && profile.supports_buffer_fp32_atomic_min_max)) {
+        ctx.AddExtension("SPV_EXT_shader_atomic_float_min_max");
+        ctx.AddCapability(spv::Capability::AtomicFloat32MinMaxEXT);
     }
     if (info.uses_lane_id) {
         ctx.AddCapability(spv::Capability::GroupNonUniform);
@@ -294,6 +299,16 @@ void SetupCapabilities(const Info& info, const Profile& profile, EmitContext& ct
     }
     if (stage == LogicalStage::TessellationControl || stage == LogicalStage::TessellationEval) {
         ctx.AddCapability(spv::Capability::Tessellation);
+    }
+    if (info.uses_dma) {
+        ctx.AddCapability(spv::Capability::PhysicalStorageBufferAddresses);
+        ctx.AddExtension("SPV_KHR_physical_storage_buffer");
+    }
+    const auto shared_type_count = std::popcount(static_cast<u32>(info.shared_types));
+    if (shared_type_count > 1 && profile.supports_workgroup_explicit_memory_layout) {
+        ctx.AddExtension("SPV_KHR_workgroup_memory_explicit_layout");
+        ctx.AddCapability(spv::Capability::WorkgroupMemoryExplicitLayoutKHR);
+        ctx.AddCapability(spv::Capability::WorkgroupMemoryExplicitLayout16BitAccessKHR);
     }
 }
 
@@ -336,8 +351,7 @@ void DefineEntryPoint(const Info& info, EmitContext& ctx, Id main) {
             ctx.AddExecutionMode(main, spv::ExecutionMode::OriginUpperLeft);
         }
         if (info.has_discard) {
-            ctx.AddExtension("SPV_EXT_demote_to_helper_invocation");
-            ctx.AddCapability(spv::Capability::DemoteToHelperInvocationEXT);
+            ctx.AddCapability(spv::Capability::DemoteToHelperInvocation);
         }
         if (info.stores.GetAny(IR::Attribute::Depth)) {
             ctx.AddExecutionMode(main, spv::ExecutionMode::DepthReplacing);
@@ -372,7 +386,12 @@ void SetupFloatMode(EmitContext& ctx, const Profile& profile, const RuntimeInfo&
         LOG_WARNING(Render_Vulkan, "Unknown FP denorm mode {}", u32(fp_denorm_mode));
     }
     const auto fp_round_mode = runtime_info.fp_round_mode32;
-    if (fp_round_mode != AmdGpu::FpRoundMode::NearestEven) {
+    if (fp_round_mode == AmdGpu::FpRoundMode::ToZero) {
+        if (profile.support_fp32_round_to_zero) {
+            ctx.AddCapability(spv::Capability::RoundingModeRTZ);
+            ctx.AddExecutionMode(main_func, spv::ExecutionMode::RoundingModeRTZ, 32U);
+        }
+    } else if (fp_round_mode != AmdGpu::FpRoundMode::NearestEven) {
         LOG_WARNING(Render_Vulkan, "Unknown FP rounding mode {}", u32(fp_round_mode));
     }
 }
@@ -380,7 +399,7 @@ void SetupFloatMode(EmitContext& ctx, const Profile& profile, const RuntimeInfo&
 void PatchPhiNodes(const IR::Program& program, EmitContext& ctx) {
     auto inst{program.blocks.front()->begin()};
     size_t block_index{0};
-    ctx.PatchDeferredPhi([&](size_t phi_arg) {
+    ctx.PatchDeferredPhi([&](u32 phi_arg, Id first_parent) {
         if (phi_arg == 0) {
             ++inst;
             if (inst == program.blocks[block_index]->end() ||
@@ -391,7 +410,9 @@ void PatchPhiNodes(const IR::Program& program, EmitContext& ctx) {
                 } while (inst->GetOpcode() != IR::Opcode::Phi);
             }
         }
-        return ctx.Def(inst->Arg(phi_arg));
+        const Id arg = ctx.Def(inst->Arg(phi_arg));
+        const Id parent = ctx.first_to_last_label_map[first_parent.value];
+        return std::make_pair(arg, parent);
     });
 }
 } // Anonymous namespace

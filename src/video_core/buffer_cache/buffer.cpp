@@ -70,8 +70,11 @@ UniqueBuffer::~UniqueBuffer() {
 
 void UniqueBuffer::Create(const vk::BufferCreateInfo& buffer_ci, MemoryUsage usage,
                           VmaAllocationInfo* out_alloc_info) {
+    const bool with_bda = bool(buffer_ci.usage & vk::BufferUsageFlagBits::eShaderDeviceAddress);
+    const VmaAllocationCreateFlags bda_flag =
+        with_bda ? VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT : 0;
     const VmaAllocationCreateInfo alloc_ci = {
-        .flags = VMA_ALLOCATION_CREATE_WITHIN_BUDGET_BIT | MemoryUsageVmaFlags(usage),
+        .flags = VMA_ALLOCATION_CREATE_WITHIN_BUDGET_BIT | bda_flag | MemoryUsageVmaFlags(usage),
         .usage = MemoryUsageVma(usage),
         .requiredFlags = 0,
         .preferredFlags = MemoryUsagePreferredVmaFlags(usage),
@@ -86,6 +89,15 @@ void UniqueBuffer::Create(const vk::BufferCreateInfo& buffer_ci, MemoryUsage usa
     ASSERT_MSG(result == VK_SUCCESS, "Failed allocating buffer with error {}",
                vk::to_string(vk::Result{result}));
     buffer = vk::Buffer{unsafe_buffer};
+
+    if (with_bda) {
+        vk::BufferDeviceAddressInfo bda_info{
+            .buffer = buffer,
+        };
+        auto bda_result = device.getBufferAddress(bda_info);
+        ASSERT_MSG(bda_result != 0, "Failed to get buffer device address");
+        bda_addr = bda_result;
+    }
 }
 
 Buffer::Buffer(const Vulkan::Instance& instance_, Vulkan::Scheduler& scheduler_, MemoryUsage usage_,
@@ -95,8 +107,7 @@ Buffer::Buffer(const Vulkan::Instance& instance_, Vulkan::Scheduler& scheduler_,
     // Create buffer object.
     const vk::BufferCreateInfo buffer_ci = {
         .size = size_bytes,
-        // When maintenance5 is not supported, use all flags since we can't add flags to views.
-        .usage = instance->IsMaintenance5Supported() ? flags : AllFlags,
+        .usage = flags,
     };
     VmaAllocationInfo alloc_info{};
     buffer.Create(buffer_ci, usage, &alloc_info);
@@ -111,29 +122,6 @@ Buffer::Buffer(const Vulkan::Instance& instance_, Vulkan::Scheduler& scheduler_,
         mapped_data = std::span<u8>{std::bit_cast<u8*>(alloc_info.pMappedData), size_bytes};
     }
     is_coherent = property_flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-}
-
-vk::BufferView Buffer::View(u32 offset, u32 size, bool is_written, AmdGpu::DataFormat dfmt,
-                            AmdGpu::NumberFormat nfmt) {
-    const vk::BufferUsageFlags2CreateInfoKHR usage_flags = {
-        .usage = is_written ? vk::BufferUsageFlagBits2KHR::eStorageTexelBuffer
-                            : vk::BufferUsageFlagBits2KHR::eUniformTexelBuffer,
-    };
-    const vk::BufferViewCreateInfo view_ci = {
-        .pNext = instance->IsMaintenance5Supported() ? &usage_flags : nullptr,
-        .buffer = buffer.buffer,
-        .format = Vulkan::LiverpoolToVK::SurfaceFormat(dfmt, nfmt),
-        .offset = offset,
-        .range = size,
-    };
-    const auto [view_result, view] = instance->GetDevice().createBufferView(view_ci);
-    ASSERT_MSG(view_result == vk::Result::eSuccess, "Failed to create buffer view: {}",
-               vk::to_string(view_result));
-    scheduler->DeferOperation(
-        [view, device = instance->GetDevice()] { device.destroyBufferView(view); });
-    Vulkan::SetObjectName(instance->GetDevice(), view, "BufferView {:#x}:{:#x}", cpu_addr + offset,
-                          size);
-    return view;
 }
 
 constexpr u64 WATCHES_INITIAL_RESERVE = 0x4000;

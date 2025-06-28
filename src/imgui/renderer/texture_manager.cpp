@@ -152,7 +152,7 @@ void WorkerLoop() {
             g_job_list.pop_front();
             g_job_list_mtx.unlock();
 
-            if (Config::vkCrashDiagnosticEnabled()) {
+            if (Config::getVkCrashDiagnosticEnabled()) {
                 // FIXME: Crash diagnostic hangs when building the command buffer here
                 continue;
             }
@@ -175,6 +175,7 @@ void WorkerLoop() {
 
             auto texture = Vulkan::UploadTexture(pixels, vk::Format::eR8G8B8A8Unorm, width, height,
                                                  width * height * 4 * sizeof(stbi_uc));
+            stbi_image_free((void*)pixels);
 
             core->upload_data = texture;
             core->width = width;

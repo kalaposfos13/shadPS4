@@ -26,6 +26,8 @@ int main(int argc, char* argv[]) {
 
     QApplication a(argc, argv);
 
+    QApplication::setDesktopFileName("net.shadps4.shadPS4");
+
     // Load configurations and initialize Qt application
     const auto user_dir = Common::FS::GetUserPath(Common::FS::PathType::UserDir);
     Config::load(user_dir / "config.toml");
@@ -39,20 +41,22 @@ int main(int argc, char* argv[]) {
     std::unordered_map<std::string, std::function<void(int&)>> arg_map = {
         {"-h",
          [&](int&) {
-             std::cout << "Usage: shadps4 [options]\n"
-                          "Options:\n"
-                          "  No arguments: Opens the GUI.\n"
-                          "  -g, --game <path|ID>          Specify <eboot.bin or elf path> or "
-                          "<game ID (CUSAXXXXX)> to launch\n"
-                          " -- ...                         Parameters passed to the game ELF. "
-                          "Needs to be at the end of the line, and everything after \"--\" is a "
-                          "game argument.\n"
-                          "  -p, --patch <patch_file>      Apply specified patch file\n"
-                          "  -s, --show-gui                Show the GUI\n"
-                          "  -f, --fullscreen <true|false> Specify window initial fullscreen "
-                          "state. Does not overwrite the config file.\n"
-                          "  --add-game-folder <folder>    Adds a new game folder to the config.\n"
-                          "  -h, --help                    Display this help message\n";
+             std::cout
+                 << "Usage: shadps4 [options]\n"
+                    "Options:\n"
+                    "  No arguments: Opens the GUI.\n"
+                    "  -g, --game <path|ID>          Specify <eboot.bin or elf path> or "
+                    "<game ID (CUSAXXXXX)> to launch\n"
+                    " -- ...                         Parameters passed to the game ELF. "
+                    "Needs to be at the end of the line, and everything after \"--\" is a "
+                    "game argument.\n"
+                    "  -p, --patch <patch_file>      Apply specified patch file\n"
+                    "  -i, --ignore-game-patch       Disable automatic loading of game patch\n"
+                    "  -s, --show-gui                Show the GUI\n"
+                    "  -f, --fullscreen <true|false> Specify window initial fullscreen "
+                    "state. Does not overwrite the config file.\n"
+                    "  --add-game-folder <folder>    Adds a new game folder to the config.\n"
+                    "  -h, --help                    Display this help message\n";
              exit(0);
          }},
         {"--help", [&](int& i) { arg_map["-h"](i); }}, // Redirect --help to -h
@@ -82,6 +86,8 @@ int main(int argc, char* argv[]) {
              }
          }},
         {"--patch", [&](int& i) { arg_map["-p"](i); }},
+        {"-i", [&](int&) { Core::FileSys::MntPoints::ignore_game_patches = true; }},
+        {"--ignore-game-patch", [&](int& i) { arg_map["-i"](i); }},
         {"-f",
          [&](int& i) {
              if (++i >= argc) {
@@ -155,8 +161,8 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // If no game directory is set and no command line argument, prompt for it
-    if (Config::getGameInstallDirs().empty() && !has_command_line_argument) {
+    // If no game directories are set and no command line argument, prompt for it
+    if (Config::getGameInstallDirsEnabled().empty() && !has_command_line_argument) {
         GameInstallDialog dlg;
         dlg.exec();
     }
@@ -181,12 +187,12 @@ int main(int argc, char* argv[]) {
 
         // Check if the provided path is a valid file
         if (!std::filesystem::exists(game_file_path)) {
-            // If not a file, treat it as a game ID and search in install directories
+            // If not a file, treat it as a game ID and search in install directories recursively
             bool game_found = false;
+            const int max_depth = 5;
             for (const auto& install_dir : Config::getGameInstallDirs()) {
-                auto potential_game_path = install_dir / game_path / "eboot.bin";
-                if (std::filesystem::exists(potential_game_path)) {
-                    game_file_path = potential_game_path;
+                if (auto found_path = Common::FS::FindGameByID(install_dir, game_path, max_depth)) {
+                    game_file_path = *found_path;
                     game_found = true;
                     break;
                 }

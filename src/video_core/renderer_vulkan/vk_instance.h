@@ -84,19 +84,19 @@ public:
         return features.samplerAnisotropy;
     }
 
+    /// Returns true if depth bounds testing is supported
+    bool IsDepthBoundsSupported() const {
+        return features.depthBounds;
+    }
+
+    /// Returns true if 64-bit floats are supported in shaders
+    bool IsShaderFloat64Supported() const {
+        return features.shaderFloat64;
+    }
+
     /// Returns true when VK_EXT_custom_border_color is supported
     bool IsCustomBorderColorSupported() const {
         return custom_border_color;
-    }
-
-    /// Returns true when VK_EXT_fragment_shader_interlock is supported
-    bool IsFragmentShaderInterlockSupported() const {
-        return fragment_shader_interlock;
-    }
-
-    /// Returns true when VK_EXT_pipeline_creation_cache_control is supported
-    bool IsPipelineCreationCacheControlSupported() const {
-        return pipeline_creation_cache_control;
     }
 
     /// Returns true when VK_EXT_shader_stencil_export is supported
@@ -104,19 +104,20 @@ public:
         return shader_stencil_export;
     }
 
-    /// Returns true when VK_EXT_external_memory_host is supported
-    bool IsExternalMemoryHostSupported() const {
-        return external_memory_host;
-    }
-
     /// Returns true when VK_EXT_depth_clip_control is supported
     bool IsDepthClipControlSupported() const {
         return depth_clip_control;
     }
 
-    /// Returns true when VK_EXT_color_write_enable is supported
-    bool IsColorWriteEnableSupported() const {
-        return color_write_en;
+    /// Returns true when VK_EXT_depth_range_unrestricted is supported
+    bool IsDepthRangeUnrestrictedSupported() const {
+        return depth_range_unrestricted;
+    }
+
+    /// Returns true when the extendedDynamicState3ColorWriteMask feature of
+    /// VK_EXT_extended_dynamic_state3 is supported.
+    bool IsDynamicColorWriteMaskSupported() const {
+        return dynamic_state_3 && dynamic_state_3_features.extendedDynamicState3ColorWriteMask;
     }
 
     /// Returns true when VK_EXT_vertex_input_dynamic_state is supported.
@@ -124,14 +125,14 @@ public:
         return vertex_input_dynamic_state;
     }
 
-    /// Returns true when the nullDescriptor feature of VK_EXT_robustness2 is supported.
-    bool IsNullDescriptorSupported() const {
-        return null_descriptor;
+    /// Returns true when the robustBufferAccess2 feature of VK_EXT_robustness2 is supported.
+    bool IsRobustBufferAccess2Supported() const {
+        return robustness2 && robustness2_features.robustBufferAccess2;
     }
 
-    /// Returns true when VK_KHR_maintenance5 is supported.
-    bool IsMaintenance5Supported() const {
-        return maintenance5;
+    /// Returns true when the nullDescriptor feature of VK_EXT_robustness2 is supported.
+    bool IsNullDescriptorSupported() const {
+        return robustness2 && robustness2_features.nullDescriptor;
     }
 
     /// Returns true when VK_KHR_fragment_shader_barycentric is supported.
@@ -159,6 +160,30 @@ public:
         return amd_gcn_shader;
     }
 
+    /// Returns true when VK_AMD_shader_trinary_minmax is supported.
+    bool IsAmdShaderTrinaryMinMaxSupported() const {
+        return amd_shader_trinary_minmax;
+    }
+
+    /// Returns true when the shaderBufferFloat32AtomicMinMax feature of
+    /// VK_EXT_shader_atomic_float2 is supported.
+    bool IsShaderAtomicFloatBuffer32MinMaxSupported() const {
+        return shader_atomic_float2 &&
+               shader_atomic_float2_features.shaderBufferFloat32AtomicMinMax;
+    }
+
+    /// Returns true when the shaderImageFloat32AtomicMinMax feature of
+    /// VK_EXT_shader_atomic_float2 is supported.
+    bool IsShaderAtomicFloatImage32MinMaxSupported() const {
+        return shader_atomic_float2 && shader_atomic_float2_features.shaderImageFloat32AtomicMinMax;
+    }
+
+    /// Returns true when VK_KHR_workgroup_memory_explicit_layout is supported.
+    bool IsWorkgroupMemoryExplicitLayoutSupported() const {
+        return workgroup_memory_explicit_layout &&
+               workgroup_memory_explicit_layout_features.workgroupMemoryExplicitLayout16BitAccess;
+    }
+
     /// Returns true when geometry shaders are supported by the device
     bool IsGeometryStageSupported() const {
         return features.geometryShader;
@@ -167,6 +192,16 @@ public:
     /// Returns true when tessellation is supported by the device
     bool IsTessellationSupported() const {
         return features.tessellationShader;
+    }
+
+    /// Returns true when tessellation isolines are supported by the device
+    bool IsTessellationIsolinesSupported() const {
+        return !portability_subset || portability_features.tessellationIsolines;
+    }
+
+    /// Returns true when tessellation point mode is supported by the device
+    bool IsTessellationPointModeSupported() const {
+        return !portability_subset || portability_features.tessellationPointMode;
     }
 
     /// Returns the vendor ID of the physical device
@@ -219,14 +254,14 @@ public:
         return properties.limits.minUniformBufferOffsetAlignment;
     }
 
+    ///  Returns the maximum size of uniform buffers.
+    vk::DeviceSize UniformMaxSize() const {
+        return properties.limits.maxUniformBufferRange;
+    }
+
     /// Returns the minimum required alignment for storage buffers
     vk::DeviceSize StorageMinAlignment() const {
         return properties.limits.minStorageBufferOffsetAlignment;
-    }
-
-    /// Returns the minimum required alignment for texel buffers
-    vk::DeviceSize TexelBufferMinAlignment() const {
-        return properties.limits.minTexelBufferOffsetAlignment;
     }
 
     /// Returns the minimum alignemt required for accessing host-mapped device memory
@@ -236,17 +271,12 @@ public:
 
     /// Returns the subgroup size of the selected physical device.
     u32 SubgroupSize() const {
-        return subgroup_size;
+        return vk11_props.subgroupSize;
     }
 
     /// Returns the maximum size of compute shared memory.
     u32 MaxComputeSharedMemorySize() const {
         return properties.limits.maxComputeSharedMemorySize;
-    }
-
-    /// Returns the maximum supported elements in a texel buffer
-    u32 MaxTexelBufferElements() const {
-        return properties.limits.maxTexelBufferElements;
     }
 
     /// Returns the maximum sampler LOD bias.
@@ -269,20 +299,22 @@ public:
         return vk12_props;
     }
 
+    /// Returns the memory properties of the physical device.
+    const vk::PhysicalDeviceMemoryProperties& GetMemoryProperties() const noexcept {
+        return memory_properties;
+    }
+
     /// Returns true if shaders can declare the ClipDistance attribute
     bool IsShaderClipDistanceSupported() const {
         return features.shaderClipDistance;
     }
 
-    /// Returns the minimum imported host pointer alignment
-    u64 GetMinImportedHostPointerAlignment() const {
-        return min_imported_host_pointer_alignment;
-    }
-
+    /// Returns the maximim viewport width.
     u32 GetMaxViewportWidth() const {
         return properties.limits.maxViewportDimensions[0];
     }
 
+    ///  Returns the maximum viewport height.
     u32 GetMaxViewportHeight() const {
         return properties.limits.maxViewportDimensions[1];
     }
@@ -294,6 +326,14 @@ public:
                properties.limits.framebufferStencilSampleCounts;
     }
 
+    /// Returns whether disabling primitive restart is supported.
+    bool IsPrimitiveRestartDisableSupported() const {
+        return driver_id != vk::DriverId::eMoltenvk;
+    }
+
+    /// Determines if a format is supported for a set of feature flags.
+    [[nodiscard]] bool IsFormatSupported(vk::Format format, vk::FormatFeatureFlags2 flags) const;
+
 private:
     /// Creates the logical device opportunistically enabling extensions
     bool CreateDevice();
@@ -303,22 +343,27 @@ private:
 
     /// Collects telemetry information from the device.
     void CollectDeviceParameters();
-    void CollectToolingInfo();
+    void CollectToolingInfo() const;
 
     /// Gets the supported feature flags for a format.
     [[nodiscard]] vk::FormatFeatureFlags2 GetFormatFeatureFlags(vk::Format format) const;
-
-    /// Determines if a format is supported for a set of feature flags.
-    [[nodiscard]] bool IsFormatSupported(vk::Format format, vk::FormatFeatureFlags2 flags) const;
 
 private:
     vk::UniqueInstance instance;
     vk::PhysicalDevice physical_device;
     vk::UniqueDevice device;
     vk::PhysicalDeviceProperties properties;
-    vk::PhysicalDevicePushDescriptorPropertiesKHR push_descriptor_props;
+    vk::PhysicalDeviceMemoryProperties memory_properties;
+    vk::PhysicalDeviceVulkan11Properties vk11_props;
     vk::PhysicalDeviceVulkan12Properties vk12_props;
+    vk::PhysicalDevicePushDescriptorPropertiesKHR push_descriptor_props;
     vk::PhysicalDeviceFeatures features;
+    vk::PhysicalDevicePortabilitySubsetFeaturesKHR portability_features;
+    vk::PhysicalDeviceExtendedDynamicState3FeaturesEXT dynamic_state_3_features;
+    vk::PhysicalDeviceRobustness2FeaturesEXT robustness2_features;
+    vk::PhysicalDeviceShaderAtomicFloat2FeaturesEXT shader_atomic_float2_features;
+    vk::PhysicalDeviceWorkgroupMemoryExplicitLayoutFeaturesKHR
+        workgroup_memory_explicit_layout_features;
     vk::DriverIdKHR driver_id;
     vk::UniqueDebugUtilsMessengerEXT debug_callback{};
     std::string vendor_name;
@@ -330,27 +375,22 @@ private:
     std::unordered_map<vk::Format, vk::FormatProperties3> format_properties;
     TracyVkCtx profiler_context{};
     u32 queue_family_index{0};
-    bool image_view_reinterpretation{true};
-    bool timeline_semaphores{};
     bool custom_border_color{};
-    bool fragment_shader_interlock{};
-    bool pipeline_creation_cache_control{};
     bool fragment_shader_barycentric{};
-    bool shader_stencil_export{};
-    bool external_memory_host{};
     bool depth_clip_control{};
-    bool workgroup_memory_explicit_layout{};
-    bool color_write_en{};
+    bool depth_range_unrestricted{};
+    bool dynamic_state_3{};
     bool vertex_input_dynamic_state{};
-    bool null_descriptor{};
-    bool maintenance5{};
+    bool robustness2{};
     bool list_restart{};
     bool legacy_vertex_attributes{};
+    bool shader_stencil_export{};
     bool image_load_store_lod{};
     bool amd_gcn_shader{};
-    bool tooling_info{};
-    u64 min_imported_host_pointer_alignment{};
-    u32 subgroup_size{};
+    bool amd_shader_trinary_minmax{};
+    bool shader_atomic_float2{};
+    bool workgroup_memory_explicit_layout{};
+    bool portability_subset{};
 };
 
 } // namespace Vulkan

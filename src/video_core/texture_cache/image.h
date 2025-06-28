@@ -35,6 +35,7 @@ enum ImageFlagBits : u32 {
 DECLARE_ENUM_FLAG_OPERATORS(ImageFlagBits)
 
 struct UniqueImage {
+    explicit UniqueImage();
     explicit UniqueImage(vk::Device device, VmaAllocator allocator);
     ~UniqueImage();
 
@@ -103,8 +104,9 @@ struct Image {
                  std::optional<SubresourceRange> range, vk::CommandBuffer cmdbuf = {});
     void Upload(vk::Buffer buffer, u64 offset);
 
-    void CopyImage(const Image& image);
-    void CopyMip(const Image& image, u32 mip);
+    void CopyImage(const Image& src_image);
+    void CopyImageWithBuffer(Image& src_image, vk::Buffer buffer, u64 offset);
+    void CopyMip(const Image& src_image, u32 mip, u32 slice);
 
     bool IsTracked() {
         return track_addr != 0 && track_addr_end != 0;

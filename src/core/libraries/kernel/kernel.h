@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include <algorithm>
-#include <fmt/core.h>
 #include "common/types.h"
 #include "core/libraries/kernel/orbis_error.h"
 
@@ -14,41 +12,28 @@ class SymbolsResolver;
 
 namespace Libraries::Kernel {
 
-void ErrSceToPosix(int result);
-int ErrnoToSceKernelError(int e);
-void SetPosixErrno(int e);
+void ErrSceToPosix(s32 result);
+s32 ErrnoToSceKernelError(s32 e);
+void SetPosixErrno(s32 e);
+s32* PS4_SYSV_ABI __Error();
 
-template <size_t N>
-struct StringLiteral {
-    constexpr StringLiteral(const char (&str)[N]) {
-        std::copy_n(str, N, value);
-    }
+template <class F, F f>
+struct OrbisWrapperImpl;
 
-    char value[N];
-};
-
-template <StringLiteral name, class F, F f>
-struct WrapperImpl;
-
-template <StringLiteral name, class R, class... Args, PS4_SYSV_ABI R (*f)(Args...)>
-struct WrapperImpl<name, PS4_SYSV_ABI R (*)(Args...), f> {
-    static constexpr StringLiteral Name{name};
+template <class R, class... Args, PS4_SYSV_ABI R (*f)(Args...)>
+struct OrbisWrapperImpl<PS4_SYSV_ABI R (*)(Args...), f> {
     static R PS4_SYSV_ABI wrap(Args... args) {
         u32 ret = f(args...);
         if (ret != 0) {
-            // LOG_ERROR(Lib_Kernel, "Function {} returned {}", std::string_view{name.value}, ret);
             ret += ORBIS_KERNEL_ERROR_UNKNOWN;
         }
         return ret;
     }
 };
 
-template <StringLiteral name, class F, F f>
-constexpr auto OrbisWrapper = WrapperImpl<name, F, f>::wrap;
+#define ORBIS(func) (Libraries::Kernel::OrbisWrapperImpl<decltype(&(func)), func>::wrap)
 
-#define ORBIS(func) WrapperImpl<#func, decltype(&func), func>::wrap
-
-int* PS4_SYSV_ABI __Error();
+s32* PS4_SYSV_ABI __Error();
 
 void RegisterKernel(Core::Loader::SymbolsResolver* sym);
 

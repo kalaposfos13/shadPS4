@@ -11,65 +11,67 @@ void Translator::EmitVectorMemory(const GcnInst& inst) {
 
         // Buffer load operations
     case Opcode::TBUFFER_LOAD_FORMAT_X:
-        return BUFFER_LOAD(1, true, inst);
+        return BUFFER_LOAD(1, true, false, inst);
     case Opcode::TBUFFER_LOAD_FORMAT_XY:
-        return BUFFER_LOAD(2, true, inst);
+        return BUFFER_LOAD(2, true, false, inst);
     case Opcode::TBUFFER_LOAD_FORMAT_XYZ:
-        return BUFFER_LOAD(3, true, inst);
+        return BUFFER_LOAD(3, true, false, inst);
     case Opcode::TBUFFER_LOAD_FORMAT_XYZW:
-        return BUFFER_LOAD(4, true, inst);
+        return BUFFER_LOAD(4, true, false, inst);
 
     case Opcode::BUFFER_LOAD_FORMAT_X:
-        return BUFFER_LOAD_FORMAT(1, inst);
+        return BUFFER_LOAD(1, false, true, inst);
     case Opcode::BUFFER_LOAD_FORMAT_XY:
-        return BUFFER_LOAD_FORMAT(2, inst);
+        return BUFFER_LOAD(2, false, true, inst);
     case Opcode::BUFFER_LOAD_FORMAT_XYZ:
-        return BUFFER_LOAD_FORMAT(3, inst);
+        return BUFFER_LOAD(3, false, true, inst);
     case Opcode::BUFFER_LOAD_FORMAT_XYZW:
-        return BUFFER_LOAD_FORMAT(4, inst);
+        return BUFFER_LOAD(4, false, true, inst);
 
     case Opcode::BUFFER_LOAD_DWORD:
-        return BUFFER_LOAD(1, false, inst);
+        return BUFFER_LOAD(1, false, false, inst);
     case Opcode::BUFFER_LOAD_DWORDX2:
-        return BUFFER_LOAD(2, false, inst);
+        return BUFFER_LOAD(2, false, false, inst);
     case Opcode::BUFFER_LOAD_DWORDX3:
-        return BUFFER_LOAD(3, false, inst);
+        return BUFFER_LOAD(3, false, false, inst);
     case Opcode::BUFFER_LOAD_DWORDX4:
-        return BUFFER_LOAD(4, false, inst);
+        return BUFFER_LOAD(4, false, false, inst);
 
         // Buffer store operations
     case Opcode::BUFFER_STORE_FORMAT_X:
-        return BUFFER_STORE_FORMAT(1, inst);
+        return BUFFER_STORE(1, false, true, inst);
     case Opcode::BUFFER_STORE_FORMAT_XY:
-        return BUFFER_STORE_FORMAT(2, inst);
+        return BUFFER_STORE(2, false, true, inst);
     case Opcode::BUFFER_STORE_FORMAT_XYZ:
-        return BUFFER_STORE_FORMAT(3, inst);
+        return BUFFER_STORE(3, false, true, inst);
     case Opcode::BUFFER_STORE_FORMAT_XYZW:
-        return BUFFER_STORE_FORMAT(4, inst);
+        return BUFFER_STORE(4, false, true, inst);
 
     case Opcode::TBUFFER_STORE_FORMAT_X:
-        return BUFFER_STORE(1, true, inst);
+        return BUFFER_STORE(1, true, false, inst);
     case Opcode::TBUFFER_STORE_FORMAT_XY:
-        return BUFFER_STORE(2, true, inst);
+        return BUFFER_STORE(2, true, false, inst);
     case Opcode::TBUFFER_STORE_FORMAT_XYZ:
-        return BUFFER_STORE(3, true, inst);
+        return BUFFER_STORE(3, true, false, inst);
     case Opcode::TBUFFER_STORE_FORMAT_XYZW:
-        return BUFFER_STORE(4, true, inst);
+        return BUFFER_STORE(4, true, false, inst);
 
     case Opcode::BUFFER_STORE_DWORD:
-        return BUFFER_STORE(1, false, inst);
+        return BUFFER_STORE(1, false, false, inst);
     case Opcode::BUFFER_STORE_DWORDX2:
-        return BUFFER_STORE(2, false, inst);
+        return BUFFER_STORE(2, false, false, inst);
     case Opcode::BUFFER_STORE_DWORDX3:
-        return BUFFER_STORE(3, false, inst);
+        return BUFFER_STORE(3, false, false, inst);
     case Opcode::BUFFER_STORE_DWORDX4:
-        return BUFFER_STORE(4, false, inst);
+        return BUFFER_STORE(4, false, false, inst);
 
         // Buffer atomic operations
     case Opcode::BUFFER_ATOMIC_ADD:
         return BUFFER_ATOMIC(AtomicOp::Add, inst);
     case Opcode::BUFFER_ATOMIC_SWAP:
         return BUFFER_ATOMIC(AtomicOp::Swap, inst);
+    case Opcode::BUFFER_ATOMIC_CMPSWAP:
+        return BUFFER_ATOMIC(AtomicOp::CmpSwap, inst);
     case Opcode::BUFFER_ATOMIC_SMIN:
         return BUFFER_ATOMIC(AtomicOp::Smin, inst);
     case Opcode::BUFFER_ATOMIC_UMIN:
@@ -88,6 +90,10 @@ void Translator::EmitVectorMemory(const GcnInst& inst) {
         return BUFFER_ATOMIC(AtomicOp::Inc, inst);
     case Opcode::BUFFER_ATOMIC_DEC:
         return BUFFER_ATOMIC(AtomicOp::Dec, inst);
+    case Opcode::BUFFER_ATOMIC_FMIN:
+        return BUFFER_ATOMIC(AtomicOp::Fmin, inst);
+    case Opcode::BUFFER_ATOMIC_FMAX:
+        return BUFFER_ATOMIC(AtomicOp::Fmax, inst);
 
         // MIMG
         // Image load operations
@@ -115,8 +121,12 @@ void Translator::EmitVectorMemory(const GcnInst& inst) {
         return IMAGE_ATOMIC(AtomicOp::Smin, inst);
     case Opcode::IMAGE_ATOMIC_UMIN:
         return IMAGE_ATOMIC(AtomicOp::Umin, inst);
+    case Opcode::IMAGE_ATOMIC_FMIN:
+        return IMAGE_ATOMIC(AtomicOp::Fmin, inst);
     case Opcode::IMAGE_ATOMIC_SMAX:
         return IMAGE_ATOMIC(AtomicOp::Smax, inst);
+    case Opcode::IMAGE_ATOMIC_FMAX:
+        return IMAGE_ATOMIC(AtomicOp::Fmax, inst);
     case Opcode::IMAGE_ATOMIC_UMAX:
         return IMAGE_ATOMIC(AtomicOp::Umax, inst);
     case Opcode::IMAGE_ATOMIC_AND:
@@ -139,6 +149,7 @@ void Translator::EmitVectorMemory(const GcnInst& inst) {
     case Opcode::IMAGE_SAMPLE_C_LZ:
     case Opcode::IMAGE_SAMPLE_O:
     case Opcode::IMAGE_SAMPLE_L_O:
+    case Opcode::IMAGE_SAMPLE_B_O:
     case Opcode::IMAGE_SAMPLE_LZ_O:
     case Opcode::IMAGE_SAMPLE_C_O:
     case Opcode::IMAGE_SAMPLE_C_LZ_O:
@@ -147,6 +158,7 @@ void Translator::EmitVectorMemory(const GcnInst& inst) {
 
         // Image gather operations
     case Opcode::IMAGE_GATHER4:
+    case Opcode::IMAGE_GATHER4_L:
     case Opcode::IMAGE_GATHER4_LZ:
     case Opcode::IMAGE_GATHER4_C:
     case Opcode::IMAGE_GATHER4_O:
@@ -165,7 +177,8 @@ void Translator::EmitVectorMemory(const GcnInst& inst) {
     }
 }
 
-void Translator::BUFFER_LOAD(u32 num_dwords, bool is_typed, const GcnInst& inst) {
+void Translator::BUFFER_LOAD(u32 num_dwords, bool is_inst_typed, bool is_buffer_typed,
+                             const GcnInst& inst) {
     const auto& mubuf = inst.control.mubuf;
     const bool is_ring = mubuf.glc && mubuf.slc;
     const IR::VectorReg vaddr{inst.src[0].code};
@@ -195,64 +208,38 @@ void Translator::BUFFER_LOAD(u32 num_dwords, bool is_typed, const GcnInst& inst)
     buffer_info.inst_offset.Assign(mubuf.offset);
     buffer_info.globally_coherent.Assign(mubuf.glc);
     buffer_info.system_coherent.Assign(mubuf.slc);
-    if (is_typed) {
+    buffer_info.typed.Assign(is_inst_typed || is_buffer_typed);
+    if (is_inst_typed) {
         const auto& mtbuf = inst.control.mtbuf;
-        const auto dmft = static_cast<AmdGpu::DataFormat>(mtbuf.dfmt);
-        const auto nfmt = static_cast<AmdGpu::NumberFormat>(mtbuf.nfmt);
-        ASSERT(nfmt == AmdGpu::NumberFormat::Float &&
-               (dmft == AmdGpu::DataFormat::Format32_32_32_32 ||
-                dmft == AmdGpu::DataFormat::Format32_32_32 ||
-                dmft == AmdGpu::DataFormat::Format32_32 || dmft == AmdGpu::DataFormat::Format32));
+        buffer_info.inst_data_fmt.Assign(static_cast<AmdGpu::DataFormat>(mtbuf.dfmt));
+        buffer_info.inst_num_fmt.Assign(static_cast<AmdGpu::NumberFormat>(mtbuf.nfmt));
+    } else {
+        buffer_info.inst_data_fmt.Assign(AmdGpu::DataFormat::FormatInvalid);
     }
 
     const IR::Value handle =
         ir.CompositeConstruct(ir.GetScalarReg(sharp), ir.GetScalarReg(sharp + 1),
                               ir.GetScalarReg(sharp + 2), ir.GetScalarReg(sharp + 3));
-    const IR::Value value = ir.LoadBuffer(num_dwords, handle, address, buffer_info);
     const IR::VectorReg dst_reg{inst.src[1].code};
-    if (num_dwords == 1) {
-        ir.SetVectorReg(dst_reg, IR::U32{value});
-        return;
-    }
-    for (u32 i = 0; i < num_dwords; i++) {
-        ir.SetVectorReg(dst_reg + i, IR::U32{ir.CompositeExtract(value, i)});
+    if (buffer_info.typed) {
+        const IR::Value value = ir.LoadBufferFormat(handle, address, buffer_info);
+        for (u32 i = 0; i < num_dwords; i++) {
+            ir.SetVectorReg(dst_reg + i, IR::F32{ir.CompositeExtract(value, i)});
+        }
+    } else {
+        const IR::Value value = ir.LoadBufferU32(num_dwords, handle, address, buffer_info);
+        if (num_dwords == 1) {
+            ir.SetVectorReg(dst_reg, IR::U32{value});
+            return;
+        }
+        for (u32 i = 0; i < num_dwords; i++) {
+            ir.SetVectorReg(dst_reg + i, IR::U32{ir.CompositeExtract(value, i)});
+        }
     }
 }
 
-void Translator::BUFFER_LOAD_FORMAT(u32 num_dwords, const GcnInst& inst) {
-    const auto& mubuf = inst.control.mubuf;
-    const IR::VectorReg vaddr{inst.src[0].code};
-    const IR::ScalarReg sharp{inst.src[2].code * 4};
-    const IR::Value address = [&] -> IR::Value {
-        if (mubuf.idxen && mubuf.offen) {
-            return ir.CompositeConstruct(ir.GetVectorReg(vaddr), ir.GetVectorReg(vaddr + 1));
-        }
-        if (mubuf.idxen || mubuf.offen) {
-            return ir.GetVectorReg(vaddr);
-        }
-        return {};
-    }();
-    const IR::Value soffset{GetSrc(inst.src[3])};
-    ASSERT_MSG(soffset.IsImmediate() && soffset.U32() == 0, "Non immediate offset not supported");
-
-    IR::BufferInstInfo buffer_info{};
-    buffer_info.index_enable.Assign(mubuf.idxen);
-    buffer_info.offset_enable.Assign(mubuf.offen);
-    buffer_info.inst_offset.Assign(mubuf.offset);
-    buffer_info.globally_coherent.Assign(mubuf.glc);
-    buffer_info.system_coherent.Assign(mubuf.slc);
-
-    const IR::Value handle =
-        ir.CompositeConstruct(ir.GetScalarReg(sharp), ir.GetScalarReg(sharp + 1),
-                              ir.GetScalarReg(sharp + 2), ir.GetScalarReg(sharp + 3));
-    const IR::Value value = ir.LoadBufferFormat(handle, address, buffer_info);
-    const IR::VectorReg dst_reg{inst.src[1].code};
-    for (u32 i = 0; i < num_dwords; i++) {
-        ir.SetVectorReg(dst_reg + i, IR::F32{ir.CompositeExtract(value, i)});
-    }
-}
-
-void Translator::BUFFER_STORE(u32 num_dwords, bool is_typed, const GcnInst& inst) {
+void Translator::BUFFER_STORE(u32 num_dwords, bool is_inst_typed, bool is_buffer_typed,
+                              const GcnInst& inst) {
     const auto& mubuf = inst.control.mubuf;
     const bool is_ring = mubuf.glc && mubuf.slc;
     const IR::VectorReg vaddr{inst.src[0].code};
@@ -283,76 +270,38 @@ void Translator::BUFFER_STORE(u32 num_dwords, bool is_typed, const GcnInst& inst
     buffer_info.inst_offset.Assign(mubuf.offset);
     buffer_info.globally_coherent.Assign(mubuf.glc);
     buffer_info.system_coherent.Assign(mubuf.slc);
-    if (is_typed) {
+    buffer_info.typed.Assign(is_inst_typed || is_buffer_typed);
+    if (is_inst_typed) {
         const auto& mtbuf = inst.control.mtbuf;
-        const auto dmft = static_cast<AmdGpu::DataFormat>(mtbuf.dfmt);
-        const auto nfmt = static_cast<AmdGpu::NumberFormat>(mtbuf.nfmt);
-        ASSERT(nfmt == AmdGpu::NumberFormat::Float &&
-               (dmft == AmdGpu::DataFormat::Format32_32_32_32 ||
-                dmft == AmdGpu::DataFormat::Format32_32_32 ||
-                dmft == AmdGpu::DataFormat::Format32_32 || dmft == AmdGpu::DataFormat::Format32));
+        buffer_info.inst_data_fmt.Assign(static_cast<AmdGpu::DataFormat>(mtbuf.dfmt));
+        buffer_info.inst_num_fmt.Assign(static_cast<AmdGpu::NumberFormat>(mtbuf.nfmt));
+    } else {
+        buffer_info.inst_data_fmt.Assign(AmdGpu::DataFormat::FormatInvalid);
     }
 
-    IR::Value value{};
-    const IR::VectorReg src_reg{inst.src[1].code};
-    switch (num_dwords) {
-    case 1:
-        value = ir.GetVectorReg(src_reg);
-        break;
-    case 2:
-        value = ir.CompositeConstruct(ir.GetVectorReg(src_reg), ir.GetVectorReg(src_reg + 1));
-        break;
-    case 3:
-        value = ir.CompositeConstruct(ir.GetVectorReg(src_reg), ir.GetVectorReg(src_reg + 1),
-                                      ir.GetVectorReg(src_reg + 2));
-        break;
-    case 4:
-        value = ir.CompositeConstruct(ir.GetVectorReg(src_reg), ir.GetVectorReg(src_reg + 1),
-                                      ir.GetVectorReg(src_reg + 2), ir.GetVectorReg(src_reg + 3));
-        break;
-    }
     const IR::Value handle =
         ir.CompositeConstruct(ir.GetScalarReg(sharp), ir.GetScalarReg(sharp + 1),
                               ir.GetScalarReg(sharp + 2), ir.GetScalarReg(sharp + 3));
-    ir.StoreBuffer(num_dwords, handle, address, value, buffer_info);
-}
-
-void Translator::BUFFER_STORE_FORMAT(u32 num_dwords, const GcnInst& inst) {
-    const auto& mubuf = inst.control.mubuf;
-    const IR::VectorReg vaddr{inst.src[0].code};
-    const IR::ScalarReg sharp{inst.src[2].code * 4};
-    ASSERT_MSG(!mubuf.offen && mubuf.offset == 0, "Offsets for image buffers are not supported");
-    const IR::Value address = [&] -> IR::Value {
-        if (mubuf.idxen) {
-            return ir.GetVectorReg(vaddr);
-        }
-        return {};
-    }();
-    const IR::Value soffset{GetSrc(inst.src[3])};
-    ASSERT_MSG(soffset.IsImmediate() && soffset.U32() == 0, "Non immediate offset not supported");
-
-    IR::BufferInstInfo buffer_info{};
-    buffer_info.index_enable.Assign(mubuf.idxen);
-    buffer_info.offset_enable.Assign(mubuf.offen);
-    buffer_info.inst_offset.Assign(mubuf.offset);
-    buffer_info.globally_coherent.Assign(mubuf.glc);
-    buffer_info.system_coherent.Assign(mubuf.slc);
-
     const IR::VectorReg src_reg{inst.src[1].code};
 
-    std::array<IR::F32, 4> comps{};
+    boost::container::static_vector<IR::Value, 4> comps;
     for (u32 i = 0; i < num_dwords; i++) {
-        comps[i] = ir.GetVectorReg<IR::F32>(src_reg + i);
+        const auto src_reg_i = src_reg + i;
+        if (buffer_info.typed) {
+            comps.push_back(ir.GetVectorReg<IR::F32>(src_reg_i));
+        } else {
+            comps.push_back(ir.GetVectorReg<IR::U32>(src_reg_i));
+        }
     }
-    for (u32 i = num_dwords; i < 4; i++) {
-        comps[i] = ir.Imm32(0.f);
+    if (buffer_info.typed) {
+        for (u32 i = num_dwords; i < 4; i++) {
+            comps.push_back(ir.Imm32(0.f));
+        }
+        ir.StoreBufferFormat(handle, address, ir.CompositeConstruct(comps), buffer_info);
+    } else {
+        const auto value = num_dwords == 1 ? comps[0] : ir.CompositeConstruct(comps);
+        ir.StoreBufferU32(num_dwords, handle, address, value, buffer_info);
     }
-
-    const IR::Value value = ir.CompositeConstruct(comps[0], comps[1], comps[2], comps[3]);
-    const IR::Value handle =
-        ir.CompositeConstruct(ir.GetScalarReg(sharp), ir.GetScalarReg(sharp + 1),
-                              ir.GetScalarReg(sharp + 2), ir.GetScalarReg(sharp + 3));
-    ir.StoreBufferFormat(handle, address, value, buffer_info);
 }
 
 void Translator::BUFFER_ATOMIC(AtomicOp op, const GcnInst& inst) {
@@ -388,6 +337,10 @@ void Translator::BUFFER_ATOMIC(AtomicOp op, const GcnInst& inst) {
         switch (op) {
         case AtomicOp::Swap:
             return ir.BufferAtomicSwap(handle, address, vdata_val, buffer_info);
+        case AtomicOp::CmpSwap: {
+            const IR::Value cmp_val = ir.GetVectorReg(vdata + 1);
+            return ir.BufferAtomicCmpSwap(handle, address, vdata_val, cmp_val, buffer_info);
+        }
         case AtomicOp::Add:
             return ir.BufferAtomicIAdd(handle, address, vdata_val, buffer_info);
         case AtomicOp::Smin:
@@ -405,9 +358,13 @@ void Translator::BUFFER_ATOMIC(AtomicOp op, const GcnInst& inst) {
         case AtomicOp::Xor:
             return ir.BufferAtomicXor(handle, address, vdata_val, buffer_info);
         case AtomicOp::Inc:
-            return ir.BufferAtomicInc(handle, address, vdata_val, buffer_info);
+            return ir.BufferAtomicInc(handle, address, buffer_info);
         case AtomicOp::Dec:
-            return ir.BufferAtomicDec(handle, address, vdata_val, buffer_info);
+            return ir.BufferAtomicDec(handle, address, buffer_info);
+        case AtomicOp::Fmin:
+            return ir.BufferAtomicFMin(handle, address, vdata_val, buffer_info);
+        case AtomicOp::Fmax:
+            return ir.BufferAtomicFMax(handle, address, vdata_val, buffer_info);
         default:
             UNREACHABLE();
         }
@@ -435,6 +392,7 @@ void Translator::IMAGE_LOAD(bool has_mip, const GcnInst& inst) {
     IR::TextureInstInfo info{};
     info.has_lod.Assign(has_mip);
     info.is_array.Assign(mimg.da);
+    info.is_r128.Assign(mimg.r128);
     const IR::Value texel = ir.ImageRead(handle, body, {}, {}, info);
 
     for (u32 i = 0; i < 4; i++) {
@@ -484,6 +442,7 @@ void Translator::IMAGE_GET_RESINFO(const GcnInst& inst) {
 
     IR::TextureInstInfo info{};
     info.is_array.Assign(mimg.da);
+    info.is_r128.Assign(mimg.r128);
 
     const IR::Value size = ir.ImageQueryDimension(tsharp, lod, ir.Imm1(has_mips), info);
 
@@ -509,6 +468,7 @@ void Translator::IMAGE_ATOMIC(AtomicOp op, const GcnInst& inst) {
 
     IR::TextureInstInfo info{};
     info.is_array.Assign(mimg.da);
+    info.is_r128.Assign(mimg.r128);
 
     const IR::Value value = ir.GetVectorReg(val_reg);
     const IR::Value handle = ir.GetScalarReg(tsharp_reg);
@@ -529,6 +489,10 @@ void Translator::IMAGE_ATOMIC(AtomicOp op, const GcnInst& inst) {
             return ir.ImageAtomicIMax(handle, body, value, true, info);
         case AtomicOp::Umax:
             return ir.ImageAtomicUMax(handle, body, value, info);
+        case AtomicOp::Fmax:
+            return ir.ImageAtomicFMax(handle, body, value, info);
+        case AtomicOp::Fmin:
+            return ir.ImageAtomicFMin(handle, body, value, info);
         case AtomicOp::And:
             return ir.ImageAtomicAnd(handle, body, value, info);
         case AtomicOp::Or:
@@ -563,6 +527,7 @@ IR::Value EmitImageSample(IR::IREmitter& ir, const GcnInst& inst, const IR::Scal
     info.has_lod.Assign(flags.any(MimgModifier::Lod));
     info.is_array.Assign(mimg.da);
     info.is_unnormalized.Assign(mimg.unrm);
+    info.is_r128.Assign(mimg.r128);
 
     if (gather) {
         info.gather_comp.Assign(std::bit_width(mimg.dmask) - 1);
@@ -574,8 +539,10 @@ IR::Value EmitImageSample(IR::IREmitter& ir, const GcnInst& inst, const IR::Scal
     // Load first dword of T# and S#. We will use them as the handle that will guide resource
     // tracking pass where to read the sharps. This will later also get patched to the SPIRV texture
     // binding index.
-    const IR::Value handle =
-        ir.CompositeConstruct(ir.GetScalarReg(tsharp_reg), ir.GetScalarReg(sampler_reg));
+    const IR::Value handle = ir.GetScalarReg(tsharp_reg);
+    const IR::Value inline_sampler =
+        ir.CompositeConstruct(ir.GetScalarReg(sampler_reg), ir.GetScalarReg(sampler_reg + 1),
+                              ir.GetScalarReg(sampler_reg + 2), ir.GetScalarReg(sampler_reg + 3));
 
     // Determine how many address registers need to be passed.
     // The image type is unknown, so add all 4 possible base registers and resolve later.
@@ -611,7 +578,8 @@ IR::Value EmitImageSample(IR::IREmitter& ir, const GcnInst& inst, const IR::Scal
     const IR::Value address4 = get_addr_reg(12);
 
     // Issue the placeholder IR instruction.
-    IR::Value texel = ir.ImageSampleRaw(handle, address1, address2, address3, address4, info);
+    IR::Value texel =
+        ir.ImageSampleRaw(handle, address1, address2, address3, address4, inline_sampler, info);
     if (info.is_depth && !gather) {
         // For non-gather depth sampling, only return a single value.
         texel = ir.CompositeExtract(texel, 0);
@@ -671,6 +639,7 @@ void Translator::IMAGE_GET_LOD(const GcnInst& inst) {
 
     IR::TextureInstInfo info{};
     info.is_array.Assign(mimg.da);
+    info.is_r128.Assign(mimg.r128);
 
     const IR::Value handle = ir.GetScalarReg(tsharp_reg);
     const IR::Value body = ir.CompositeConstruct(

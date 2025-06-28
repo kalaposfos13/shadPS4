@@ -4,6 +4,7 @@
 #pragma once
 
 #include <filesystem>
+#include <optional>
 #include <vector>
 
 #ifdef ENABLE_QT_GUI
@@ -17,7 +18,6 @@ enum class PathType {
     LogDir,         // Where log files are stored.
     ScreenshotsDir, // Where screenshots are stored.
     ShaderDir,      // Where shaders are stored.
-    SaveDataDir,    // Where guest save data is stored.
     TempDataDir,    // Where game temp data is stored.
     GameDataDir,    // Where game data is stored.
     SysModuleDir,   // Where system modules are stored.
@@ -26,6 +26,7 @@ enum class PathType {
     CheatsDir,      // Where cheats are stored.
     PatchesDir,     // Where patches are stored.
     MetaDataDir,    // Where game metadata (e.g. trophies and menu backgrounds) is stored.
+    CustomTrophy,   // Where custom files for trophies are stored.
 };
 
 constexpr auto PORTABLE_DIR = "user";
@@ -34,7 +35,6 @@ constexpr auto PORTABLE_DIR = "user";
 constexpr auto LOG_DIR = "log";
 constexpr auto SCREENSHOTS_DIR = "screenshots";
 constexpr auto SHADER_DIR = "shader";
-constexpr auto SAVEDATA_DIR = "savedata";
 constexpr auto GAMEDATA_DIR = "data";
 constexpr auto TEMPDATA_DIR = "temp";
 constexpr auto SYSMODULES_DIR = "sys_modules";
@@ -43,6 +43,7 @@ constexpr auto CAPTURES_DIR = "captures";
 constexpr auto CHEATS_DIR = "cheats";
 constexpr auto PATCHES_DIR = "patches";
 constexpr auto METADATA_DIR = "game_data";
+constexpr auto CUSTOM_TROPHY = "custom_trophy";
 
 // Filenames
 constexpr auto LOG_FILE = "shad_log.txt";
@@ -114,5 +115,19 @@ void PathToQString(QString& result, const std::filesystem::path& path);
  */
 [[nodiscard]] std::filesystem::path PathFromQString(const QString& path);
 #endif
+
+/**
+ * Recursively searches for a game directory by its ID.
+ * Limits search depth to prevent excessive filesystem traversal.
+ *
+ * @param dir Base directory to start the search from
+ * @param game_id The game ID to search for
+ * @param max_depth Maximum directory depth to search
+ *
+ * @returns Path to eboot.bin if found, std::nullopt otherwise
+ */
+[[nodiscard]] std::optional<std::filesystem::path> FindGameByID(const std::filesystem::path& dir,
+                                                                const std::string& game_id,
+                                                                int max_depth);
 
 } // namespace Common::FS

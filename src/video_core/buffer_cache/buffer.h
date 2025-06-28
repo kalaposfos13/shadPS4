@@ -32,13 +32,12 @@ enum class MemoryUsage {
 };
 
 constexpr vk::BufferUsageFlags ReadFlags =
-    vk::BufferUsageFlagBits::eTransferSrc | vk::BufferUsageFlagBits::eUniformTexelBuffer |
-    vk::BufferUsageFlagBits::eUniformBuffer | vk::BufferUsageFlagBits::eIndexBuffer |
-    vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eIndirectBuffer;
+    vk::BufferUsageFlagBits::eTransferSrc | vk::BufferUsageFlagBits::eUniformBuffer |
+    vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eVertexBuffer |
+    vk::BufferUsageFlagBits::eIndirectBuffer;
 
-constexpr vk::BufferUsageFlags AllFlags = ReadFlags | vk::BufferUsageFlagBits::eTransferDst |
-                                          vk::BufferUsageFlagBits::eStorageTexelBuffer |
-                                          vk::BufferUsageFlagBits::eStorageBuffer;
+constexpr vk::BufferUsageFlags AllFlags =
+    ReadFlags | vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eStorageBuffer;
 
 struct UniqueBuffer {
     explicit UniqueBuffer(vk::Device device, VmaAllocator allocator);
@@ -69,6 +68,7 @@ struct UniqueBuffer {
     VmaAllocator allocator;
     VmaAllocation allocation;
     vk::Buffer buffer{};
+    vk::DeviceAddress bda_addr = 0;
 };
 
 class Buffer {
@@ -82,9 +82,6 @@ public:
 
     Buffer& operator=(Buffer&&) = default;
     Buffer(Buffer&&) = default;
-
-    vk::BufferView View(u32 offset, u32 size, bool is_written, AmdGpu::DataFormat dfmt,
-                        AmdGpu::NumberFormat nfmt);
 
     /// Increases the likeliness of this being a stream buffer
     void IncreaseStreamScore(int score) noexcept {
@@ -117,6 +114,11 @@ public:
 
     vk::Buffer Handle() const noexcept {
         return buffer;
+    }
+
+    vk::DeviceAddress BufferDeviceAddress() const noexcept {
+        ASSERT_MSG(buffer.bda_addr != 0, "Can't get BDA from a non BDA buffer");
+        return buffer.bda_addr;
     }
 
     std::optional<vk::BufferMemoryBarrier2> GetBarrier(
@@ -172,7 +174,7 @@ public:
     void Commit();
 
     /// Maps and commits a memory region with user provided data
-    u64 Copy(VAddr src, size_t size, size_t alignment = 0) {
+    u64 Copy(auto src, size_t size, size_t alignment = 0) {
         const auto [data, offset] = Map(size, alignment);
         std::memcpy(data, reinterpret_cast<const void*>(src), size);
         Commit();

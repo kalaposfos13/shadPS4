@@ -26,7 +26,11 @@ vk::PolygonMode PolygonMode(Liverpool::PolygonMode mode);
 
 vk::CullModeFlags CullMode(Liverpool::CullMode mode);
 
+vk::FrontFace FrontFace(Liverpool::FrontFace mode);
+
 vk::BlendFactor BlendFactor(Liverpool::BlendControl::BlendFactor factor);
+
+bool IsDualSourceBlendFactor(Liverpool::BlendControl::BlendFactor factor);
 
 vk::BlendOp BlendOp(Liverpool::BlendControl::BlendFunc func);
 
@@ -104,7 +108,7 @@ static inline vk::Format PromoteFormatToDepth(vk::Format fmt) {
     } else if (fmt == vk::Format::eR16Unorm) {
         return vk::Format::eD16Unorm;
     }
-    UNREACHABLE();
+    UNREACHABLE_MSG("Unexpected depth format {}", vk::to_string(fmt));
 }
 
 } // namespace Vulkan::LiverpoolToVK

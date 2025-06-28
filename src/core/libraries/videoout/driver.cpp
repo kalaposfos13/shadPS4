@@ -63,6 +63,7 @@ void VideoOutDriver::Close(s32 handle) {
 
     main_port.is_open = false;
     main_port.flip_rate = 0;
+    main_port.prev_index = -1;
     ASSERT(main_port.flip_events.empty());
 }
 
@@ -133,6 +134,10 @@ int VideoOutDriver::RegisterBuffers(VideoOutPort* port, s32 startIndex, void* co
             .address_right = 0,
         };
 
+        // Reset flip label also when registering buffer
+        port->buffer_labels[startIndex + i] = 0;
+        port->SignalVoLabel();
+
         presenter->RegisterVideoOutSurface(group, address);
         LOG_INFO(Lib_VideoOut, "buffers[{}] = {:#x}", i + startIndex, address);
     }
@@ -160,11 +165,8 @@ int VideoOutDriver::UnregisterBuffers(VideoOutPort* port, s32 attributeIndex) {
 }
 
 void VideoOutDriver::Flip(const Request& req) {
-    // Whatever the game is rendering show splash if it is active
-    if (!presenter->ShowSplash(req.frame)) {
-        // Present the frame.
-        presenter->Present(req.frame);
-    }
+    // Present the frame.
+    presenter->Present(req.frame);
 
     // Update flip status.
     auto* port = req.port;
@@ -185,23 +187,24 @@ void VideoOutDriver::Flip(const Request& req) {
     // Trigger flip events for the port.
     for (auto& event : port->flip_events) {
         if (event != nullptr) {
-            event->TriggerEvent(u64(OrbisVideoOutEventId::Flip),
-                                Kernel::SceKernelEvent::Filter::VideoOut,
-                                reinterpret_cast<void*>(req.flip_arg));
+            event->TriggerEvent(
+                static_cast<u64>(OrbisVideoOutInternalEventId::Flip),
+                Kernel::SceKernelEvent::Filter::VideoOut,
+                reinterpret_cast<void*>(static_cast<u64>(OrbisVideoOutInternalEventId::Flip) |
+                                        (req.flip_arg << 16)));
         }
     }
 
-    // Reset flip label
-    if (req.index != -1) {
-        port->buffer_labels[req.index] = 0;
+    // Reset prev flip label
+    if (port->prev_index != -1) {
+        port->buffer_labels[port->prev_index] = 0;
         port->SignalVoLabel();
     }
+    // save to prev buf index
+    port->prev_index = req.index;
 }
 
 void VideoOutDriver::DrawBlankFrame() {
-    if (presenter->ShowSplash(nullptr)) {
-        return;
-    }
     const auto empty_frame = presenter->PrepareBlankFrame(false);
     presenter->Present(empty_frame);
 }
@@ -323,7 +326,7 @@ void VideoOutDriver::PresentThread(std::stop_token token) {
         // Trigger flip events for the port.
         for (auto& event : main_port.vblank_events) {
             if (event != nullptr) {
-                event->TriggerEvent(u64(OrbisVideoOutEventId::Vblank),
+                event->TriggerEvent(static_cast<u64>(OrbisVideoOutInternalEventId::Vblank),
                                     Kernel::SceKernelEvent::Filter::VideoOut, nullptr);
             }
         }

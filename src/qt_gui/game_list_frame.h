@@ -3,6 +3,9 @@
 
 #pragma once
 
+#include <algorithm> // std::transform
+#include <cctype>    // std::tolower
+
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -14,11 +17,13 @@
 #include "game_info.h"
 #include "game_list_utils.h"
 #include "gui_context_menus.h"
+#include "gui_settings.h"
 
 class GameListFrame : public QTableWidget {
     Q_OBJECT
 public:
-    explicit GameListFrame(std::shared_ptr<GameInfoClass> game_info_get,
+    explicit GameListFrame(std::shared_ptr<gui_settings> gui_settings,
+                           std::shared_ptr<GameInfoClass> game_info_get,
                            std::shared_ptr<CompatibilityInfoClass> compat_info_get,
                            QWidget* parent = nullptr);
 Q_SIGNALS:
@@ -27,6 +32,7 @@ Q_SIGNALS:
 public Q_SLOTS:
     void SetListBackgroundImage(QTableWidgetItem* item);
     void RefreshListBackgroundImage();
+    void resizeEvent(QResizeEvent* event);
     void SortNameAscending(int columnIndex);
     void SortNameDescending(int columnIndex);
     void PlayBackgroundMusic(QTableWidgetItem* item);
@@ -36,16 +42,23 @@ public Q_SLOTS:
 private:
     void SetTableItem(int row, int column, QString itemStr);
     void SetRegionFlag(int row, int column, QString itemStr);
+    void SetFavoriteIcon(int row, int column);
     void SetCompatibilityItem(int row, int column, CompatibilityEntry entry);
     QString GetPlayTime(const std::string& serial);
     QList<QAction*> m_columnActs;
     GameInfoClass* game_inf_get = nullptr;
     bool ListSortedAsc = true;
+    int sortColumn = 1;
+    QTableWidgetItem* m_current_item = nullptr;
+    int m_last_opacity = -1; // Track last opacity to avoid unnecessary recomputation
+    std::filesystem::path m_current_game_path; // Track current game path to detect changes
+    std::shared_ptr<gui_settings> m_gui_settings;
 
 public:
-    void PopulateGameList();
+    void PopulateGameList(bool isInitialPopulation = true);
     void ResizeIcons(int iconSize);
-
+    void ApplyLastSorting(bool isInitialPopulation);
+    QTableWidgetItem* GetCurrentItem();
     QImage backgroundImage;
     GameListUtils m_game_list_utils;
     GuiContextMenus m_gui_context_menus;
@@ -53,6 +66,7 @@ public:
     std::shared_ptr<CompatibilityInfoClass> m_compat_info;
 
     int icon_size;
+    std::string last_favorite;
 
     static float parseAsFloat(const std::string& str, const int& offset) {
         return std::stof(str.substr(0, str.size() - offset));
@@ -65,8 +79,12 @@ public:
 
     static bool CompareStringsAscending(GameInfo a, GameInfo b, int columnIndex) {
         switch (columnIndex) {
-        case 1:
-            return a.name < b.name;
+        case 1: {
+            std::string name_a = a.name, name_b = b.name;
+            std::transform(name_a.begin(), name_a.end(), name_a.begin(), ::tolower);
+            std::transform(name_b.begin(), name_b.end(), name_b.begin(), ::tolower);
+            return name_a < name_b;
+        }
         case 2:
             return a.compatibility.status < b.compatibility.status;
         case 3:
@@ -90,8 +108,12 @@ public:
 
     static bool CompareStringsDescending(GameInfo a, GameInfo b, int columnIndex) {
         switch (columnIndex) {
-        case 1:
-            return a.name > b.name;
+        case 1: {
+            std::string name_a = a.name, name_b = b.name;
+            std::transform(name_a.begin(), name_a.end(), name_a.begin(), ::tolower);
+            std::transform(name_b.begin(), name_b.end(), name_b.begin(), ::tolower);
+            return name_a > name_b;
+        }
         case 2:
             return a.compatibility.status > b.compatibility.status;
         case 3:
@@ -112,4 +134,6 @@ public:
             return false;
         }
     }
+
+    bool CompareWithFavorite(GameInfo a, GameInfo b, int columnIndex, bool ascending);
 };

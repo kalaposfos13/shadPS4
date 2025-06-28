@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2024 shadPS4 Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <filesystem>
 #include <set>
 #include <fmt/core.h>
 
@@ -10,21 +11,23 @@
 #include "common/logging/log.h"
 #ifdef ENABLE_QT_GUI
 #include <QtCore>
-#include "common/memory_patcher.h"
 #endif
 #include "common/assert.h"
 #ifdef ENABLE_DISCORD_RPC
 #include "common/discord_rpc_handler.h"
 #endif
+#ifdef _WIN32
+#include <WinSock2.h>
+#endif
 #include "common/elf_info.h"
+#include "common/memory_patcher.h"
 #include "common/ntapi.h"
 #include "common/path_util.h"
 #include "common/polyfill_thread.h"
 #include "common/scm_rev.h"
 #include "common/singleton.h"
-#include "common/version.h"
+#include "core/devtools/widget/module_list.h"
 #include "core/file_format/psf.h"
-#include "core/file_format/splash.h"
 #include "core/file_format/trp.h"
 #include "core/file_sys/fs.h"
 #include "core/libraries/disc_map/disc_map.h"
@@ -33,6 +36,7 @@
 #include "core/libraries/ngs2/ngs2.h"
 #include "core/libraries/np_trophy/np_trophy.h"
 #include "core/libraries/rtc/rtc.h"
+#include "core/libraries/save_data/save_backup.h"
 #include "core/linker.h"
 #include "core/memory.h"
 #include "emulator.h"
@@ -47,15 +51,83 @@ Emulator::Emulator() {
 #ifdef _WIN32
     Common::NtApi::Initialize();
     SetPriorityClass(GetCurrentProcess(), ABOVE_NORMAL_PRIORITY_CLASS);
+    // need to init this in order for winsock2 to work
+    WORD versionWanted = MAKEWORD(2, 2);
+    WSADATA wsaData;
+    WSAStartup(versionWanted, &wsaData);
 #endif
+}
 
-    // Start logger.
-    Common::Log::Initialize();
+Emulator::~Emulator() {}
+
+void Emulator::Run(std::filesystem::path file, const std::vector<std::string> args) {
+    if (std::filesystem::is_directory(file)) {
+        file /= "eboot.bin";
+    }
+
+    const auto eboot_name = file.filename().string();
+
+    auto game_folder = file.parent_path();
+    if (const auto game_folder_name = game_folder.filename().string();
+        game_folder_name.ends_with("-UPDATE") || game_folder_name.ends_with("-patch")) {
+        // If an executable was launched from a separate update directory,
+        // use the base game directory as the game folder.
+        const std::string base_name = game_folder_name.substr(0, game_folder_name.rfind('-'));
+        const auto base_path = game_folder.parent_path() / base_name;
+        if (std::filesystem::is_directory(base_path)) {
+            game_folder = base_path;
+        }
+    }
+
+    // Applications expect to be run from /app0 so mount the file's parent path as app0.
+    auto* mnt = Common::Singleton<Core::FileSys::MntPoints>::Instance();
+    mnt->Mount(game_folder, "/app0", true);
+    // Certain games may use /hostapp as well such as CUSA001100
+    mnt->Mount(game_folder, "/hostapp", true);
+
+    const auto param_sfo_path = mnt->GetHostPath("/app0/sce_sys/param.sfo");
+    const auto param_sfo_exists = std::filesystem::exists(param_sfo_path);
+
+    // Load param.sfo details if it exists
+    std::string id;
+    std::string title;
+    std::string app_version;
+    u32 fw_version;
+    Common::PSFAttributes psf_attributes{};
+    if (param_sfo_exists) {
+        auto* param_sfo = Common::Singleton<PSF>::Instance();
+        ASSERT_MSG(param_sfo->Open(param_sfo_path), "Failed to open param.sfo");
+
+        const auto content_id = param_sfo->GetString("CONTENT_ID");
+        ASSERT_MSG(content_id.has_value(), "Failed to get CONTENT_ID");
+
+        id = std::string(*content_id, 7, 9);
+        title = param_sfo->GetString("TITLE").value_or("Unknown title");
+        fw_version = param_sfo->GetInteger("SYSTEM_VER").value_or(0x4700000);
+        app_version = param_sfo->GetString("APP_VER").value_or("Unknown version");
+        if (const auto raw_attributes = param_sfo->GetInteger("ATTRIBUTE")) {
+            psf_attributes.raw = *raw_attributes;
+        }
+    }
+
+    // Initialize logging as soon as possible
+    if (!id.empty() && Config::getSeparateLogFilesEnabled()) {
+        Common::Log::Initialize(id + ".log");
+    } else {
+        Common::Log::Initialize();
+    }
     Common::Log::Start();
-    LOG_INFO(Loader, "Starting shadps4 emulator v{} ", Common::VERSION);
+    if (!std::filesystem::exists(file)) {
+        LOG_CRITICAL(Loader, "eboot.bin does not exist: {}",
+                     std::filesystem::absolute(file).string());
+        std::quick_exit(0);
+    }
+
+    LOG_INFO(Loader, "Starting shadps4 emulator v{} ", Common::g_version);
     LOG_INFO(Loader, "Revision {}", Common::g_scm_rev);
     LOG_INFO(Loader, "Branch {}", Common::g_scm_branch);
     LOG_INFO(Loader, "Description {}", Common::g_scm_desc);
+    LOG_INFO(Loader, "Remote {}", Common::g_scm_remote_url);
 
     LOG_INFO(Config, "General LogType: {}", Config::getLogType());
     LOG_INFO(Config, "General isNeo: {}", Config::isNeoModeConsole());
@@ -66,65 +138,41 @@ Emulator::Emulator() {
     LOG_INFO(Config, "Vulkan vkValidation: {}", Config::vkValidationEnabled());
     LOG_INFO(Config, "Vulkan vkValidationSync: {}", Config::vkValidationSyncEnabled());
     LOG_INFO(Config, "Vulkan vkValidationGpu: {}", Config::vkValidationGpuEnabled());
-    LOG_INFO(Config, "Vulkan crashDiagnostics: {}", Config::vkCrashDiagnosticEnabled());
-    LOG_INFO(Config, "Vulkan hostMarkers: {}", Config::vkHostMarkersEnabled());
-    LOG_INFO(Config, "Vulkan guestMarkers: {}", Config::vkGuestMarkersEnabled());
+    LOG_INFO(Config, "Vulkan crashDiagnostics: {}", Config::getVkCrashDiagnosticEnabled());
+    LOG_INFO(Config, "Vulkan hostMarkers: {}", Config::getVkHostMarkersEnabled());
+    LOG_INFO(Config, "Vulkan guestMarkers: {}", Config::getVkGuestMarkersEnabled());
     LOG_INFO(Config, "Vulkan rdocEnable: {}", Config::isRdocEnabled());
+
+    if (param_sfo_exists) {
+        LOG_INFO(Loader, "Game id: {} Title: {}", id, title);
+        LOG_INFO(Loader, "Fw: {:#x} App Version: {}", fw_version, app_version);
+    }
+    if (!args.empty()) {
+        const auto argc = std::min<size_t>(args.size(), 32);
+        for (auto i = 0; i < argc; i++) {
+            LOG_INFO(Loader, "Game argument {}: {}", i, args[i]);
+        }
+        if (args.size() > 32) {
+            LOG_ERROR(Loader, "Too many game arguments, only passing the first 32");
+        }
+    }
 
     // Create stdin/stdout/stderr
     Common::Singleton<FileSys::HandleTable>::Instance()->CreateStdHandles();
 
-    // Defer until after logging is initialized.
+    // Initialize components
     memory = Core::Memory::Instance();
     controller = Common::Singleton<Input::GameController>::Instance();
     linker = Common::Singleton<Core::Linker>::Instance();
 
-    // Load renderdoc module.
+    // Load renderdoc module
     VideoCore::LoadRenderDoc();
 
-    // Start the timer (Play Time)
-#ifdef ENABLE_QT_GUI
-    start_time = std::chrono::steady_clock::now();
-    const auto user_dir = Common::FS::GetUserPath(Common::FS::PathType::UserDir);
-    QString filePath = QString::fromStdString((user_dir / "play_time.txt").string());
-    QFile file(filePath);
-    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
-        LOG_INFO(Loader, "Error opening or creating play_time.txt");
-    }
-#endif
-}
-
-Emulator::~Emulator() {
-    const auto config_dir = Common::FS::GetUserPath(Common::FS::PathType::UserDir);
-    Config::saveMainWindow(config_dir / "config.toml");
-}
-
-void Emulator::Run(const std::filesystem::path& file, const std::vector<std::string> args) {
-    // Applications expect to be run from /app0 so mount the file's parent path as app0.
-    auto* mnt = Common::Singleton<Core::FileSys::MntPoints>::Instance();
-    const auto game_folder = file.parent_path();
-    mnt->Mount(game_folder, "/app0");
-    // Certain games may use /hostapp as well such as CUSA001100
-    mnt->Mount(game_folder, "/hostapp");
-
-    auto& game_info = Common::ElfInfo::Instance();
-
-    // Loading param.sfo file if exists
-    std::string id;
-    std::string title;
-    std::string app_version;
-    u32 fw_version;
-    Common::PSFAttributes psf_attributes{};
-
-    const auto param_sfo_path = mnt->GetHostPath("/app0/sce_sys/param.sfo");
-    if (std::filesystem::exists(param_sfo_path)) {
-        auto* param_sfo = Common::Singleton<PSF>::Instance();
-        const bool success = param_sfo->Open(param_sfo_path);
-        ASSERT_MSG(success, "Failed to open param.sfo");
-        const auto content_id = param_sfo->GetString("CONTENT_ID");
-        ASSERT_MSG(content_id.has_value(), "Failed to get CONTENT_ID");
-        id = std::string(*content_id, 7, 9);
+    // Initialize patcher and trophies
+    if (!id.empty()) {
+        MemoryPatcher::g_game_serial = id;
         Libraries::NpTrophy::game_serial = id;
+
         const auto trophyDir =
             Common::FS::GetUserPath(Common::FS::PathType::MetaDataDir) / id / "TrophyFiles";
         if (!std::filesystem::exists(trophyDir)) {
@@ -133,46 +181,9 @@ void Emulator::Run(const std::filesystem::path& file, const std::vector<std::str
                 LOG_ERROR(Loader, "Couldn't extract trophies");
             }
         }
-#ifdef ENABLE_QT_GUI
-        MemoryPatcher::g_game_serial = id;
-
-        // Timer for 'Play Time'
-        QTimer* timer = new QTimer();
-        QObject::connect(timer, &QTimer::timeout, [this, id]() {
-            UpdatePlayTime(id);
-            start_time = std::chrono::steady_clock::now();
-        });
-        timer->start(60000); // 60000 ms = 1 minute
-#endif
-        title = param_sfo->GetString("TITLE").value_or("Unknown title");
-        LOG_INFO(Loader, "Game id: {} Title: {}", id, title);
-        fw_version = param_sfo->GetInteger("SYSTEM_VER").value_or(0x4700000);
-        app_version = param_sfo->GetString("APP_VER").value_or("Unknown version");
-        LOG_INFO(Loader, "Fw: {:#x} App Version: {}", fw_version, app_version);
-        if (const auto raw_attributes = param_sfo->GetInteger("ATTRIBUTE")) {
-            psf_attributes.raw = *raw_attributes;
-        }
-        if (!args.empty()) {
-            int argc = std::min<int>(args.size(), 32);
-            for (int i = 0; i < argc; i++) {
-                LOG_INFO(Loader, "Game argument {}: {}", i, args[i]);
-            }
-            if (args.size() > 32) {
-                LOG_ERROR(Loader, "Too many game arguments, only passing the first 32");
-            }
-        }
     }
 
-    const auto pic1_path = mnt->GetHostPath("/app0/sce_sys/pic1.png");
-    if (std::filesystem::exists(pic1_path)) {
-        auto* splash = Common::Singleton<Splash>::Instance();
-        if (!splash->IsLoaded()) {
-            if (!splash->Open(pic1_path)) {
-                LOG_ERROR(Loader, "Game splash: unable to open file");
-            }
-        }
-    }
-
+    auto& game_info = Common::ElfInfo::Instance();
     game_info.initialized = true;
     game_info.game_serial = id;
     game_info.title = title;
@@ -181,13 +192,32 @@ void Emulator::Run(const std::filesystem::path& file, const std::vector<std::str
     game_info.raw_firmware_ver = fw_version;
     game_info.psf_attributes = psf_attributes;
 
+    const auto pic1_path = mnt->GetHostPath("/app0/sce_sys/pic1.png");
+    if (std::filesystem::exists(pic1_path)) {
+        game_info.splash_path = pic1_path;
+    }
+
+    game_info.game_folder = game_folder;
+
     std::string game_title = fmt::format("{} - {} <{}>", id, title, app_version);
     std::string window_title = "";
-    if (Common::isRelease) {
-        window_title = fmt::format("shadPS4 v{} | {}", Common::VERSION, game_title);
+    std::string remote_url(Common::g_scm_remote_url);
+    std::string remote_host = Common::GetRemoteNameFromLink();
+    if (Common::g_is_release) {
+        if (remote_host == "shadps4-emu" || remote_url.length() == 0) {
+            window_title = fmt::format("shadPS4 v{} | {}", Common::g_version, game_title);
+        } else {
+            window_title =
+                fmt::format("shadPS4 {}/v{} | {}", remote_host, Common::g_version, game_title);
+        }
     } else {
-        window_title = fmt::format("shadPS4 v{} {} {} | {}", Common::VERSION, Common::g_scm_branch,
-                                   Common::g_scm_desc, game_title);
+        if (remote_host == "shadps4-emu" || remote_url.length() == 0) {
+            window_title = fmt::format("shadPS4 v{} {} {} | {}", Common::g_version,
+                                       Common::g_scm_branch, Common::g_scm_desc, game_title);
+        } else {
+            window_title = fmt::format("shadPS4 v{} {}/{} {} | {}", Common::g_version, remote_host,
+                                       Common::g_scm_branch, Common::g_scm_desc, game_title);
+        }
     }
     window = std::make_unique<Frontend::WindowSDL>(
         Config::getScreenWidth(), Config::getScreenHeight(), controller, window_title);
@@ -199,11 +229,15 @@ void Emulator::Run(const std::filesystem::path& file, const std::vector<std::str
         std::filesystem::create_directory(mount_data_dir);
     }
     mnt->Mount(mount_data_dir, "/data"); // should just exist, manually create with game serial
+
+    // Mounting temp folders
     const auto& mount_temp_dir = Common::FS::GetUserPath(Common::FS::PathType::TempDataDir) / id;
-    if (!std::filesystem::exists(mount_temp_dir)) {
-        std::filesystem::create_directory(mount_temp_dir);
+    if (std::filesystem::exists(mount_temp_dir)) {
+        // Temp folder should be cleared on each boot.
+        std::filesystem::remove_all(mount_temp_dir);
     }
-    mnt->Mount(mount_temp_dir, "/temp0"); // called in app_content ==> stat/mkdir
+    std::filesystem::create_directory(mount_temp_dir);
+    mnt->Mount(mount_temp_dir, "/temp0");
     mnt->Mount(mount_temp_dir, "/temp");
 
     const auto& mount_download_dir =
@@ -223,8 +257,12 @@ void Emulator::Run(const std::filesystem::path& file, const std::vector<std::str
     Libraries::InitHLELibs(&linker->GetHLESymbols());
 
     // Load the module with the linker
-    const auto eboot_path = mnt->GetHostPath("/app0/" + file.filename().string());
-    linker->LoadModule(eboot_path);
+    const auto eboot_path = mnt->GetHostPath("/app0/" + eboot_name);
+    if (linker->LoadModule(eboot_path) == -1) {
+        LOG_CRITICAL(Loader, "Failed to load game's eboot.bin: {}",
+                     std::filesystem::absolute(eboot_path).string());
+        std::quick_exit(0);
+    }
 
     // check if we have system modules to load
     LoadSystemModules(game_info.game_serial);
@@ -248,6 +286,25 @@ void Emulator::Run(const std::filesystem::path& file, const std::vector<std::str
     }
 #endif
 
+    // Start the timer (Play Time)
+#ifdef ENABLE_QT_GUI
+    if (!id.empty()) {
+        auto* timer = new QTimer();
+        QObject::connect(timer, &QTimer::timeout, [this, id]() {
+            UpdatePlayTime(id);
+            start_time = std::chrono::steady_clock::now();
+        });
+        timer->start(60000); // 60000 ms = 1 minute
+
+        start_time = std::chrono::steady_clock::now();
+        const auto user_dir = Common::FS::GetUserPath(Common::FS::PathType::UserDir);
+        QString filePath = QString::fromStdString((user_dir / "play_time.txt").string());
+        QFile file(filePath);
+        ASSERT_MSG(file.open(QIODevice::ReadWrite | QIODevice::Text),
+                   "Error opening or creating play_time.txt");
+    }
+#endif
+
     linker->Execute(args);
 
     window->InitTimers();
@@ -259,17 +316,16 @@ void Emulator::Run(const std::filesystem::path& file, const std::vector<std::str
     UpdatePlayTime(id);
 #endif
 
-    std::exit(0);
+    std::quick_exit(0);
 }
 
 void Emulator::LoadSystemModules(const std::string& game_serial) {
-    constexpr std::array<SysModules, 11> ModulesToLoad{
+    constexpr std::array<SysModules, 10> ModulesToLoad{
         {{"libSceNgs2.sprx", &Libraries::Ngs2::RegisterlibSceNgs2},
          {"libSceUlt.sprx", nullptr},
          {"libSceJson.sprx", nullptr},
          {"libSceJson2.sprx", nullptr},
          {"libSceLibcInternal.sprx", &Libraries::LibcInternal::RegisterlibSceLibcInternal},
-         {"libSceDiscMap.sprx", &Libraries::DiscMap::RegisterlibSceDiscMap},
          {"libSceRtc.sprx", &Libraries::Rtc::RegisterlibSceRtc},
          {"libSceCesCs.sprx", nullptr},
          {"libSceFont.sprx", nullptr},

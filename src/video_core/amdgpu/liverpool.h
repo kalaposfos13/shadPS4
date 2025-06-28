@@ -83,8 +83,7 @@ struct Liverpool {
         u32 crc32;
 
         bool Valid() const {
-            return shader_hash && crc32 &&
-                   (std::memcmp(signature.data(), signature_ref, sizeof(signature_ref)) == 0);
+            return std::memcmp(signature.data(), signature_ref, sizeof(signature_ref)) == 0;
         }
     };
 
@@ -143,6 +142,11 @@ struct Liverpool {
             const u32 num_dwords = bininfo.length / sizeof(u32);
             return std::span{code, num_dwords};
         }
+
+        [[nodiscard]] u32 NumVgprs() const {
+            // Each increment allocates 4 registers, where 0 = 4 registers.
+            return (settings.num_vgprs + 1) * 4;
+        }
     };
 
     struct HsTessFactorClamp {
@@ -190,6 +194,10 @@ struct Liverpool {
         u32 SharedMemSize() const noexcept {
             // lds_dwords is in units of 128 dwords. We return bytes.
             return settings.lds_dwords.Value() * 128 * 4;
+        }
+
+        u32 NumWorkgroups() const noexcept {
+            return dim_x * dim_y * dim_z;
         }
 
         bool IsTgidEnabled(u32 i) const noexcept {
@@ -600,6 +608,16 @@ struct Liverpool {
         }
     };
 
+    struct BorderColorBufferBase {
+        u32 base_addr_lo;
+        BitField<0, 8, u32> base_addr_hi;
+
+        template <typename T = VAddr>
+        T Address() const {
+            return std::bit_cast<T>(u64(base_addr_hi) << 40 | u64(base_addr_lo) << 8);
+        }
+    };
+
     struct IndexBufferBase {
         BitField<0, 8, u32> base_addr_hi;
         u32 base_addr_lo;
@@ -896,7 +914,7 @@ struct Liverpool {
         }
 
         size_t GetColorSliceSize() const {
-            const auto num_bytes_per_element = NumBits(info.format) / 8u;
+            const auto num_bytes_per_element = NumBitsPerBlock(info.format) / 8u;
             const auto slice_size =
                 num_bytes_per_element * (slice.tile_max + 1) * 64u * NumSamples();
             return slice_size;
@@ -916,15 +934,11 @@ struct Liverpool {
         }
 
         [[nodiscard]] NumberFormat GetNumberFmt() const {
-            // There is a small difference between T# and CB number types, account for it.
-            return RemapNumberFormat(info.number_type == NumberFormat::SnormNz
-                                         ? NumberFormat::Srgb
-                                         : info.number_type.Value(),
-                                     info.format);
+            return RemapNumberFormat(GetFixedNumberFormat(), info.format);
         }
 
         [[nodiscard]] NumberConversion GetNumberConversion() const {
-            return MapNumberConversion(info.number_type);
+            return MapNumberConversion(GetFixedNumberFormat(), info.format);
         }
 
         [[nodiscard]] CompMapping Swizzle() const {
@@ -964,6 +978,13 @@ struct Liverpool {
             const auto components_idx = NumComponents(info.format) - 1;
             const auto mrt_swizzle = mrt_swizzles[swap_idx][components_idx];
             return RemapSwizzle(info.format, mrt_swizzle);
+        }
+
+    private:
+        [[nodiscard]] NumberFormat GetFixedNumberFormat() const {
+            // There is a small difference between T# and CB number types, account for it.
+            return info.number_type == NumberFormat::SnormNz ? NumberFormat::Srgb
+                                                             : info.number_type.Value();
         }
     };
 
@@ -1158,10 +1179,26 @@ struct Liverpool {
     };
 
     union GsMode {
+        enum class Mode : u32 {
+            Off = 0,
+            ScenarioA = 1,
+            ScenarioB = 2,
+            ScenarioG = 3,
+            ScenarioC = 4,
+        };
+
         u32 raw;
-        BitField<0, 3, u32> mode;
+        BitField<0, 3, Mode> mode;
         BitField<3, 2, u32> cut_mode;
         BitField<22, 2, u32> onchip;
+    };
+
+    union StreamOutControl {
+        u32 raw;
+        struct {
+            u32 offset_update_done : 1;
+            u32 : 31;
+        };
     };
 
     union StreamOutConfig {
@@ -1280,7 +1317,9 @@ struct Liverpool {
             Scissor screen_scissor;
             INSERT_PADDING_WORDS(0xA010 - 0xA00C - 2);
             DepthBuffer depth_buffer;
-            INSERT_PADDING_WORDS(0xA080 - 0xA018);
+            INSERT_PADDING_WORDS(8);
+            BorderColorBufferBase ta_bc_base;
+            INSERT_PADDING_WORDS(0xA080 - 0xA020 - 2);
             WindowOffset window_offset;
             ViewportScissor window_scissor;
             INSERT_PADDING_WORDS(0xA08E - 0xA081 - 2);
@@ -1367,7 +1406,9 @@ struct Liverpool {
             AaConfig aa_config;
             INSERT_PADDING_WORDS(0xA318 - 0xA2F8 - 1);
             ColorBuffer color_buffers[NumColorBuffers];
-            INSERT_PADDING_WORDS(0xC242 - 0xA390);
+            INSERT_PADDING_WORDS(0xC03F - 0xA390);
+            StreamOutControl cp_strmout_cntl;
+            INSERT_PADDING_WORDS(0xC242 - 0xC040);
             PrimitiveType primitive_type;
             INSERT_PADDING_WORDS(0xC24C - 0xC243);
             u32 num_indices;
@@ -1413,6 +1454,10 @@ struct Liverpool {
                 num_samples = std::max(num_samples, depth_buffer.NumSamples());
             }
             return num_samples;
+        }
+
+        bool IsClipDisabled() const {
+            return clipper_control.clip_disable || primitive_type == PrimitiveType::RectList;
         }
 
         void SetDefaults();
@@ -1488,10 +1533,13 @@ public:
     }
 
     struct AscQueueInfo {
+        static constexpr size_t Pm4BufferSize = 1024;
         VAddr map_addr;
         u32* read_addr;
         u32 ring_size_dw;
         u32 pipe_id;
+        std::array<u32, Pm4BufferSize> tmp_packet;
+        u32 tmp_dwords;
     };
     Common::SlotVector<AscQueueInfo> asc_queues{};
 
@@ -1533,7 +1581,7 @@ private:
     Task ProcessGraphics(std::span<const u32> dcb, std::span<const u32> ccb);
     Task ProcessCeUpdate(std::span<const u32> ccb);
     template <bool is_indirect = false>
-    Task ProcessCompute(std::span<const u32> acb, u32 vqid);
+    Task ProcessCompute(const u32* acb, u32 acb_dwords, u32 vqid);
 
     void Process(std::stop_token stoken);
 
@@ -1598,6 +1646,7 @@ static_assert(GFX6_3D_REG_INDEX(depth_htile_data_base) == 0xA005);
 static_assert(GFX6_3D_REG_INDEX(screen_scissor) == 0xA00C);
 static_assert(GFX6_3D_REG_INDEX(depth_buffer.z_info) == 0xA010);
 static_assert(GFX6_3D_REG_INDEX(depth_buffer.depth_slice) == 0xA017);
+static_assert(GFX6_3D_REG_INDEX(ta_bc_base) == 0xA020);
 static_assert(GFX6_3D_REG_INDEX(window_offset) == 0xA080);
 static_assert(GFX6_3D_REG_INDEX(window_scissor) == 0xA081);
 static_assert(GFX6_3D_REG_INDEX(color_target_mask) == 0xA08E);
@@ -1650,6 +1699,7 @@ static_assert(GFX6_3D_REG_INDEX(color_buffers[0].base_address) == 0xA318);
 static_assert(GFX6_3D_REG_INDEX(color_buffers[0].pitch) == 0xA319);
 static_assert(GFX6_3D_REG_INDEX(color_buffers[0].slice) == 0xA31A);
 static_assert(GFX6_3D_REG_INDEX(color_buffers[7].base_address) == 0xA381);
+static_assert(GFX6_3D_REG_INDEX(cp_strmout_cntl) == 0xC03F);
 static_assert(GFX6_3D_REG_INDEX(primitive_type) == 0xC242);
 static_assert(GFX6_3D_REG_INDEX(num_instances) == 0xC24D);
 static_assert(GFX6_3D_REG_INDEX(vgt_tf_memory_base) == 0xc250);

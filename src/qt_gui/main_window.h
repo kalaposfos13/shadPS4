@@ -5,6 +5,7 @@
 
 #include <QActionGroup>
 #include <QDragEnterEvent>
+#include <QProcess>
 #include <QTranslator>
 
 #include "background_music_player.h"
@@ -19,9 +20,9 @@
 #include "game_info.h"
 #include "game_list_frame.h"
 #include "game_list_utils.h"
+#include "gui_settings.h"
 #include "main_window_themes.h"
 #include "main_window_ui.h"
-#include "pkg_viewer.h"
 
 class GameListFrame;
 
@@ -29,33 +30,38 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 signals:
     void WindowResized(QResizeEvent* event);
-    void ExtractionFinished();
 
 public:
     explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
     bool Init();
-    void InstallDragDropPkg(std::filesystem::path file, int pkgNum, int nPkg);
     void InstallDirectory();
     void StartGame();
+    void PauseGame();
+    bool showLabels;
 
 private Q_SLOTS:
     void ConfigureGuiFromSettings();
-    void SaveWindowState() const;
+    void SaveWindowState();
     void SearchGameTable(const QString& text);
     void ShowGameList();
     void RefreshGameTable();
     void HandleResize(QResizeEvent* event);
-    void OnLanguageChanged(const std::string& locale);
+    void OnLanguageChanged(const QString& locale);
+    void toggleLabelsUnderIcons();
 
 private:
     Ui_MainWindow* ui;
     void AddUiWidgets();
+    void UpdateToolbarLabels();
+    void UpdateToolbarButtons();
+    QWidget* createButtonWithLabel(QPushButton* button, const QString& labelText, bool showLabel);
     void CreateActions();
+    void toggleFullscreen();
     void CreateRecentGameActions();
     void CreateDockWindows();
-    void GetPhysicalDevices();
     void LoadGameLists();
+
 #ifdef ENABLE_UPDATER
     void CheckUpdateMain(bool checkSave);
 #endif
@@ -63,21 +69,24 @@ private:
     void SetLastUsedTheme();
     void SetLastIconSizeBullet();
     void SetUiIcons(bool isWhite);
-    void InstallPkg();
     void BootGame();
     void AddRecentFiles(QString filePath);
     void LoadTranslation();
     void PlayBackgroundMusic();
     QIcon RecolorIcon(const QIcon& icon, bool isWhite);
     void StartEmulator(std::filesystem::path);
+
     bool isIconBlack = false;
     bool isTableList = true;
     bool isGameRunning = false;
+    bool isWhite = false;
+    bool is_paused = false;
+    std::string runningGameSerial = "";
+
     QActionGroup* m_icon_size_act_group = nullptr;
     QActionGroup* m_list_mode_act_group = nullptr;
     QActionGroup* m_theme_act_group = nullptr;
     QActionGroup* m_recent_files_group = nullptr;
-    PKG pkg;
     // Dockable widget frames
     WindowThemes m_window_themes;
     GameListUtils m_game_list_utils;
@@ -88,8 +97,6 @@ private:
     QScopedPointer<ElfViewer> m_elf_viewer;
     // Status Bar.
     QScopedPointer<QStatusBar> statusBar;
-    // Available GPU devices
-    std::vector<QString> m_physical_devices;
 
     PSF psf;
 
@@ -98,6 +105,7 @@ private:
         std::make_shared<CompatibilityInfoClass>();
 
     QTranslator* translator;
+    std::shared_ptr<gui_settings> m_gui_settings;
 
 protected:
     bool eventFilter(QObject* obj, QEvent* event) override;
@@ -108,19 +116,9 @@ protected:
         }
     }
 
-    void dropEvent(QDropEvent* event1) override {
-        const QMimeData* mimeData = event1->mimeData();
-        if (mimeData->hasUrls()) {
-            QList<QUrl> urlList = mimeData->urls();
-            int pkgNum = 0;
-            int nPkg = urlList.size();
-            for (const QUrl& url : urlList) {
-                pkgNum++;
-                std::filesystem::path path = Common::FS::PathFromQString(url.toLocalFile());
-                InstallDragDropPkg(path, pkgNum, nPkg);
-            }
-        }
-    }
-
     void resizeEvent(QResizeEvent* event) override;
+
+    std::filesystem::path last_install_dir = "";
+    bool delete_file_on_install = false;
+    bool use_for_all_queued = false;
 };

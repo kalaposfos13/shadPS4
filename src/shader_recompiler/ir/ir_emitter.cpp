@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <array>
-#include <bit>
 #include <source_location>
 #include <boost/container/small_vector.hpp>
 #include "common/assert.h"
@@ -82,16 +81,6 @@ IR::U16 IREmitter::BitCast<IR::U16, IR::F16>(const IR::F16& value) {
 template <>
 IR::F16 IREmitter::BitCast<IR::F16, IR::U16>(const IR::U16& value) {
     return Inst<IR::F16>(Opcode::BitCastF16U16, value);
-}
-
-template <>
-IR::U64 IREmitter::BitCast<IR::U64, IR::F64>(const IR::F64& value) {
-    return Inst<IR::U64>(Opcode::BitCastU64F64, value);
-}
-
-template <>
-IR::F64 IREmitter::BitCast<IR::F64, IR::U64>(const IR::U64& value) {
-    return Inst<IR::F64>(Opcode::BitCastF64U64, value);
 }
 
 U1 IREmitter::ConditionRef(const U1& value) {
@@ -304,12 +293,12 @@ void IREmitter::SetPatch(Patch patch, const F32& value) {
 
 Value IREmitter::LoadShared(int bit_size, bool is_signed, const U32& offset) {
     switch (bit_size) {
+    case 16:
+        return Inst<U16>(Opcode::LoadSharedU16, offset);
     case 32:
         return Inst<U32>(Opcode::LoadSharedU32, offset);
     case 64:
-        return Inst(Opcode::LoadSharedU64, offset);
-    case 128:
-        return Inst(Opcode::LoadSharedU128, offset);
+        return Inst<U64>(Opcode::LoadSharedU64, offset);
     default:
         UNREACHABLE_MSG("Invalid bit size {}", bit_size);
     }
@@ -317,24 +306,26 @@ Value IREmitter::LoadShared(int bit_size, bool is_signed, const U32& offset) {
 
 void IREmitter::WriteShared(int bit_size, const Value& value, const U32& offset) {
     switch (bit_size) {
+    case 16:
+        Inst(Opcode::WriteSharedU16, offset, value);
+        break;
     case 32:
         Inst(Opcode::WriteSharedU32, offset, value);
         break;
     case 64:
         Inst(Opcode::WriteSharedU64, offset, value);
         break;
-    case 128:
-        Inst(Opcode::WriteSharedU128, offset, value);
-        break;
     default:
         UNREACHABLE_MSG("Invalid bit size {}", bit_size);
     }
 }
 
-U32F32 IREmitter::SharedAtomicIAdd(const U32& address, const U32F32& data) {
+U32U64 IREmitter::SharedAtomicIAdd(const U32& address, const U32U64& data) {
     switch (data.Type()) {
     case Type::U32:
         return Inst<U32>(Opcode::SharedAtomicIAdd32, address, data);
+    case Type::U64:
+        return Inst<U64>(Opcode::SharedAtomicIAdd64, address, data);
     default:
         ThrowInvalidType(data.Type());
     }
@@ -362,6 +353,18 @@ U32 IREmitter::SharedAtomicXor(const U32& address, const U32& data) {
     return Inst<U32>(Opcode::SharedAtomicXor32, address, data);
 }
 
+U32 IREmitter::SharedAtomicInc(const U32& address) {
+    return Inst<U32>(Opcode::SharedAtomicInc32, address);
+}
+
+U32 IREmitter::SharedAtomicDec(const U32& address) {
+    return Inst<U32>(Opcode::SharedAtomicDec32, address);
+}
+
+U32 IREmitter::SharedAtomicISub(const U32& address, const U32& data) {
+    return Inst<U32>(Opcode::SharedAtomicISub32, address, data);
+}
+
 U32 IREmitter::ReadConst(const Value& base, const U32& offset) {
     return Inst<U32>(Opcode::ReadConst, base, offset);
 }
@@ -370,8 +373,16 @@ U32 IREmitter::ReadConstBuffer(const Value& handle, const U32& index) {
     return Inst<U32>(Opcode::ReadConstBuffer, handle, index);
 }
 
-Value IREmitter::LoadBuffer(int num_dwords, const Value& handle, const Value& address,
-                            BufferInstInfo info) {
+U8 IREmitter::LoadBufferU8(const Value& handle, const Value& address, BufferInstInfo info) {
+    return Inst<U8>(Opcode::LoadBufferU8, Flags{info}, handle, address);
+}
+
+U16 IREmitter::LoadBufferU16(const Value& handle, const Value& address, BufferInstInfo info) {
+    return Inst<U16>(Opcode::LoadBufferU16, Flags{info}, handle, address);
+}
+
+Value IREmitter::LoadBufferU32(int num_dwords, const Value& handle, const Value& address,
+                               BufferInstInfo info) {
     switch (num_dwords) {
     case 1:
         return Inst(Opcode::LoadBufferU32, Flags{info}, handle, address);
@@ -386,12 +397,42 @@ Value IREmitter::LoadBuffer(int num_dwords, const Value& handle, const Value& ad
     }
 }
 
+U64 IREmitter::LoadBufferU64(const Value& handle, const Value& address, BufferInstInfo info) {
+    return Inst<U64>(Opcode::LoadBufferU64, Flags{info}, handle, address);
+}
+
+Value IREmitter::LoadBufferF32(int num_dwords, const Value& handle, const Value& address,
+                               BufferInstInfo info) {
+    switch (num_dwords) {
+    case 1:
+        return Inst(Opcode::LoadBufferF32, Flags{info}, handle, address);
+    case 2:
+        return Inst(Opcode::LoadBufferF32x2, Flags{info}, handle, address);
+    case 3:
+        return Inst(Opcode::LoadBufferF32x3, Flags{info}, handle, address);
+    case 4:
+        return Inst(Opcode::LoadBufferF32x4, Flags{info}, handle, address);
+    default:
+        UNREACHABLE_MSG("Invalid number of dwords {}", num_dwords);
+    }
+}
+
 Value IREmitter::LoadBufferFormat(const Value& handle, const Value& address, BufferInstInfo info) {
     return Inst(Opcode::LoadBufferFormatF32, Flags{info}, handle, address);
 }
 
-void IREmitter::StoreBuffer(int num_dwords, const Value& handle, const Value& address,
-                            const Value& data, BufferInstInfo info) {
+void IREmitter::StoreBufferU8(const Value& handle, const Value& address, const U8& data,
+                              BufferInstInfo info) {
+    Inst(Opcode::StoreBufferU8, Flags{info}, handle, address, data);
+}
+
+void IREmitter::StoreBufferU16(const Value& handle, const Value& address, const U16& data,
+                               BufferInstInfo info) {
+    Inst(Opcode::StoreBufferU16, Flags{info}, handle, address, data);
+}
+
+void IREmitter::StoreBufferU32(int num_dwords, const Value& handle, const Value& address,
+                               const Value& data, BufferInstInfo info) {
     switch (num_dwords) {
     case 1:
         Inst(Opcode::StoreBufferU32, Flags{info}, handle, address, data);
@@ -410,9 +451,51 @@ void IREmitter::StoreBuffer(int num_dwords, const Value& handle, const Value& ad
     }
 }
 
+void IREmitter::StoreBufferU64(const Value& handle, const Value& address, const U64& data,
+                               BufferInstInfo info) {
+    Inst(Opcode::StoreBufferU64, Flags{info}, handle, address, data);
+}
+
+void IREmitter::StoreBufferF32(int num_dwords, const Value& handle, const Value& address,
+                               const Value& data, BufferInstInfo info) {
+    switch (num_dwords) {
+    case 1:
+        Inst(Opcode::StoreBufferF32, Flags{info}, handle, address, data);
+        break;
+    case 2:
+        Inst(Opcode::StoreBufferF32x2, Flags{info}, handle, address, data);
+        break;
+    case 3:
+        Inst(Opcode::StoreBufferF32x3, Flags{info}, handle, address, data);
+        break;
+    case 4:
+        Inst(Opcode::StoreBufferF32x4, Flags{info}, handle, address, data);
+        break;
+    default:
+        UNREACHABLE_MSG("Invalid number of dwords {}", num_dwords);
+    }
+}
+
+void IREmitter::StoreBufferFormat(const Value& handle, const Value& address, const Value& data,
+                                  BufferInstInfo info) {
+    Inst(Opcode::StoreBufferFormatF32, Flags{info}, handle, address, data);
+}
+
 Value IREmitter::BufferAtomicIAdd(const Value& handle, const Value& address, const Value& value,
                                   BufferInstInfo info) {
-    return Inst(Opcode::BufferAtomicIAdd32, Flags{info}, handle, address, value);
+    switch (value.Type()) {
+    case Type::U32:
+        return Inst(Opcode::BufferAtomicIAdd32, Flags{info}, handle, address, value);
+    case Type::U64:
+        return Inst(Opcode::BufferAtomicIAdd64, Flags{info}, handle, address, value);
+    default:
+        ThrowInvalidType(value.Type());
+    }
+}
+
+Value IREmitter::BufferAtomicISub(const Value& handle, const Value& address, const Value& value,
+                                  BufferInstInfo info) {
+    return Inst(Opcode::BufferAtomicISub32, Flags{info}, handle, address, value);
 }
 
 Value IREmitter::BufferAtomicIMin(const Value& handle, const Value& address, const Value& value,
@@ -421,20 +504,28 @@ Value IREmitter::BufferAtomicIMin(const Value& handle, const Value& address, con
                      : Inst(Opcode::BufferAtomicUMin32, Flags{info}, handle, address, value);
 }
 
+Value IREmitter::BufferAtomicFMin(const Value& handle, const Value& address, const Value& value,
+                                  BufferInstInfo info) {
+    return Inst(Opcode::BufferAtomicFMin32, Flags{info}, handle, address, value);
+}
+
 Value IREmitter::BufferAtomicIMax(const Value& handle, const Value& address, const Value& value,
                                   bool is_signed, BufferInstInfo info) {
     return is_signed ? Inst(Opcode::BufferAtomicSMax32, Flags{info}, handle, address, value)
                      : Inst(Opcode::BufferAtomicUMax32, Flags{info}, handle, address, value);
 }
 
-Value IREmitter::BufferAtomicInc(const Value& handle, const Value& address, const Value& value,
-                                 BufferInstInfo info) {
-    return Inst(Opcode::BufferAtomicInc32, Flags{info}, handle, address, value);
+Value IREmitter::BufferAtomicFMax(const Value& handle, const Value& address, const Value& value,
+                                  BufferInstInfo info) {
+    return Inst(Opcode::BufferAtomicFMax32, Flags{info}, handle, address, value);
 }
 
-Value IREmitter::BufferAtomicDec(const Value& handle, const Value& address, const Value& value,
-                                 BufferInstInfo info) {
-    return Inst(Opcode::BufferAtomicDec32, Flags{info}, handle, address, value);
+Value IREmitter::BufferAtomicInc(const Value& handle, const Value& address, BufferInstInfo info) {
+    return Inst(Opcode::BufferAtomicInc32, Flags{info}, handle, address);
+}
+
+Value IREmitter::BufferAtomicDec(const Value& handle, const Value& address, BufferInstInfo info) {
+    return Inst(Opcode::BufferAtomicDec32, Flags{info}, handle, address);
 }
 
 Value IREmitter::BufferAtomicAnd(const Value& handle, const Value& address, const Value& value,
@@ -457,9 +548,9 @@ Value IREmitter::BufferAtomicSwap(const Value& handle, const Value& address, con
     return Inst(Opcode::BufferAtomicSwap32, Flags{info}, handle, address, value);
 }
 
-void IREmitter::StoreBufferFormat(const Value& handle, const Value& address, const Value& data,
-                                  BufferInstInfo info) {
-    Inst(Opcode::StoreBufferFormatF32, Flags{info}, handle, address, data);
+Value IREmitter::BufferAtomicCmpSwap(const Value& handle, const Value& address, const Value& vdata,
+                                     const Value& cmp_value, BufferInstInfo info) {
+    return Inst(Opcode::BufferAtomicCmpSwap32, Flags{info}, handle, address, vdata, cmp_value);
 }
 
 U32 IREmitter::DataAppend(const U32& counter) {
@@ -527,10 +618,14 @@ Value IREmitter::CompositeConstruct(const Value& e1, const Value& e2) {
     switch (e1.Type()) {
     case Type::U32:
         return Inst(Opcode::CompositeConstructU32x2, e1, e2);
+    case Type::U32x2:
+        return Inst(Opcode::CompositeConstructU32x2x2, e1, e2);
     case Type::F16:
         return Inst(Opcode::CompositeConstructF16x2, e1, e2);
     case Type::F32:
         return Inst(Opcode::CompositeConstructF32x2, e1, e2);
+    case Type::F32x2:
+        return Inst(Opcode::CompositeConstructF32x2x2, e1, e2);
     case Type::F64:
         return Inst(Opcode::CompositeConstructF64x2, e1, e2);
     default:
@@ -585,7 +680,8 @@ Value IREmitter::CompositeConstruct(std::span<const Value> elements) {
     case 4:
         return CompositeConstruct(elements[0], elements[1], elements[2], elements[3]);
     default:
-        UNREACHABLE_MSG("Composite construct with greater than 4 elements");
+        UNREACHABLE_MSG("Composite construct with {} elements, only 2-4 are supported",
+                        elements.size());
     }
 }
 
@@ -775,56 +871,124 @@ Value IREmitter::UnpackUint2x32(const U64& value) {
     return Inst<Value>(Opcode::UnpackUint2x32, value);
 }
 
-F64 IREmitter::PackFloat2x32(const Value& vector) {
-    return Inst<F64>(Opcode::PackFloat2x32, vector);
+F64 IREmitter::PackDouble2x32(const Value& vector) {
+    return Inst<F64>(Opcode::PackDouble2x32, vector);
 }
 
-U32 IREmitter::PackFloat2x16(const Value& vector) {
-    return Inst<U32>(Opcode::PackFloat2x16, vector);
+Value IREmitter::UnpackDouble2x32(const F64& value) {
+    return Inst<Value>(Opcode::UnpackDouble2x32, value);
 }
 
-Value IREmitter::UnpackFloat2x16(const U32& value) {
-    return Inst(Opcode::UnpackFloat2x16, value);
+U32 IREmitter::Pack2x16(const AmdGpu::NumberFormat number_format, const Value& vector) {
+    switch (number_format) {
+    case AmdGpu::NumberFormat::Unorm:
+        return Inst<U32>(Opcode::PackUnorm2x16, vector);
+    case AmdGpu::NumberFormat::Snorm:
+        return Inst<U32>(Opcode::PackSnorm2x16, vector);
+    case AmdGpu::NumberFormat::Uint:
+        return Inst<U32>(Opcode::PackUint2x16, vector);
+    case AmdGpu::NumberFormat::Sint:
+        return Inst<U32>(Opcode::PackSint2x16, vector);
+    case AmdGpu::NumberFormat::Float:
+        return Inst<U32>(Opcode::PackHalf2x16, vector);
+    default:
+        UNREACHABLE_MSG("Unsupported 2x16 number format: {}", number_format);
+    }
 }
 
-U32 IREmitter::PackHalf2x16(const Value& vector) {
-    return Inst<U32>(Opcode::PackHalf2x16, vector);
+Value IREmitter::Unpack2x16(const AmdGpu::NumberFormat number_format, const U32& value) {
+    switch (number_format) {
+    case AmdGpu::NumberFormat::Unorm:
+        return Inst(Opcode::UnpackUnorm2x16, value);
+    case AmdGpu::NumberFormat::Snorm:
+        return Inst(Opcode::UnpackSnorm2x16, value);
+    case AmdGpu::NumberFormat::Uint:
+        return Inst(Opcode::UnpackUint2x16, value);
+    case AmdGpu::NumberFormat::Sint:
+        return Inst(Opcode::UnpackSint2x16, value);
+    case AmdGpu::NumberFormat::Float:
+        return Inst(Opcode::UnpackHalf2x16, value);
+    default:
+        UNREACHABLE_MSG("Unsupported 2x16 number format: {}", number_format);
+    }
 }
 
-Value IREmitter::UnpackHalf2x16(const U32& value) {
-    return Inst(Opcode::UnpackHalf2x16, value);
+U32 IREmitter::Pack4x8(const AmdGpu::NumberFormat number_format, const Value& vector) {
+    switch (number_format) {
+    case AmdGpu::NumberFormat::Unorm:
+        return Inst<U32>(Opcode::PackUnorm4x8, vector);
+    case AmdGpu::NumberFormat::Snorm:
+        return Inst<U32>(Opcode::PackSnorm4x8, vector);
+    case AmdGpu::NumberFormat::Uint:
+        return Inst<U32>(Opcode::PackUint4x8, vector);
+    case AmdGpu::NumberFormat::Sint:
+        return Inst<U32>(Opcode::PackSint4x8, vector);
+    default:
+        UNREACHABLE_MSG("Unsupported 4x8 number format: {}", number_format);
+    }
 }
 
-U32 IREmitter::PackUnorm2x16(const Value& vector) {
-    return Inst<U32>(Opcode::PackUnorm2x16, vector);
+Value IREmitter::Unpack4x8(const AmdGpu::NumberFormat number_format, const U32& value) {
+    switch (number_format) {
+    case AmdGpu::NumberFormat::Unorm:
+        return Inst(Opcode::UnpackUnorm4x8, value);
+    case AmdGpu::NumberFormat::Snorm:
+        return Inst(Opcode::UnpackSnorm4x8, value);
+    case AmdGpu::NumberFormat::Uint:
+        return Inst(Opcode::UnpackUint4x8, value);
+    case AmdGpu::NumberFormat::Sint:
+        return Inst(Opcode::UnpackSint4x8, value);
+    default:
+        UNREACHABLE_MSG("Unsupported 4x8 number format: {}", number_format);
+    }
 }
 
-Value IREmitter::UnpackUnorm2x16(const U32& value) {
-    return Inst(Opcode::UnpackUnorm2x16, value);
+U32 IREmitter::Pack10_11_11(const AmdGpu::NumberFormat number_format, const Value& vector) {
+    switch (number_format) {
+    case AmdGpu::NumberFormat::Float:
+        return Inst<U32>(Opcode::PackUfloat10_11_11, vector);
+    default:
+        UNREACHABLE_MSG("Unsupported 10_11_11 number format: {}", number_format);
+    }
 }
 
-U32 IREmitter::PackSnorm2x16(const Value& vector) {
-    return Inst<U32>(Opcode::PackSnorm2x16, vector);
+U32 IREmitter::Pack2_10_10_10(const AmdGpu::NumberFormat number_format, const Value& vector) {
+    switch (number_format) {
+    case AmdGpu::NumberFormat::Unorm:
+        return Inst<U32>(Opcode::PackUnorm2_10_10_10, vector);
+    case AmdGpu::NumberFormat::Snorm:
+        return Inst<U32>(Opcode::PackSnorm2_10_10_10, vector);
+    case AmdGpu::NumberFormat::Uint:
+        return Inst<U32>(Opcode::PackUint2_10_10_10, vector);
+    case AmdGpu::NumberFormat::Sint:
+        return Inst<U32>(Opcode::PackSint2_10_10_10, vector);
+    default:
+        UNREACHABLE_MSG("Unsupported 2_10_10_10 number format: {}", number_format);
+    }
 }
 
-Value IREmitter::UnpackSnorm2x16(const U32& value) {
-    return Inst(Opcode::UnpackSnorm2x16, value);
+Value IREmitter::Unpack2_10_10_10(const AmdGpu::NumberFormat number_format, const U32& value) {
+    switch (number_format) {
+    case AmdGpu::NumberFormat::Unorm:
+        return Inst(Opcode::UnpackUnorm2_10_10_10, value);
+    case AmdGpu::NumberFormat::Snorm:
+        return Inst(Opcode::UnpackSnorm2_10_10_10, value);
+    case AmdGpu::NumberFormat::Uint:
+        return Inst(Opcode::UnpackUint2_10_10_10, value);
+    case AmdGpu::NumberFormat::Sint:
+        return Inst(Opcode::UnpackSint2_10_10_10, value);
+    default:
+        UNREACHABLE_MSG("Unsupported 2_10_10_10 number format: {}", number_format);
+    }
 }
 
-U32 IREmitter::PackUint2x16(const Value& value) {
-    return Inst<U32>(Opcode::PackUint2x16, value);
-}
-
-Value IREmitter::UnpackUint2x16(const U32& value) {
-    return Inst(Opcode::UnpackUint2x16, value);
-}
-
-U32 IREmitter::PackSint2x16(const Value& value) {
-    return Inst<U32>(Opcode::PackSint2x16, value);
-}
-
-Value IREmitter::UnpackSint2x16(const U32& value) {
-    return Inst(Opcode::UnpackSint2x16, value);
+Value IREmitter::Unpack10_11_11(const AmdGpu::NumberFormat number_format, const U32& value) {
+    switch (number_format) {
+    case AmdGpu::NumberFormat::Float:
+        return Inst(Opcode::UnpackUfloat10_11_11, value);
+    default:
+        UNREACHABLE_MSG("Unsupported 10_11_11 number format: {}", number_format);
+    }
 }
 
 F32F64 IREmitter::FPMul(const F32F64& a, const F32F64& b) {
@@ -1218,6 +1382,18 @@ F32F64 IREmitter::FPMin(const F32F64& lhs, const F32F64& rhs, bool is_legacy) {
     }
 }
 
+F32F64 IREmitter::FPMinTri(const F32F64& a, const F32F64& b, const F32F64& c) {
+    return Inst<F32>(Opcode::FPMinTri32, a, b, c);
+}
+
+F32F64 IREmitter::FPMaxTri(const F32F64& a, const F32F64& b, const F32F64& c) {
+    return Inst<F32>(Opcode::FPMaxTri32, a, b, c);
+}
+
+F32F64 IREmitter::FPMedTri(const F32F64& a, const F32F64& b, const F32F64& c) {
+    return Inst<F32>(Opcode::FPMedTri32, a, b, c);
+}
+
 U32U64 IREmitter::IAdd(const U32U64& a, const U32U64& b) {
     if (a.Type() != b.Type()) {
         UNREACHABLE_MSG("Mismatching types {} and {}", a.Type(), b.Type());
@@ -1258,8 +1434,8 @@ U32U64 IREmitter::ISub(const U32U64& a, const U32U64& b) {
     }
 }
 
-IR::Value IREmitter::IMulExt(const U32& a, const U32& b, bool is_signed) {
-    return Inst(is_signed ? Opcode::SMulExt : Opcode::UMulExt, a, b);
+U32 IREmitter::IMulHi(const U32& a, const U32& b, bool is_signed) {
+    return Inst<U32>(is_signed ? Opcode::SMulHi : Opcode::UMulHi, a, b);
 }
 
 U32U64 IREmitter::IMul(const U32U64& a, const U32U64& b) {
@@ -1410,8 +1586,15 @@ U32 IREmitter::FindSMsb(const U32& value) {
     return Inst<U32>(Opcode::FindSMsb32, value);
 }
 
-U32 IREmitter::FindUMsb(const U32& value) {
-    return Inst<U32>(Opcode::FindUMsb32, value);
+U32 IREmitter::FindUMsb(const U32U64& value) {
+    switch (value.Type()) {
+    case Type::U32:
+        return Inst<U32>(Opcode::FindUMsb32, value);
+    case Type::U64:
+        return Inst<U32>(Opcode::FindUMsb64, value);
+    default:
+        ThrowInvalidType(value.Type());
+    }
 }
 
 U32 IREmitter::FindILsb(const U32U64& value) {
@@ -1447,6 +1630,42 @@ U32 IREmitter::UMax(const U32& a, const U32& b) {
 
 U32 IREmitter::IMax(const U32& a, const U32& b, bool is_signed) {
     return is_signed ? SMax(a, b) : UMax(a, b);
+}
+
+U32 IREmitter::SMinTri(const U32& a, const U32& b, const U32& c) {
+    return Inst<U32>(Opcode::SMinTri32, a, b, c);
+}
+
+U32 IREmitter::UMinTri(const U32& a, const U32& b, const U32& c) {
+    return Inst<U32>(Opcode::UMinTri32, a, b, c);
+}
+
+U32 IREmitter::IMinTri(const U32& a, const U32& b, const U32& c, bool is_signed) {
+    return is_signed ? SMinTri(a, b, c) : UMinTri(a, b, c);
+}
+
+U32 IREmitter::SMaxTri(const U32& a, const U32& b, const U32& c) {
+    return Inst<U32>(Opcode::SMaxTri32, a, b, c);
+}
+
+U32 IREmitter::UMaxTri(const U32& a, const U32& b, const U32& c) {
+    return Inst<U32>(Opcode::UMaxTri32, a, b, c);
+}
+
+U32 IREmitter::IMaxTri(const U32& a, const U32& b, const U32& c, bool is_signed) {
+    return is_signed ? SMaxTri(a, b, c) : UMaxTri(a, b, c);
+}
+
+U32 IREmitter::SMedTri(const U32& a, const U32& b, const U32& c) {
+    return Inst<U32>(Opcode::SMedTri32, a, b, c);
+}
+
+U32 IREmitter::UMedTri(const U32& a, const U32& b, const U32& c) {
+    return Inst<U32>(Opcode::UMedTri32, a, b, c);
+}
+
+U32 IREmitter::IMedTri(const U32& a, const U32& b, const U32& c, bool is_signed) {
+    return is_signed ? SMedTri(a, b, c) : UMedTri(a, b, c);
 }
 
 U32 IREmitter::SClamp(const U32& value, const U32& min, const U32& max) {
@@ -1614,8 +1833,15 @@ F32F64 IREmitter::ConvertIToF(size_t dest_bitsize, size_t src_bitsize, bool is_s
                      : ConvertUToF(dest_bitsize, src_bitsize, value);
 }
 
-U16U32U64 IREmitter::UConvert(size_t result_bitsize, const U16U32U64& value) {
+U8U16U32U64 IREmitter::UConvert(size_t result_bitsize, const U8U16U32U64& value) {
     switch (result_bitsize) {
+    case 8:
+        switch (value.Type()) {
+        case Type::U32:
+            return Inst<U8>(Opcode::ConvertU8U32, value);
+        default:
+            break;
+        }
     case 16:
         switch (value.Type()) {
         case Type::U32:
@@ -1625,6 +1851,8 @@ U16U32U64 IREmitter::UConvert(size_t result_bitsize, const U16U32U64& value) {
         }
     case 32:
         switch (value.Type()) {
+        case Type::U8:
+            return Inst<U32>(Opcode::ConvertU32U8, value);
         case Type::U16:
             return Inst<U32>(Opcode::ConvertU32U16, value);
         default:
@@ -1698,6 +1926,16 @@ Value IREmitter::ImageAtomicUMax(const Value& handle, const Value& coords, const
     return Inst(Opcode::ImageAtomicUMax32, Flags{info}, handle, coords, value);
 }
 
+Value IREmitter::ImageAtomicFMax(const Value& handle, const Value& coords, const Value& value,
+                                 TextureInstInfo info) {
+    return Inst(Opcode::ImageAtomicFMax32, Flags{info}, handle, coords, value);
+}
+
+Value IREmitter::ImageAtomicFMin(const Value& handle, const Value& coords, const Value& value,
+                                 TextureInstInfo info) {
+    return Inst(Opcode::ImageAtomicFMin32, Flags{info}, handle, coords, value);
+}
+
 Value IREmitter::ImageAtomicIMax(const Value& handle, const Value& coords, const Value& value,
                                  bool is_signed, TextureInstInfo info) {
     return is_signed ? ImageAtomicSMax(handle, coords, value, info)
@@ -1736,9 +1974,9 @@ Value IREmitter::ImageAtomicExchange(const Value& handle, const Value& coords, c
 
 Value IREmitter::ImageSampleRaw(const Value& handle, const Value& address1, const Value& address2,
                                 const Value& address3, const Value& address4,
-                                TextureInstInfo info) {
-    return Inst(Opcode::ImageSampleRaw, Flags{info}, handle, address1, address2, address3,
-                address4);
+                                const Value& inline_sampler, TextureInstInfo info) {
+    return Inst(Opcode::ImageSampleRaw, Flags{info}, handle, address1, address2, address3, address4,
+                inline_sampler);
 }
 
 Value IREmitter::ImageSampleImplicitLod(const Value& handle, const Value& coords, const F32& bias,

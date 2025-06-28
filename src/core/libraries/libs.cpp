@@ -8,9 +8,13 @@
 #include "core/libraries/audio/audioout.h"
 #include "core/libraries/audio3d/audio3d.h"
 #include "core/libraries/avplayer/avplayer.h"
+#include "core/libraries/camera/camera.h"
+#include "core/libraries/companion/companion_httpd.h"
+#include "core/libraries/companion/companion_util.h"
 #include "core/libraries/disc_map/disc_map.h"
 #include "core/libraries/game_live_streaming/gamelivestreaming.h"
 #include "core/libraries/gnmdriver/gnmdriver.h"
+#include "core/libraries/hmd/hmd.h"
 #include "core/libraries/ime/error_dialog.h"
 #include "core/libraries/ime/ime.h"
 #include "core/libraries/ime/ime_dialog.h"
@@ -26,6 +30,7 @@
 #include "core/libraries/network/netctl.h"
 #include "core/libraries/network/ssl.h"
 #include "core/libraries/network/ssl2.h"
+#include "core/libraries/np_auth/np_auth.h"
 #include "core/libraries/np_common/np_common.h"
 #include "core/libraries/np_manager/np_manager.h"
 #include "core/libraries/np_party/np_party.h"
@@ -43,17 +48,21 @@
 #include "core/libraries/save_data/savedata.h"
 #include "core/libraries/screenshot/screenshot.h"
 #include "core/libraries/share_play/shareplay.h"
+#include "core/libraries/signin_dialog/signindialog.h"
 #include "core/libraries/system/commondialog.h"
 #include "core/libraries/system/msgdialog.h"
 #include "core/libraries/system/posix.h"
 #include "core/libraries/system/sysmodule.h"
 #include "core/libraries/system/systemservice.h"
 #include "core/libraries/system/userservice.h"
+#include "core/libraries/ulobjmgr/ulobjmgr.h"
 #include "core/libraries/usbd/usbd.h"
 #include "core/libraries/videodec/videodec.h"
 #include "core/libraries/videodec/videodec2.h"
 #include "core/libraries/videoout/video_out.h"
+#include "core/libraries/voice/voice.h"
 #include "core/libraries/web_browser_dialog/webbrowserdialog.h"
+#include "core/libraries/zlib/zlib_sce.h"
 #include "fiber/fiber.h"
 #include "jpeg/jpegenc.h"
 
@@ -85,6 +94,7 @@ void InitHLELibs(Core::Loader::SymbolsResolver* sym) {
     Libraries::NpScore::RegisterlibSceNpScore(sym);
     Libraries::NpTrophy::RegisterlibSceNpTrophy(sym);
     Libraries::NpWebApi::RegisterlibSceNpWebApi(sym);
+    Libraries::NpAuth::RegisterlibSceNpAuth(sym);
     Libraries::ScreenShot::RegisterlibSceScreenShot(sym);
     Libraries::AppContent::RegisterlibSceAppContent(sym);
     Libraries::PngDec::RegisterlibScePngDec(sym);
@@ -111,6 +121,15 @@ void InitHLELibs(Core::Loader::SymbolsResolver* sym) {
     Libraries::Mouse::RegisterlibSceMouse(sym);
     Libraries::WebBrowserDialog::RegisterlibSceWebBrowserDialog(sym);
     Libraries::NpParty::RegisterlibSceNpParty(sym);
+    Libraries::Zlib::RegisterlibSceZlib(sym);
+    Libraries::Hmd::RegisterlibSceHmd(sym);
+    Libraries::DiscMap::RegisterlibSceDiscMap(sym);
+    Libraries::Ulobjmgr::RegisterlibSceUlobjmgr(sym);
+    Libraries::SigninDialog::RegisterlibSceSigninDialog(sym);
+    Libraries::Camera::RegisterlibSceCamera(sym);
+    Libraries::CompanionHttpd::RegisterlibSceCompanionHttpd(sym);
+    Libraries::CompanionUtil::RegisterlibSceCompanionUtil(sym);
+    Libraries::Voice::RegisterlibSceVoice(sym);
 }
 
 } // namespace Libraries

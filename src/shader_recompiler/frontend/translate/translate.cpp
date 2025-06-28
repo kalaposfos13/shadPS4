@@ -4,7 +4,7 @@
 #include "common/config.h"
 #include "common/io_file.h"
 #include "common/path_util.h"
-#include "shader_recompiler/exception.h"
+#include "shader_recompiler/frontend/decode.h"
 #include "shader_recompiler/frontend/fetch_shader.h"
 #include "shader_recompiler/frontend/translate/translate.h"
 #include "shader_recompiler/info.h"
@@ -21,11 +21,60 @@
 
 namespace Shader::Gcn {
 
-Translator::Translator(IR::Block* block_, Info& info_, const RuntimeInfo& runtime_info_,
-                       const Profile& profile_)
-    : ir{*block_, block_->begin()}, info{info_}, runtime_info{runtime_info_}, profile{profile_} {}
+Translator::Translator(Info& info_, const RuntimeInfo& runtime_info_, const Profile& profile_)
+    : info{info_}, runtime_info{runtime_info_}, profile{profile_},
+      next_vgpr_num{runtime_info.num_allocated_vgprs} {
+    if (info.l_stage == LogicalStage::Fragment) {
+        dst_frag_vreg = GatherInterpQualifiers();
+    }
+}
 
-void Translator::EmitPrologue() {
+IR::VectorReg Translator::GatherInterpQualifiers() {
+    u32 dst_vreg{};
+    if (runtime_info.fs_info.addr_flags.persp_sample_ena) {
+        vgpr_to_interp[dst_vreg++] = IR::Interpolation::PerspectiveSample; // I
+        vgpr_to_interp[dst_vreg++] = IR::Interpolation::PerspectiveSample; // J
+        info.has_perspective_interp = true;
+    }
+    if (runtime_info.fs_info.addr_flags.persp_center_ena) {
+        vgpr_to_interp[dst_vreg++] = IR::Interpolation::PerspectiveCenter; // I
+        vgpr_to_interp[dst_vreg++] = IR::Interpolation::PerspectiveCenter; // J
+        info.has_perspective_interp = true;
+    }
+    if (runtime_info.fs_info.addr_flags.persp_centroid_ena) {
+        vgpr_to_interp[dst_vreg++] = IR::Interpolation::PerspectiveCentroid; // I
+        vgpr_to_interp[dst_vreg++] = IR::Interpolation::PerspectiveCentroid; // J
+        info.has_perspective_interp = true;
+    }
+    if (runtime_info.fs_info.addr_flags.persp_pull_model_ena) {
+        ++dst_vreg; // I/W
+        ++dst_vreg; // J/W
+        ++dst_vreg; // 1/W
+    }
+    if (runtime_info.fs_info.addr_flags.linear_sample_ena) {
+        vgpr_to_interp[dst_vreg++] = IR::Interpolation::LinearSample; // I
+        vgpr_to_interp[dst_vreg++] = IR::Interpolation::LinearSample; // J
+        info.has_linear_interp = true;
+    }
+    if (runtime_info.fs_info.addr_flags.linear_center_ena) {
+        vgpr_to_interp[dst_vreg++] = IR::Interpolation::LinearCenter; // I
+        vgpr_to_interp[dst_vreg++] = IR::Interpolation::LinearCenter; // J
+        info.has_linear_interp = true;
+    }
+    if (runtime_info.fs_info.addr_flags.linear_centroid_ena) {
+        vgpr_to_interp[dst_vreg++] = IR::Interpolation::LinearCentroid; // I
+        vgpr_to_interp[dst_vreg++] = IR::Interpolation::LinearCentroid; // J
+        info.has_linear_interp = true;
+    }
+    if (runtime_info.fs_info.addr_flags.line_stipple_tex_ena) {
+        ++dst_vreg;
+    }
+    return IR::VectorReg(dst_vreg);
+}
+
+void Translator::EmitPrologue(IR::Block* first_block) {
+    ir = IR::IREmitter(*first_block, first_block->begin());
+
     ir.Prologue();
     ir.SetExec(ir.Imm1(true));
 
@@ -55,39 +104,7 @@ void Translator::EmitPrologue() {
         }
         break;
     case LogicalStage::Fragment:
-        dst_vreg = IR::VectorReg::V0;
-        if (runtime_info.fs_info.addr_flags.persp_sample_ena) {
-            ++dst_vreg; // I
-            ++dst_vreg; // J
-        }
-        if (runtime_info.fs_info.addr_flags.persp_center_ena) {
-            ++dst_vreg; // I
-            ++dst_vreg; // J
-        }
-        if (runtime_info.fs_info.addr_flags.persp_centroid_ena) {
-            ++dst_vreg; // I
-            ++dst_vreg; // J
-        }
-        if (runtime_info.fs_info.addr_flags.persp_pull_model_ena) {
-            ++dst_vreg; // I/W
-            ++dst_vreg; // J/W
-            ++dst_vreg; // 1/W
-        }
-        if (runtime_info.fs_info.addr_flags.linear_sample_ena) {
-            ++dst_vreg; // I
-            ++dst_vreg; // J
-        }
-        if (runtime_info.fs_info.addr_flags.linear_center_ena) {
-            ++dst_vreg; // I
-            ++dst_vreg; // J
-        }
-        if (runtime_info.fs_info.addr_flags.linear_centroid_ena) {
-            ++dst_vreg; // I
-            ++dst_vreg; // J
-        }
-        if (runtime_info.fs_info.addr_flags.line_stipple_tex_ena) {
-            ++dst_vreg;
-        }
+        dst_vreg = dst_frag_vreg;
         if (runtime_info.fs_info.addr_flags.pos_x_float_ena) {
             if (runtime_info.fs_info.en_flags.pos_x_float_ena) {
                 ir.SetVectorReg(dst_vreg++, ir.GetAttribute(IR::Attribute::FragCoord, 0));
@@ -179,7 +196,20 @@ void Translator::EmitPrologue() {
     default:
         UNREACHABLE_MSG("Unknown shader stage");
     }
+
+    // Clear any scratch vgpr mappings for next shader.
+    vgpr_map.clear();
 }
+
+IR::VectorReg Translator::GetScratchVgpr(u32 offset) {
+    const auto [it, is_new] = vgpr_map.try_emplace(offset);
+    if (is_new) {
+        ASSERT_MSG(next_vgpr_num < 256, "Out of VGPRs");
+        const auto new_vgpr = static_cast<IR::VectorReg>(next_vgpr_num++);
+        it->second = new_vgpr;
+    }
+    return it->second;
+};
 
 template <typename T>
 T Translator::GetSrc(const InstOperand& operand) {
@@ -318,7 +348,7 @@ T Translator::GetSrc64(const InstOperand& operand) {
         const auto value_lo = ir.GetVectorReg(IR::VectorReg(operand.code));
         const auto value_hi = ir.GetVectorReg(IR::VectorReg(operand.code + 1));
         if constexpr (is_float) {
-            value = ir.PackFloat2x32(ir.CompositeConstruct(value_lo, value_hi));
+            value = ir.PackDouble2x32(ir.CompositeConstruct(value_lo, value_hi));
         } else {
             value = ir.PackUint2x32(ir.CompositeConstruct(value_lo, value_hi));
         }
@@ -362,7 +392,7 @@ T Translator::GetSrc64(const InstOperand& operand) {
         break;
     case OperandField::VccLo:
         if constexpr (is_float) {
-            UNREACHABLE();
+            value = ir.PackDouble2x32(ir.CompositeConstruct(ir.GetVccLo(), ir.GetVccHi()));
         } else {
             value = ir.PackUint2x32(ir.CompositeConstruct(ir.GetVccLo(), ir.GetVccHi()));
         }
@@ -426,10 +456,9 @@ void Translator::SetDst64(const InstOperand& operand, const IR::U64F64& value_ra
             value_untyped = ir.FPSaturate(value_raw);
         }
     }
-    const IR::U64 value =
-        is_float ? ir.BitCast<IR::U64>(IR::F64{value_untyped}) : IR::U64{value_untyped};
 
-    const IR::Value unpacked{ir.UnpackUint2x32(value)};
+    const IR::Value unpacked{is_float ? ir.UnpackDouble2x32(IR::F64{value_untyped})
+                                      : ir.UnpackUint2x32(IR::U64{value_untyped})};
     const IR::U32 lo{ir.CompositeExtract(unpacked, 0U)};
     const IR::U32 hi{ir.CompositeExtract(unpacked, 1U)};
     switch (operand.field) {
@@ -453,8 +482,29 @@ void Translator::SetDst64(const InstOperand& operand, const IR::U64F64& value_ra
 
 void Translator::EmitFetch(const GcnInst& inst) {
     // Read the pointer to the fetch shader assembly.
+    const auto code_sgpr_base = inst.src[0].code;
+    if (!profile.supports_robust_buffer_access) {
+        // The fetch shader must be inlined to access as regular buffers, so that
+        // bounds checks can be emitted to emulate robust buffer access.
+        const auto* code = GetFetchShaderCode(info, code_sgpr_base);
+        GcnCodeSlice slice(code, code + std::numeric_limits<u32>::max());
+        GcnDecodeContext decoder;
+
+        // Decode and save instructions
+        u32 sub_pc = 0;
+        while (!slice.atEnd()) {
+            const auto sub_inst = decoder.decodeInstruction(slice);
+            if (sub_inst.opcode == Opcode::S_SETPC_B64) {
+                // Assume we're swapping back to the main shader.
+                break;
+            }
+            TranslateInstruction(sub_inst, sub_pc++);
+        }
+        return;
+    }
+
     info.has_fetch_shader = true;
-    info.fetch_shader_sgpr_base = inst.src[0].code;
+    info.fetch_shader_sgpr_base = code_sgpr_base;
 
     const auto fetch_data = ParseFetchShader(info);
     ASSERT(fetch_data.has_value());
@@ -479,7 +529,9 @@ void Translator::EmitFetch(const GcnInst& inst) {
         const auto values =
             ir.CompositeConstruct(ir.GetAttribute(attr, 0), ir.GetAttribute(attr, 1),
                                   ir.GetAttribute(attr, 2), ir.GetAttribute(attr, 3));
-        const auto swizzled = ApplySwizzle(ir, values, buffer.DstSelect());
+        const auto converted =
+            IR::ApplyReadNumberConversionVec4(ir, values, buffer.GetNumberConversion());
+        const auto swizzled = ApplySwizzle(ir, converted, buffer.DstSelect());
         for (u32 i = 0; i < 4; i++) {
             ir.SetVectorReg(dst_reg++, IR::F32{ir.CompositeExtract(swizzled, i)});
         }
@@ -490,7 +542,6 @@ void Translator::EmitFetch(const GcnInst& inst) {
             info.buffers.push_back({
                 .sharp_idx = info.srt_info.ReserveSharp(attrib.sgpr_base, attrib.dword_offset, 4),
                 .used_types = IR::Type::F32,
-                .is_instance_data = true,
                 .instance_attrib = attrib.semantic,
             });
         }
@@ -504,12 +555,11 @@ void Translator::LogMissingOpcode(const GcnInst& inst) {
     info.translation_failed = true;
 }
 
-void Translate(IR::Block* block, u32 pc, std::span<const GcnInst> inst_list, Info& info,
-               const RuntimeInfo& runtime_info, const Profile& profile) {
+void Translator::Translate(IR::Block* block, u32 pc, std::span<const GcnInst> inst_list) {
     if (inst_list.empty()) {
         return;
     }
-    Translator translator{block, info, runtime_info, profile};
+    ir = IR::IREmitter{*block, block->begin()};
     for (const auto& inst : inst_list) {
         pc += inst.length;
 
@@ -517,41 +567,45 @@ void Translate(IR::Block* block, u32 pc, std::span<const GcnInst> inst_list, Inf
         if (inst.opcode == Opcode::S_SWAPPC_B64) {
             ASSERT(info.stage == Stage::Vertex || info.stage == Stage::Export ||
                    info.stage == Stage::Local);
-            translator.EmitFetch(inst);
+            EmitFetch(inst);
             continue;
         }
 
-        // Emit instructions for each category.
-        switch (inst.category) {
-        case InstCategory::DataShare:
-            translator.EmitDataShare(inst);
-            break;
-        case InstCategory::VectorInterpolation:
-            translator.EmitVectorInterpolation(inst);
-            break;
-        case InstCategory::ScalarMemory:
-            translator.EmitScalarMemory(inst);
-            break;
-        case InstCategory::VectorMemory:
-            translator.EmitVectorMemory(inst);
-            break;
-        case InstCategory::Export:
-            translator.EmitExport(inst);
-            break;
-        case InstCategory::FlowControl:
-            translator.EmitFlowControl(pc, inst);
-            break;
-        case InstCategory::ScalarALU:
-            translator.EmitScalarAlu(inst);
-            break;
-        case InstCategory::VectorALU:
-            translator.EmitVectorAlu(inst);
-            break;
-        case InstCategory::DebugProfile:
-            break;
-        default:
-            UNREACHABLE();
-        }
+        TranslateInstruction(inst, pc);
+    }
+}
+
+void Translator::TranslateInstruction(const GcnInst& inst, const u32 pc) {
+    // Emit instructions for each category.
+    switch (inst.category) {
+    case InstCategory::DataShare:
+        EmitDataShare(inst);
+        break;
+    case InstCategory::VectorInterpolation:
+        EmitVectorInterpolation(inst);
+        break;
+    case InstCategory::ScalarMemory:
+        EmitScalarMemory(inst);
+        break;
+    case InstCategory::VectorMemory:
+        EmitVectorMemory(inst);
+        break;
+    case InstCategory::Export:
+        EmitExport(inst);
+        break;
+    case InstCategory::FlowControl:
+        EmitFlowControl(pc, inst);
+        break;
+    case InstCategory::ScalarALU:
+        EmitScalarAlu(inst);
+        break;
+    case InstCategory::VectorALU:
+        EmitVectorAlu(inst);
+        break;
+    case InstCategory::DebugProfile:
+        break;
+    default:
+        UNREACHABLE();
     }
 }
 

@@ -25,6 +25,7 @@ struct GameInfo {
     std::string version = "Unknown";
     std::string region = "Unknown";
     std::string fw = "Unknown";
+    std::string save_dir = "Unknown";
 
     std::string play_time = "Unknown";
     CompatibilityEntry compatibility = CompatibilityEntry{CompatibilityStatus::Unknown};
@@ -69,8 +70,12 @@ public:
         }
 
         // Cache path
-        QFile size_cache_file(Common::FS::GetUserPath(Common::FS::PathType::MetaDataDir) /
-                              game.serial / "size_cache.txt");
+        QDir cacheDir =
+            QDir(Common::FS::GetUserPath(Common::FS::PathType::MetaDataDir) / game.serial);
+        if (!cacheDir.exists()) {
+            cacheDir.mkpath(".");
+        }
+        QFile size_cache_file(cacheDir.absoluteFilePath("size_cache.txt"));
         QFileInfo cacheInfo(size_cache_file);
         QFileInfo dirInfo(dirPath);
 
@@ -197,6 +202,32 @@ public:
             for (int j = c1; j < c2; j++, p -= 4)
                 for (int i = i1; i <= i2; i++)
                     p[i] = (rgba[i] += ((p[i] << 4) - rgba[i]) * alpha / 16) >> 4;
+        }
+
+        return result;
+    }
+
+    // Opacity is a float between 0 and 1
+    static QImage ChangeImageOpacity(const QImage& image, const QRect& rect, float opacity) {
+        // Convert to ARGB32 format to ensure alpha channel support
+        QImage result = image.convertToFormat(QImage::Format_ARGB32);
+
+        // Ensure opacity is between 0 and 1
+        opacity = std::clamp(opacity, 0.0f, 1.0f);
+
+        // Convert opacity to integer alpha value (0-255)
+        int alpha = static_cast<int>(opacity * 255);
+
+        // Process only the specified rectangle area
+        for (int y = rect.top(); y <= rect.bottom(); ++y) {
+            QRgb* line = reinterpret_cast<QRgb*>(result.scanLine(y));
+            for (int x = rect.left(); x <= rect.right(); ++x) {
+                // Get current pixel
+                QRgb pixel = line[x];
+                // Keep RGB values, but modify alpha while preserving relative transparency
+                int newAlpha = (qAlpha(pixel) * alpha) / 255;
+                line[x] = qRgba(qRed(pixel), qGreen(pixel), qBlue(pixel), newAlpha);
+            }
         }
 
         return result;

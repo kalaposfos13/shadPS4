@@ -13,6 +13,7 @@
 #include "common/va_ctx.h"
 #include "core/aerolib/aerolib.h"
 #include "core/aerolib/stubs.h"
+#include "core/devtools/widget/module_list.h"
 #include "core/libraries/kernel/memory.h"
 #include "core/libraries/kernel/threads.h"
 #include "core/linker.h"
@@ -120,9 +121,32 @@ void Linker::Execute(const std::vector<std::string> args) {
     else if (title_id == "CUSA24767")
         GT7Hooks::Initialize(module);
     */
+    // Simulate sceKernelInternalMemory mapping, a mapping usually performed during libkernel init.
+    // Due to the large size of this mapping, failing to emulate it causes issues in some titles.
+    // This mapping belongs in the system reserved area, which starts at address 0x880000000.
+    static constexpr VAddr KernelAllocBase = 0x880000000ULL;
+    static constexpr s64 InternalMemorySize = 0x1000000;
+    void* addr_out{reinterpret_cast<void*>(KernelAllocBase)};
+
+    s32 ret = Libraries::Kernel::sceKernelMapNamedFlexibleMemory(&addr_out, InternalMemorySize, 3,
+                                                                 0, "SceKernelInternalMemory");
+    ASSERT_MSG(ret == 0, "Unable to perform sceKernelInternalMemory mapping");
+
     main_thread.Run([this, module, args](std::stop_token) {
         Common::SetCurrentThreadName("GAME_MainThread");
         LoadSharedLibraries();
+
+        // Simulate libSceGnmDriver initialization, which maps a chunk of direct memory.
+        // Some games fail without accurately emulating this behavior.
+        s64 phys_addr{};
+        s32 result = Libraries::Kernel::sceKernelAllocateDirectMemory(
+            0, Libraries::Kernel::sceKernelGetDirectMemorySize(), 0x10000, 0x10000, 3, &phys_addr);
+        if (result == 0) {
+            void* addr{reinterpret_cast<void*>(0xfe0000000)};
+            result = Libraries::Kernel::sceKernelMapNamedDirectMemory(
+                &addr, 0x10000, 0x13, 0, phys_addr, 0x10000, "SceGnmDriver");
+        }
+        ASSERT_MSG(result == 0, "Unable to emulate libSceGnmDriver initialization");
 
         // Start main module.
         EntryParams params{};
@@ -135,7 +159,7 @@ void Linker::Execute(const std::vector<std::string> args) {
             }
         }
         params.entry_addr = module->GetEntryAddress();
-        RunMainEntry(&params);
+        ExecuteGuest(RunMainEntry, &params);
     });
 }
 
@@ -155,7 +179,39 @@ s32 Linker::LoadModule(const std::filesystem::path& elf_name, bool is_dynamic) {
 
     num_static_modules += !is_dynamic;
     m_modules.emplace_back(std::move(module));
+
+    Core::Devtools::Widget::ModuleList::AddModule(elf_name.filename().string(), elf_name);
+
     return m_modules.size() - 1;
+}
+
+s32 Linker::LoadAndStartModule(const std::filesystem::path& path, u64 args, const void* argp,
+                               int* pRes) {
+    u32 handle = FindByName(path);
+    if (handle != -1) {
+        return handle;
+    }
+    handle = LoadModule(path, true);
+    if (handle == -1) {
+        return -1;
+    }
+    auto* module = GetModule(handle);
+    RelocateAnyImports(module);
+
+    // If the new module has a TLS image, trigger its load when TlsGetAddr is called.
+    if (module->tls.image_size != 0) {
+        AdvanceGenerationCounter();
+    }
+
+    // Retrieve and verify proc param according to libkernel.
+    u64* param = module->GetProcParam<u64*>();
+    ASSERT_MSG(!param || param[0] >= 0x18, "Invalid module param size: {}", param[0]);
+    s32 ret = module->Start(args, argp, param);
+    if (pRes) {
+        *pRes = ret;
+    }
+
+    return handle;
 }
 
 Module* Linker::FindByAddress(VAddr address) {
@@ -295,16 +351,20 @@ bool Linker::Resolve(const std::string& name, Loader::SymbolType sym_type, Modul
     sr.type = sym_type;
 
     const auto* record = m_hle_symbols.FindSymbol(sr);
-    if (!record) {
-        // Check if it an export function
-        const auto* p = FindExportedModule(*module, *library);
-        if (p && p->export_sym.GetSize() > 0) {
-            record = p->export_sym.FindSymbol(sr);
-        }
-    }
     if (record) {
         *return_info = *record;
+        Core::Devtools::Widget::ModuleList::AddModule(sr.library);
         return true;
+    }
+
+    // Check if it an export function
+    const auto* p = FindExportedModule(*module, *library);
+    if (p && p->export_sym.GetSize() > 0) {
+        record = p->export_sym.FindSymbol(sr);
+        if (record) {
+            *return_info = *record;
+            return true;
+        }
     }
 
     const auto aeronid = AeroLib::FindByNid(sr.name.c_str());
@@ -345,7 +405,8 @@ void* Linker::TlsGetAddr(u64 module_index, u64 offset) {
     if (!addr) {
         // Module was just loaded by above code. Allocate TLS block for it.
         const u32 init_image_size = module->tls.init_image_size;
-        u8* dest = reinterpret_cast<u8*>(heap_api->heap_malloc(module->tls.image_size));
+        u8* dest = reinterpret_cast<u8*>(
+            Core::ExecuteGuest(heap_api->heap_malloc, module->tls.image_size));
         const u8* src = reinterpret_cast<const u8*>(module->tls.image_virtual_addr);
         std::memcpy(dest, src, init_image_size);
         std::memset(dest + init_image_size, 0, module->tls.image_size - init_image_size);
@@ -362,7 +423,8 @@ void* Linker::AllocateTlsForThread(bool is_primary) {
 
     // If sceKernelMapNamedFlexibleMemory is being called from libkernel and addr = 0
     // it automatically places mappings in system reserved area instead of managed.
-    static constexpr VAddr KernelAllocBase = 0x880000000ULL;
+    // Since the system reserved area already has a mapping in it, this address is slightly higher.
+    static constexpr VAddr KernelAllocBase = 0x881000000ULL;
 
     // The kernel module has a few different paths for TLS allocation.
     // For SDK < 1.7 it allocates both main and secondary thread blocks using libc mspace/malloc.
