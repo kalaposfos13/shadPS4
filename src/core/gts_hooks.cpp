@@ -6,7 +6,7 @@
 #include "core/linker.h"
 #include "core/LightHook.h"
 #include "common/singleton.h"
-#include "common/version.h"
+// #include "common/version.h"
 #include "core/file_format/psf.h"
 
 #include <map>
@@ -52,26 +52,26 @@ static void PS4_SYSV_ABI GTSLogger(void* logger, char* fileName, int lineNumber,
 
     LOG_INFO(Core_Linker, "{}", std::string_view(reinterpret_cast<char*>(buffer), ret));
 }
-void __declspec(noinline) PS4_SYSV_ABI HOOK_prln(void* a1, int argCount, hObject** objects) {
+void SHAD_NO_INLINE PS4_SYSV_ABI HOOK_prln(void* a1, int argCount, hObject** objects) {
     char* outStr = {};
     objects[0]->vt->rc_class(&outStr, objects[0]);
 
     LOG_INFO(Core_Linker, "{}", outStr);
 }
 
-u64 __declspec(noinline) PS4_SYSV_ABI HOOK_GTS_FileDeviceGTFS_openFile(void* this_, char* fileName, void* PDIEXT__SimpleFileObject) {
+u64 SHAD_NO_INLINE PS4_SYSV_ABI HOOK_GTS_FileDeviceGTFS_openFile(void* this_, char* fileName, void* PDIEXT__SimpleFileObject) {
     LOG_INFO(Core_Linker, "{}", fileName);
     auto orig = (u64 PS4_SYSV_ABI(*)(void*, char*, void*))_gtfsOpenFileHook.Trampoline;
     return orig(this_, fileName, PDIEXT__SimpleFileObject);
 }
 
-u64 __declspec(noinline) PS4_SYSV_ABI HOOK_AdhocCrashHandler(char* message) {
+u64 SHAD_NO_INLINE PS4_SYSV_ABI HOOK_AdhocCrashHandler(char* message) {
     LOG_INFO(Core_Linker, "{}", message);
     auto orig = (u64 PS4_SYSV_ABI(*)(char*))_adhocCrashHandlerHook.Trampoline;
     return orig(message);
 }
 
-u64 __declspec(noinline) PS4_SYSV_ABI HOOK_hThread_exec0(hThread* thread) {
+u64 SHAD_NO_INLINE PS4_SYSV_ABI HOOK_hThread_exec0(hThread* thread) {
     auto orig = (u64 PS4_SYSV_ABI(*)(hThread*))_hThread_exec0Hook.Trampoline;
     auto res_state = orig(thread);
 
@@ -83,7 +83,7 @@ u64 __declspec(noinline) PS4_SYSV_ABI HOOK_hThread_exec0(hThread* thread) {
     return res_state;
 }
 
-u64 __declspec(noinline) PS4_SYSV_ABI HOOK_hSymbol_getOrAdd(void* list, char** name) {
+u64 SHAD_NO_INLINE PS4_SYSV_ABI HOOK_hSymbol_getOrAdd(void* list, char** name) {
     auto orig = (u64 PS4_SYSV_ABI(*)(void*, char**))_hSymbol_getOrAddHook.Trampoline;
     auto ret = orig(list, name);
 
@@ -96,7 +96,7 @@ u64 __declspec(noinline) PS4_SYSV_ABI HOOK_hSymbol_getOrAdd(void* list, char** n
 }
 
 // Hooks ALL call (hObject::call)
-u64 __declspec(noinline) PS4_SYSV_ABI HOOK_hObject_call(hObject* this_, hThread** thread, int numArgs, hObject** args) {
+u64 SHAD_NO_INLINE PS4_SYSV_ABI HOOK_hObject_call(hObject* this_, hThread** thread, int numArgs, hObject** args) {
 
     hThread* threadObj = *thread;
 
@@ -111,7 +111,7 @@ u64 __declspec(noinline) PS4_SYSV_ABI HOOK_hObject_call(hObject* this_, hThread*
 }
 
 // Hook all function calls (hFunctionObject overrides hObject::call)
-u64 __declspec(noinline) PS4_SYSV_ABI HOOK_hFunctionObject_call(hObject* this_, hThread** thread, int numArgs, hObject** args) {
+u64 SHAD_NO_INLINE PS4_SYSV_ABI HOOK_hFunctionObject_call(hObject* this_, hThread** thread, int numArgs, hObject** args) {
 
     hThread* threadObj = *thread;
 
@@ -128,7 +128,7 @@ u64 __declspec(noinline) PS4_SYSV_ABI HOOK_hFunctionObject_call(hObject* this_, 
 }
 
 // Hook all method calls (hMethodObject overrides hObject::call)
-u64 __declspec(noinline) PS4_SYSV_ABI HOOK_hMethodObject_call(hObject* this_, hThread** thread,
+u64 SHAD_NO_INLINE PS4_SYSV_ABI HOOK_hMethodObject_call(hObject* this_, hThread** thread,
                                                                 int numArgs, hObject** args) {
     hThread* threadObj = *thread;
 
@@ -152,12 +152,12 @@ void Initialize(Core::Module* mainModule) {
 
     EBOOT_MODULE_BASE = mainModule->GetBaseAddress();
 
-    _prlnHook = CreateHook(reinterpret_cast<void*>(EBOOT_MODULE_BASE + GTS_prln), &HOOK_prln);                                                   EnableHook(&_prlnHook);
-    _releasePrlnHook = CreateHook(reinterpret_cast<void*>(EBOOT_MODULE_BASE + GTS_release_prln), &HOOK_prln);                                    EnableHook(&_releasePrlnHook);
+    _prlnHook = CreateHook(reinterpret_cast<void*>(EBOOT_MODULE_BASE + GTS_prln), (void*)&HOOK_prln);                                                   EnableHook(&_prlnHook);
+    _releasePrlnHook = CreateHook(reinterpret_cast<void*>(EBOOT_MODULE_BASE + GTS_release_prln), (void*)&HOOK_prln);                                    EnableHook(&_releasePrlnHook);
     //_gtfsOpenFileHook = CreateHook(reinterpret_cast<void*>(EBOOT_MODULE_BASE + GTS_FileDeviceGTFS_openFile), &HOOK_GTS_FileDeviceGTFS_openFile); EnableHook(&_gtfsOpenFileHook);
 
     // We hook this incase the adhoc crash handler crashes. This can happen early during boot 
-    _adhocCrashHandlerHook = CreateHook(reinterpret_cast<void*>(EBOOT_MODULE_BASE + GTS_AdhocCrashHandler), &HOOK_AdhocCrashHandler);            EnableHook(&_adhocCrashHandlerHook);
+    _adhocCrashHandlerHook = CreateHook(reinterpret_cast<void*>(EBOOT_MODULE_BASE + GTS_AdhocCrashHandler), (void*)&HOOK_AdhocCrashHandler);            EnableHook(&_adhocCrashHandlerHook);
     //_hThread_exec0Hook = CreateHook(reinterpret_cast<void*>(EBOOT_MODULE_BASE + GTS_hThread_exec0), &HOOK_hThread_exec0);            EnableHook(&_hThread_exec0Hook);
     //_hSymbol_getOrAddHook = CreateHook(reinterpret_cast<void*>(EBOOT_MODULE_BASE + GTS_hSymbol_getOrAdd), &HOOK_hSymbol_getOrAdd);            EnableHook(&_hSymbol_getOrAddHook);
 

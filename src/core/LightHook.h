@@ -319,7 +319,7 @@ static unsigned long long PlatformProtect(void* address, unsigned long long size
 
     int pageSize = getpagesize();
     unsigned long long pageOffset = (unsigned long long)address % pageSize;
-    address -= pageOffset;
+    address = (void*)((unsigned long long)address - pageOffset);
 
     int status = mprotect(address, pageSize, protection);
     assert(status == 0);

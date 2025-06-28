@@ -6,7 +6,7 @@
 #include "core/linker.h"
 #include "core/LightHook.h"
 #include "common/singleton.h"
-#include "common/version.h"
+// #include "common/version.h"
 
 #include <map>
 

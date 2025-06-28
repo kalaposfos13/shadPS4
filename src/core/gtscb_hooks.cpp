@@ -6,7 +6,7 @@
 #include "core/linker.h"
 #include "core/LightHook.h"
 #include "common/singleton.h"
-#include "common/version.h"
+// #include "common/version.h"
 #include "core/file_format/psf.h"
 
 #include <map>
@@ -19,7 +19,7 @@ static u64 EBOOT_MODULE_BASE;
 constexpr auto GTSCB_prln = 0xB42420;
 static HookInformation _prlnHook = {};
 
-void __declspec(noinline) PS4_SYSV_ABI HOOK_prln(void* a1) {
+void SHAD_NO_INLINE PS4_SYSV_ABI HOOK_prln(void* a1) {
 
     LOG_INFO(Core_Linker, "{}", "a");
 }
@@ -31,7 +31,7 @@ void Initialize(Core::Module* mainModule) {
 
     EBOOT_MODULE_BASE = mainModule->GetBaseAddress();
 
-    _prlnHook = CreateHook(reinterpret_cast<void*>(EBOOT_MODULE_BASE + GTSCB_prln), &HOOK_prln); EnableHook(&_prlnHook);
+    _prlnHook = CreateHook(reinterpret_cast<void*>(EBOOT_MODULE_BASE + GTSCB_prln), (void*)&HOOK_prln); EnableHook(&_prlnHook);
 
     initted = true;
 }
