@@ -20,12 +20,13 @@
 #include "core/memory.h"
 #include "core/tls.h"
 
-#include "core/file_format/psf.h"
-#include "core/gt7_hooks.h"
-#include "core/gts_hooks.h"
-#include "core/gtscb_hooks.h"
+#include "core/game_hooks/LightHook.h"
 
-#include "core/LightHook.h"
+#include "core/file_format/psf.h"
+#include "core/game_hooks/gt7_hooks.h"
+#include "core/game_hooks/gts_hooks.h"
+#include "core/game_hooks/gtscb_hooks.h"
+#include "core/game_hooks/dc_hooks.h"
 
 namespace Core {
 
@@ -121,7 +122,7 @@ void Linker::Execute(const std::vector<std::string> args) {
     else if (title_id == "CUSA24767")
         GT7Hooks::Initialize(module);
     else if (title_id == "CUSA00003")
-        GT7Hooks::Initialize(module);
+        DCHooks::Initialize(module);
     
     // Simulate sceKernelInternalMemory mapping, a mapping usually performed during libkernel init.
     // Due to the large size of this mapping, failing to emulate it causes issues in some titles.
