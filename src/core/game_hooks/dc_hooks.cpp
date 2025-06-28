@@ -30,15 +30,26 @@ void SHAD_NO_INLINE PS4_SYSV_ABI HOOK_DebugLog(void* a1) {
 u64 SHAD_NO_INLINE PS4_SYSV_ABI HOOK_QueryHeapSize(u8* searched_array_struct, char* name) {
     LOG_INFO(Core_Hooking, "struct ptr: {}, searched name: {}, flags: {}",
              fmt::ptr(searched_array_struct), name, *(searched_array_struct + 4));
+    if (strcmp(name, "editor") == 0 || strcmp(name, "extraEditorMemForGameHeap") == 0 ||
+        strcmp(name, "DebugHeap") == 0) {
+        int a = 0;
+    }
     u64* searched_array = *(u64**)(searched_array_struct + 0x820);
     u32 array_size = *(u32*)(searched_array_struct + 0x818);
 
-    u64 index = (u64)array_size;
-    u64* element_ptr = searched_array;
+    // prints out the list of heap struct data
     // for (int i = 0; i < array_size; i++) {
-    //     LOG_INFO(Core_Hooking, " Heap name {}: {}", i, (char*)searched_array[i * 9]);
+    //     u64* heap_info = searched_array + (i * 9);
+    //     LOG_INFO(Core_Hooking, "------ Heap {} data ------", i);
+    //     LOG_INFO(Core_Hooking, "Name: {}", (char*)heap_info[0]);
+    //     LOG_INFO(Core_Hooking, "Base size: {:#x}", heap_info[1]);
+    //     for (int i = 2; i < 9; i++) {
+    //         LOG_INFO(Core_Hooking, "Part {}: {:#x}", i, heap_info[i]);
+    //     }
     // }
 
+    u64 index = (u64)array_size;
+    u64* element_ptr = searched_array;
     u64 binary_search_local;
     while (binary_search_local = index, 0 < (long)binary_search_local) {
         index = (long)binary_search_local / 2;
@@ -52,7 +63,9 @@ u64 SHAD_NO_INLINE PS4_SYSV_ABI HOOK_QueryHeapSize(u8* searched_array_struct, ch
     u64 ret = 0;
     if (element_ptr != searched_array + (ulong)array_size * 9) {
         // LOG_INFO(Core_Hooking, "Search stopped at {}", (char*)*element_ptr);
-        for (int i = 0; i < 6; i++) {
+        LOG_INFO(Core_Hooking, "Heap struct name: {}", (char*)element_ptr[0]);
+        LOG_INFO(Core_Hooking, "Heap struct base size: {:#x}", element_ptr[1]);
+        for (int i = 2; i < 9; i++) {
             LOG_INFO(Core_Hooking, "Heap struct part {}: {:#x}", i, element_ptr[i]);
         }
         if (strcmp(name, (char*)*element_ptr) == 0) {
@@ -78,11 +91,6 @@ u64 SHAD_NO_INLINE PS4_SYSV_ABI HOOK_QueryHeapSize(u8* searched_array_struct, ch
         (u64 PS4_SYSV_ABI (*)(u8*, char*))_SearchAndDoSomethingToMemoryByName_hook.Trampoline;
     ret = orig(searched_array_struct, name);
     LOG_INFO(Core_Hooking, "Return: {:#x}", ret);
-    // if (strcmp(name, "editor") == 0 || strcmp(name, "extraEditorMemForGameHeap") == 0) {
-    //     return ret == 0 ? 0x100000 : ret;
-    // } else if (strcmp(name, "DebugHeap") == 0) {
-    //     return 0x2000000;
-    // }
     return ret;
 }
 
