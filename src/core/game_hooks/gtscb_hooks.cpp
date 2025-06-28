@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 
-#include "core/gtscb_hooks.h"
+#include "core/game_hooks/gtscb_hooks.h"
 #include "core/linker.h"
-#include "core/LightHook.h"
+#include "core/game_hooks/LightHook.h"
 #include "common/singleton.h"
 // #include "common/version.h"
 #include "core/file_format/psf.h"

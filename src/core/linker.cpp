@@ -113,14 +113,16 @@ void Linker::Execute(const std::vector<std::string> args) {
     auto param_sfo = Common::Singleton<PSF>::Instance();
     auto title_id = param_sfo->GetString("TITLE_ID");
 
-    /*
+    
     if (title_id == "CUSA02168")
         GTSHooks::Initialize(module);
     else if (title_id == "CUSA07836")
         GTSCBHooks::Initialize(module);
     else if (title_id == "CUSA24767")
         GT7Hooks::Initialize(module);
-    */
+    else if (title_id == "CUSA00003")
+        GT7Hooks::Initialize(module);
+    
     // Simulate sceKernelInternalMemory mapping, a mapping usually performed during libkernel init.
     // Due to the large size of this mapping, failing to emulate it causes issues in some titles.
     // This mapping belongs in the system reserved area, which starts at address 0x880000000.

@@ -4,7 +4,7 @@
 #pragma once
 
 #include "core/linker.h"
-#include "core/LightHook.h"
+#include "core/game_hooks/LightHook.h"
 #include "common/types.h"
 
 namespace GT7Hooks {

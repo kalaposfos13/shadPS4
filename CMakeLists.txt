@@ -800,12 +800,12 @@ set(CORE src/core/aerolib/stubs.cpp
          src/core/thread.h
          src/core/tls.cpp
          src/core/tls.h
-         src/core/gt7_hooks.cpp
-         src/core/gt7_hooks.h
-         src/core/gts_hooks.cpp
-         src/core/gts_hooks.h
-         src/core/gtscb_hooks.cpp
-         src/core/gtscb_hooks.h
+         src/core/game_hooks/gt7_hooks.cpp
+         src/core/game_hooks/gt7_hooks.h
+         src/core/game_hooks/gts_hooks.cpp
+         src/core/game_hooks/gts_hooks.h
+         src/core/game_hooks/gtscb_hooks.cpp
+         src/core/game_hooks/gtscb_hooks.h
 )
 
 if (ARCHITECTURE STREQUAL "x86_64")
