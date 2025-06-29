@@ -12,30 +12,48 @@
 
 namespace DCHooks {
 
+#define HOOK_FUNC SHAD_NO_INLINE PS4_SYSV_ABI
+
 static bool initted = false;
 static u64 EBOOT_MODULE_BASE;
 constexpr u64 GHIDRA_OFFSET_ADJUSTMENT = 0x00400000;
 
-constexpr auto DC_DebugLog = 0x0126f1f0;
-static HookInformation _DebugLog_hook = {};
+constexpr auto DebugLog_offset = 0x0126f1f0;
+static HookInformation DebugLog_hook = {};
 
-constexpr auto DC_QueryHeapInfo = 0x00968a30;
-static HookInformation _QueryHeapInfo_hook = {};
+constexpr auto StubAfterBootstrap_offset = 0x0127b300;
+static HookInformation StubAfterBootstrap_hook = {};
 
-void SHAD_NO_INLINE PS4_SYSV_ABI HOOK_DebugLog(void* a1) {
+constexpr auto QueryHeapInfo_offset = 0x00968a30;
+static HookInformation QueryHeapInfo_hook = {};
 
+constexpr auto CallSetupMemory_offset = 0x0055ac70;
+static HookInformation CallSetupMemory_hook = {};
+
+constexpr auto FuncAfterLibtbb_offset = 0x00a62e90;
+static HookInformation FuncAfterLibtbb_hook = {};
+
+constexpr auto LoadAndStartModule_offset = 0x00baf2c0;
+static HookInformation LoadAndStartModule_hook = {};
+
+bool HOOK_FUNC HOOK_LoadAndStartModule(u64 param_1) {
+    LOG_INFO(Core_Hooking, "Not loading tbb library");
+    return true;
+}
+
+s32 HOOK_FUNC HOOK_FuncAfterLibtbb() {
+    auto orig = (s32 PS4_SYSV_ABI (*)())FuncAfterLibtbb_hook.Trampoline;
+    return orig();
+}
+
+void HOOK_FUNC HOOK_DebugLog(void* a1) {
     LOG_INFO(Core_Hooking, "test for hooking");
 }
 
-u64 SHAD_NO_INLINE PS4_SYSV_ABI HOOK_QueryHeapInfo(u8* searched_array_struct, char* name) {
-    LOG_INFO(Core_Hooking, "struct ptr: {}, searched name: {}, flags: {}",
-             fmt::ptr(searched_array_struct), name, *(searched_array_struct + 4));
-    if (strcmp(name, "editor") == 0 || strcmp(name, "extraEditorMemForGameHeap") == 0 ||
-        strcmp(name, "DebugHeap") == 0) {
-        int a = 0;
-    }
-    HeapMetadata* searched_array = *(HeapMetadata**)(searched_array_struct + 0x820);
-    u32 array_size = *(u32*)(searched_array_struct + 0x818);
+bool HOOK_FUNC HOOK_StubAfterBootstrap(u8* _this, char* argv0) {
+    HeapMetadata* searched_array = (HeapMetadata*)(_this + 0xc0 + 0x820);
+    u32 array_size = *(u32*)(_this + 0xc0 + 0x818);
+    LOG_INFO(Core_Hooking, "Start of printing heap info, base: {}", fmt::ptr(searched_array));
 
     // prints out the list of heap struct data
     for (int i = 0; i < array_size; i++) {
@@ -54,63 +72,130 @@ u64 SHAD_NO_INLINE PS4_SYSV_ABI HOOK_QueryHeapInfo(u8* searched_array_struct, ch
         }
         fmt::println("Part 8: {:#x}", heap_info.unk2);
     }
+    LOG_INFO(Core_Hooking, "End of hooking into stubbed function for inspecting parameters");
+    return true;
+}
 
-    u64 index = (u64)array_size;
-    HeapMetadata* element_ptr = searched_array;
-    u64 binary_search_local;
-    while (binary_search_local = index, 0 < (long)binary_search_local) {
-        index = (long)binary_search_local / 2;
-        // LOG_INFO(Core_Hooking, "Comparing \"{}\" to {}", (char*)element_ptr[index * 9], name);
-        s32 iVar2 = strcmp(element_ptr[index].name, name);
-        if (iVar2 < 0) {
-            element_ptr = element_ptr + index * 9 + 9;
-            index = (binary_search_local - 1) - index;
-        }
-    }
-    u64 ret = 0;
-    if (element_ptr != searched_array + (ulong)array_size * 9) {
-        // LOG_INFO(Core_Hooking, "Search stopped at {}", (char*)*element_ptr);
-        if (strcmp(name, "DebugHeap") == 0) {
-            LOG_INFO(Core_Hooking, "Spoofing size");
-            element_ptr->base_size = 0x30000000;
-        } else if (strcmp(name, "editor") == 0 || strcmp(name, "extraEditorMemForGameHeap") == 0) {
-            LOG_INFO(Core_Hooking, "Spoofing size");
-            element_ptr->base_size = 0x1000000;
-        }
-        LOG_INFO(Core_Hooking, "Name: {}", element_ptr->name);
-        LOG_INFO(Core_Hooking, "Base size: {:#x}", element_ptr->base_size);
+u64 HOOK_FUNC HOOK_CallSetupMemory(u8* _this) {
+    HeapMetadata* searched_array = *(HeapMetadata**)(_this + 0x820);
+    u32 array_size = *(u32*)(_this + 0x818);
+    LOG_INFO(Core_Hooking, "Start of printing heap info, base: {}", fmt::ptr(searched_array));
+
+    // prints out the list of heap struct data
+    for (int i = 0; i < array_size; i++) {
+        HeapMetadata heap_info = searched_array[i];
+        fmt::println("------ Heap {} data ------", i);
+        fmt::println("Name: {}", (char*)heap_info.name);
+        fmt::println("Base size: {:#x}", heap_info.base_size);
         for (int i = 2; i < 7; i++) {
-            // LOG_INFO(Core_Hooking, "Part {}: {:#x}", i, element_ptr[i]);
+            // fmt::println("Part {}: {:#x}", i, heap_info[i]);
         }
-        if (element_ptr->parent_heap_name) {
-            LOG_INFO(Core_Hooking, "Parent heap: {}", element_ptr->parent_heap_name);
+        constexpr const char* noname = "null";
+        if (heap_info.parent_heap_name) {
+            fmt::println("Parent heap: {}", (char*)heap_info.parent_heap_name);
         } else {
-            LOG_INFO(Core_Hooking, "Parent heap: {}", "null");
+            fmt::println("Parent heap: {}", "null");
         }
-        LOG_INFO(Core_Hooking, "Part 8: {:#x}", element_ptr->unk2);
-        if (strcmp(name, element_ptr->name) == 0) {
-            ret = element_ptr->base_size;
-            u8 flags = *(searched_array_struct + 4);
-            if ((flags & 1) != 0) {
-                ret += element_ptr->size_mod_1;
-            }
-            if ((flags & 2) != 0) {
-                ret += element_ptr->size_mod_2;
-            }
-            if ((flags & 4) != 0) {
-                ret += element_ptr->size_mod_3;
-            }
-            if ((flags & 8) != 0) {
-                ret += element_ptr->size_mod_4;
-            }
-        }
+        fmt::println("Part 8: {:#x}", heap_info.unk2);
+        break;
     }
+    LOG_INFO(Core_Hooking, "End of hooking into stubbed function for inspecting parameters");
+    auto orig = (u64 PS4_SYSV_ABI (*)(u8*))CallSetupMemory_hook.Trampoline;
+    return orig(_this);
+}
+
+u64 HOOK_FUNC HOOK_QueryHeapInfo(u8* searched_array_struct, char* name) {
+    LOG_INFO(Core_Hooking, "struct ptr: {}, searched name: {}, flags: {}",
+             fmt::ptr(searched_array_struct), name, *(searched_array_struct + 4));
+    if (strcmp(name, "editor") == 0 || strcmp(name, "extraEditorMemForGameHeap") == 0 ||
+        strcmp(name, "DebugHeap") == 0) {
+        int a = 0;
+    }
+    HeapMetadata* searched_array = *(HeapMetadata**)(searched_array_struct + 0x820);
+    u32 array_size = *(u32*)(searched_array_struct + 0x818);
+
+    // prints out the list of heap struct data
+    for (int i = 0; i < array_size; i++) {
+        break;
+        HeapMetadata heap_info = searched_array[i];
+        fmt::println("------ Heap {} data ------", i);
+        fmt::println("Name: {}", (char*)heap_info.name);
+        fmt::println("Base size: {:#x}", heap_info.base_size);
+        for (int i = 2; i < 7; i++) {
+            // fmt::println("Part {}: {:#x}", i, heap_info[i]);
+        }
+        constexpr const char* noname = "null";
+        if (heap_info.parent_heap_name) {
+            fmt::println("Parent heap: {}", (char*)heap_info.parent_heap_name);
+        } else {
+            fmt::println("Parent heap: {}", "null");
+        }
+        fmt::println("Part 8: {:#x}", heap_info.unk2);
+    }
+
+    u64 ret = 0;
+
+    // auto index = array_size;
+    // HeapMetadata* element_ptr = searched_array;
+    // u64 binary_search_local = index;
+    // while (binary_search_local = index, 0 < (long)binary_search_local) {
+    //     index = (long)binary_search_local / 2;
+    //     // LOG_INFO(Core_Hooking, "Comparing \"{}\" to {}", (char*)element_ptr[index * 9], name);
+    //     s32 iVar2 = strcmp(element_ptr[index].name, name);
+    //     if (iVar2 < 0) {
+    //         element_ptr = element_ptr + index * 9 + 9;
+    //         index = (binary_search_local - 1) - index;
+    //     }
+    // }
+    // if (element_ptr != searched_array + (ulong)array_size * 9) {
+    //     // LOG_INFO(Core_Hooking, "Search stopped at {}", (char*)*element_ptr);
+    //     if (strcmp(name, "DebugHeap") == 0) {
+    //         LOG_INFO(Core_Hooking, "Spoofing size");
+    //         element_ptr->base_size = 0x30000000;
+    //     } else if (strcmp(name, "editor") == 0 || strcmp(name, "extraEditorMemForGameHeap") == 0) {
+    //         LOG_INFO(Core_Hooking, "Spoofing size");
+    //         element_ptr->base_size = 0x1000000;
+    //     }
+    //     LOG_INFO(Core_Hooking, "Name: {}", element_ptr->name);
+    //     LOG_INFO(Core_Hooking, "Base size: {:#x}", element_ptr->base_size);
+    //     for (int i = 2; i < 7; i++) {
+    //         // LOG_INFO(Core_Hooking, "Part {}: {:#x}", i, element_ptr[i]);
+    //     }
+    //     if (element_ptr->parent_heap_name) {
+    //         LOG_INFO(Core_Hooking, "Parent heap: {}", element_ptr->parent_heap_name);
+    //     } else {
+    //         LOG_INFO(Core_Hooking, "Parent heap: {}", "null");
+    //     }
+    //     LOG_INFO(Core_Hooking, "Part 8: {:#x}", element_ptr->unk2);
+    //     if (strcmp(name, element_ptr->name) == 0) {
+    //         ret = element_ptr->base_size;
+    //         u8 flags = *(searched_array_struct + 4);
+    //         if ((flags & 1) != 0) {
+    //             ret += element_ptr->size_mod_1;
+    //         }
+    //         if ((flags & 2) != 0) {
+    //             ret += element_ptr->size_mod_2;
+    //         }
+    //         if ((flags & 4) != 0) {
+    //             ret += element_ptr->size_mod_3;
+    //         }
+    //         if ((flags & 8) != 0) {
+    //             ret += element_ptr->size_mod_4;
+    //         }
+    //     }
+    // }
     // LOG_INFO(Core_Hooking, "Predicted return: {:#x}", ret);
 
-    auto orig = (u64 PS4_SYSV_ABI (*)(u8*, char*))_QueryHeapInfo_hook.Trampoline;
+    auto orig = (u64 PS4_SYSV_ABI (*)(u8*, char*))QueryHeapInfo_hook.Trampoline;
     ret = orig(searched_array_struct, name);
     LOG_INFO(Core_Hooking, "Return: {:#x}", ret);
     return ret;
+}
+
+void InitHook(HookInformation& hook, u64 offset, void* func) {
+    hook = CreateHook(
+        reinterpret_cast<void*>(EBOOT_MODULE_BASE - GHIDRA_OFFSET_ADJUSTMENT + offset), func);
+    EnableHook(&hook);
 }
 
 void Initialize(Core::Module* mainModule) {
@@ -120,13 +205,12 @@ void Initialize(Core::Module* mainModule) {
 
     EBOOT_MODULE_BASE = mainModule->GetBaseAddress();
 
-    // _DebugLog_hook = CreateHook(reinterpret_cast<void*>(EBOOT_MODULE_BASE -
-    // GHIDRA_OFFSET_ADJUSTMENT + DC_DebugLog), (void*)&HOOK_DebugLog);
-    // EnableHook(&_DebugLog_hook);
-    _QueryHeapInfo_hook = CreateHook(
-        reinterpret_cast<void*>(EBOOT_MODULE_BASE - GHIDRA_OFFSET_ADJUSTMENT + DC_QueryHeapInfo),
-        (void*)&HOOK_QueryHeapInfo);
-    EnableHook(&_QueryHeapInfo_hook);
+    // InitHook(DebugLog_hook, DebugLog_offset, (void*)&HOOK_DebugLog);
+    InitHook(QueryHeapInfo_hook, QueryHeapInfo_offset, (void*)&HOOK_QueryHeapInfo);
+    InitHook(StubAfterBootstrap_hook, StubAfterBootstrap_offset, (void*)&HOOK_StubAfterBootstrap);
+    InitHook(CallSetupMemory_hook, CallSetupMemory_offset, (void*)&HOOK_CallSetupMemory);
+    // InitHook(FuncAfterLibtbb_hook, FuncAfterLibtbb_offset, (void*)&HOOK_FuncAfterLibtbb);
+    // InitHook(LoadAndStartModule_hook, LoadAndStartModule_offset, (void*)&HOOK_LoadAndStartModule);
 
     initted = true;
 }
