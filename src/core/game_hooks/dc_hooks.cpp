@@ -36,6 +36,20 @@ static HookInformation FuncAfterLibtbb_hook = {};
 constexpr auto LoadAndStartModule_offset = 0x00baf2c0;
 static HookInformation LoadAndStartModule_hook = {};
 
+constexpr auto SearchFlagInGlobalArgv_offset = 0x00557830;
+static HookInformation SearchFlagInGlobalArgv_hook = {};
+
+bool HOOK_SearchFlagInGlobalArgv(char* flag) {
+    LOG_WARNING(Core_Hooking, "Checked flag: {}", flag);
+    auto orig = (bool PS4_SYSV_ABI (*)(char*))SearchFlagInGlobalArgv_hook.Trampoline;
+    bool ret = orig(flag);
+    LOG_INFO(Core_Hooking, "return: {}", ret);
+    if (ret == true) {
+        LOG_INFO(Core_Hooking, "patch works");
+    }
+    return ret;
+}
+
 bool HOOK_FUNC HOOK_LoadAndStartModule(u64 param_1) {
     LOG_INFO(Core_Hooking, "Not loading tbb library");
     return true;
@@ -152,7 +166,8 @@ u64 HOOK_FUNC HOOK_QueryHeapInfo(u8* searched_array_struct, char* name) {
     //     if (strcmp(name, "DebugHeap") == 0) {
     //         LOG_INFO(Core_Hooking, "Spoofing size");
     //         element_ptr->base_size = 0x30000000;
-    //     } else if (strcmp(name, "editor") == 0 || strcmp(name, "extraEditorMemForGameHeap") == 0) {
+    //     } else if (strcmp(name, "editor") == 0 || strcmp(name, "extraEditorMemForGameHeap") == 0)
+    //     {
     //         LOG_INFO(Core_Hooking, "Spoofing size");
     //         element_ptr->base_size = 0x1000000;
     //     }
@@ -206,11 +221,15 @@ void Initialize(Core::Module* mainModule) {
     EBOOT_MODULE_BASE = mainModule->GetBaseAddress();
 
     // InitHook(DebugLog_hook, DebugLog_offset, (void*)&HOOK_DebugLog);
-    InitHook(QueryHeapInfo_hook, QueryHeapInfo_offset, (void*)&HOOK_QueryHeapInfo);
-    InitHook(StubAfterBootstrap_hook, StubAfterBootstrap_offset, (void*)&HOOK_StubAfterBootstrap);
+    // InitHook(QueryHeapInfo_hook, QueryHeapInfo_offset, (void*)&HOOK_QueryHeapInfo);
+    // InitHook(StubAfterBootstrap_hook, StubAfterBootstrap_offset,
+    // (void*)&HOOK_StubAfterBootstrap);
     InitHook(CallSetupMemory_hook, CallSetupMemory_offset, (void*)&HOOK_CallSetupMemory);
     // InitHook(FuncAfterLibtbb_hook, FuncAfterLibtbb_offset, (void*)&HOOK_FuncAfterLibtbb);
-    // InitHook(LoadAndStartModule_hook, LoadAndStartModule_offset, (void*)&HOOK_LoadAndStartModule);
+    // InitHook(LoadAndStartModule_hook, LoadAndStartModule_offset,
+    // (void*)&HOOK_LoadAndStartModule);
+    InitHook(SearchFlagInGlobalArgv_hook, SearchFlagInGlobalArgv_offset,
+             (void*)&HOOK_SearchFlagInGlobalArgv);
 
     initted = true;
 }
