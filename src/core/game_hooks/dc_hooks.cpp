@@ -7,6 +7,7 @@
 #include "core/linker.h"
 // #include "common/version.h"
 #include "core/file_format/psf.h"
+#include "core/libraries/kernel/memory.h"
 
 #include <map>
 
@@ -29,6 +30,9 @@ static HookInformation QueryHeapInfo_hook = {};
 
 constexpr auto CallSetupMemory_offset = 0x0055ac70;
 static HookInformation CallSetupMemory_hook = {};
+
+constexpr auto SetupMemory_offset = 0x00a7ae70;
+static HookInformation SetupMemory_hook = {};
 
 constexpr auto FuncAfterLibtbb_offset = 0x00a62e90;
 static HookInformation FuncAfterLibtbb_hook = {};
@@ -96,6 +100,7 @@ u64 HOOK_FUNC HOOK_CallSetupMemory(u8* _this) {
     LOG_INFO(Core_Hooking, "Start of printing heap info, base: {}", fmt::ptr(searched_array));
 
     // prints out the list of heap struct data
+    char *debugheap_str = nullptr, *mainheap_str = nullptr;
     for (int i = 0; i < array_size; i++) {
         HeapMetadata heap_info = searched_array[i];
         fmt::println("------ Heap {} data ------", i);
@@ -111,41 +116,128 @@ u64 HOOK_FUNC HOOK_CallSetupMemory(u8* _this) {
             fmt::println("Parent heap: {}", "null");
         }
         fmt::println("Part 8: {:#x}", heap_info.unk2);
-        break;
+        // break;
     }
     LOG_INFO(Core_Hooking, "End of hooking into stubbed function for inspecting parameters");
     auto orig = (u64 PS4_SYSV_ABI (*)(u8*))CallSetupMemory_hook.Trampoline;
-    return orig(_this);
+    auto ret = orig(_this);
+    for (int i = 0; i < array_size; i++) {
+        HeapMetadata& heap_info = searched_array[i];
+        if (heap_info.parent_heap_name && strcmp(heap_info.parent_heap_name, "MainHeap") == 0) {
+            // heap_info.base_size = 0x30000000;
+            mainheap_str = heap_info.parent_heap_name;
+        } else if (strcmp(heap_info.name, "debug_heap") == 0) {
+            heap_info.base_size = 0x100000;
+        } else if (strcmp(heap_info.name, "debug_memory") == 0) {
+            heap_info.base_size = 0x100000;
+        } else if (strcmp(heap_info.name, "editor") == 0) {
+            heap_info.base_size = 0x100000;
+            heap_info.parent_heap_name = mainheap_str;
+        } else if (strcmp(heap_info.name, "extraEditorForMsg") == 0) {
+            heap_info.base_size = 0x100000;
+            heap_info.parent_heap_name = mainheap_str;
+        } else if (strcmp(heap_info.name, "extraEditorForPart") == 0) {
+            heap_info.base_size = 0x100000;
+            heap_info.parent_heap_name = mainheap_str;
+        } else if (strcmp(heap_info.name, "extraEditorMemForGameHeap") == 0) {
+            heap_info.base_size = 0x100000;
+            heap_info.parent_heap_name = mainheap_str;
+        } else if (strcmp(heap_info.name, "extraEditorMemForMultiProcessorHeap") == 0) {
+            heap_info.base_size = 0x100000;
+            heap_info.parent_heap_name = mainheap_str;
+        } else if (strcmp(heap_info.name, "extraHotSwapMemForResourceSys") == 0) {
+            heap_info.base_size = 0x100000;
+            heap_info.parent_heap_name = mainheap_str;
+        } else if (strcmp(heap_info.name, "extra_stl_for_editor") == 0) {
+            heap_info.base_size = 0x100000;
+            heap_info.parent_heap_name = mainheap_str;
+        } else if (strcmp(heap_info.name, "TotalMainMemory") == 0) {
+            heap_info.base_size = 0x30000000;
+        }
+        fmt::println("------ Heap {} data ------", i);
+        fmt::println("Name: {}", (char*)heap_info.name);
+        fmt::println("Base size: {:#x}", heap_info.base_size);
+        for (int i = 2; i < 7; i++) {
+            // fmt::println("Part {}: {:#x}", i, heap_info[i]);
+        }
+        constexpr const char* noname = "null";
+        if (heap_info.parent_heap_name) {
+            fmt::println("Parent heap: {}", (char*)heap_info.parent_heap_name);
+        } else {
+            fmt::println("Parent heap: {}", "null");
+        }
+        fmt::println("Part 8: {:#x}", heap_info.unk2);
+        // break;
+    }
+    return ret;
+}
+
+u64 HOOK_FUNC HOOK_SetupMemory(u64 p1, u64 p2, u64 p3, u64 p4, u64 p5) {
+    /*
+    sceKernelAllocateDirectMemory(0,sceKernelGetDirectMemorySize(),DebugHeapSize,0x200000,0,&DebugHeapDmemStart);
+    sceKernelMapDirectMemory(&DebugHeapPtr,DebugHeapSize,0x33,0,DebugHeapDmemStart,0x200000);
+    sceKernelSetVirtualRangeName(DebugHeapPtr,DebugHeapSize,"DebugHeap");
+
+    plVar7 = (long *)FUN_00a78b60("DebugHeap",1,0);
+    (**(code **)(*plVar7 + 0xa0))(plVar7,DebugHeapSize,DebugHeapPtr,0,1,1);
+    */
+    auto orig = (u64 PS4_SYSV_ABI (*)(u64, u64, u64, u64, u64))SetupMemory_hook.Trampoline;
+    return orig(p1, p2, p3, p4, p5);
 }
 
 u64 HOOK_FUNC HOOK_QueryHeapInfo(u8* searched_array_struct, char* name) {
     LOG_INFO(Core_Hooking, "struct ptr: {}, searched name: {}, flags: {}",
              fmt::ptr(searched_array_struct), name, *(searched_array_struct + 4));
-    if (strcmp(name, "editor") == 0 || strcmp(name, "extraEditorMemForGameHeap") == 0 ||
-        strcmp(name, "DebugHeap") == 0) {
+    if (strcmp(name, "game") == 0) {
         int a = 0;
     }
     HeapMetadata* searched_array = *(HeapMetadata**)(searched_array_struct + 0x820);
     u32 array_size = *(u32*)(searched_array_struct + 0x818);
 
     // prints out the list of heap struct data
+    char *debugheap_str = nullptr, *mainheap_str = nullptr;
+    HeapMetadata* game_heap = nullptr;
     for (int i = 0; i < array_size; i++) {
-        break;
-        HeapMetadata heap_info = searched_array[i];
-        fmt::println("------ Heap {} data ------", i);
-        fmt::println("Name: {}", (char*)heap_info.name);
-        fmt::println("Base size: {:#x}", heap_info.base_size);
-        for (int i = 2; i < 7; i++) {
-            // fmt::println("Part {}: {:#x}", i, heap_info[i]);
+        HeapMetadata& heap_info = searched_array[i];
+        if (heap_info.parent_heap_name && strcmp(heap_info.parent_heap_name, "MainHeap") == 0) {
+            // heap_info.base_size = 0x30000000;
+            mainheap_str = heap_info.parent_heap_name;
+        } else if (strcmp(heap_info.name, "debug_heap") == 0) {
+            heap_info.base_size = 0x100000;
+        } else if (strcmp(heap_info.name, "debug_memory") == 0) {
+            heap_info.base_size = 0x100000;
+        } else if (strcmp(heap_info.name, "game") == 0) {
+            game_heap = &heap_info;
+        } else if (strcmp(heap_info.name, "editor") == 0) {
+            heap_info.base_size = 0x100000;
+            heap_info.parent_heap_name = mainheap_str;
+            LOG_INFO(Core_Hooking, "spoofing editor");
+        } else if (strcmp(heap_info.name, "extraEditorForMsg") == 0) {
+            heap_info.base_size = 0x100000;
+            heap_info.parent_heap_name = mainheap_str;
+        } else if (strcmp(heap_info.name, "extraEditorForPart") == 0) {
+            heap_info.base_size = 0x100000;
+            heap_info.parent_heap_name = mainheap_str;
+        } else if (strcmp(heap_info.name, "extraEditorMemForGameHeap") == 0) {
+            heap_info.base_size = 0x100000;
+            heap_info.parent_heap_name = mainheap_str;
+        } else if (strcmp(heap_info.name, "extraEditorMemForMultiProcessorHeap") == 0) {
+            heap_info.base_size = 0x100000;
+            heap_info.parent_heap_name = mainheap_str;
+        } else if (strcmp(heap_info.name, "extraHotSwapMemForResourceSys") == 0) {
+            heap_info.base_size = 0x100000;
+            heap_info.parent_heap_name = mainheap_str;
+        } else if (strcmp(heap_info.name, "extra_stl_for_editor") == 0) {
+            heap_info.base_size = 0x100000;
+            heap_info.parent_heap_name = mainheap_str;
+        } else if (strcmp(heap_info.name, "TotalMainMemory") == 0) {
+            heap_info.base_size = 0x30000000;
+        } else if (heap_info.parent_heap_name && strcmp(heap_info.parent_heap_name,"MainHeap") == 0) {
+            mainheap_str = heap_info.parent_heap_name;
         }
-        constexpr const char* noname = "null";
-        if (heap_info.parent_heap_name) {
-            fmt::println("Parent heap: {}", (char*)heap_info.parent_heap_name);
-        } else {
-            fmt::println("Parent heap: {}", "null");
-        }
-        fmt::println("Part 8: {:#x}", heap_info.unk2);
     }
+    if (game_heap && strcmp(name, "game") == 0)
+        game_heap->parent_heap_name = mainheap_str;
 
     u64 ret = 0;
 
@@ -221,15 +313,16 @@ void Initialize(Core::Module* mainModule) {
     EBOOT_MODULE_BASE = mainModule->GetBaseAddress();
 
     // InitHook(DebugLog_hook, DebugLog_offset, (void*)&HOOK_DebugLog);
-    // InitHook(QueryHeapInfo_hook, QueryHeapInfo_offset, (void*)&HOOK_QueryHeapInfo);
+    InitHook(QueryHeapInfo_hook, QueryHeapInfo_offset, (void*)&HOOK_QueryHeapInfo);
     // InitHook(StubAfterBootstrap_hook, StubAfterBootstrap_offset,
     // (void*)&HOOK_StubAfterBootstrap);
     InitHook(CallSetupMemory_hook, CallSetupMemory_offset, (void*)&HOOK_CallSetupMemory);
+    InitHook(SetupMemory_hook, SetupMemory_offset, (void*)&HOOK_SetupMemory);
     // InitHook(FuncAfterLibtbb_hook, FuncAfterLibtbb_offset, (void*)&HOOK_FuncAfterLibtbb);
     // InitHook(LoadAndStartModule_hook, LoadAndStartModule_offset,
     // (void*)&HOOK_LoadAndStartModule);
-    InitHook(SearchFlagInGlobalArgv_hook, SearchFlagInGlobalArgv_offset,
-             (void*)&HOOK_SearchFlagInGlobalArgv);
+    // InitHook(SearchFlagInGlobalArgv_hook, SearchFlagInGlobalArgv_offset,
+    //          (void*)&HOOK_SearchFlagInGlobalArgv);
 
     initted = true;
 }
