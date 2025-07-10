@@ -16,12 +16,14 @@
 void assert_fail_impl() {
     Common::Log::Stop();
     std::fflush(stdout);
+    std::quick_exit(1);
     Crash();
 }
 
 [[noreturn]] void unreachable_impl() {
     Common::Log::Stop();
     std::fflush(stdout);
+    std::quick_exit(1);
     Crash();
     throw std::runtime_error("Unreachable code");
 }

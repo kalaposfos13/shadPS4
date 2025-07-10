@@ -296,6 +296,8 @@ T Translator::GetSrc(const InstOperand& operand) {
         }
         break;
     default:
+        LOG_ERROR(Render_Recompiler, "Unknown operand");
+        break;
         UNREACHABLE();
     }
 
@@ -605,6 +607,8 @@ void Translator::TranslateInstruction(const GcnInst& inst, const u32 pc) {
     case InstCategory::DebugProfile:
         break;
     default:
+        LOG_ERROR(Render_Recompiler, "Unknown InstCategory");
+        break;
         UNREACHABLE();
     }
 }

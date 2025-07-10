@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2024 shadPS4 Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <deque>
 #include "common/arch.h"
 #include "common/assert.h"
 #include "common/decoder.h"
@@ -11,7 +12,6 @@
 #include <windows.h>
 #else
 #include <csignal>
-#include <pthread.h>
 #ifdef ARCH_X86_64
 #include <Zydis/Formatter.h>
 #endif
@@ -69,6 +69,7 @@ static std::string DisassembleInstruction(void* code_address) {
 
     return buffer;
 }
+std::deque<void*> access_violation_history = {};
 
 static void SignalHandler(int sig, siginfo_t* info, void* raw_context) {
     const auto* signals = Signals::Instance();
@@ -80,11 +81,25 @@ static void SignalHandler(int sig, siginfo_t* info, void* raw_context) {
     case SIGBUS: {
         const bool is_write = Common::IsWriteError(raw_context);
         if (!signals->DispatchAccessViolation(raw_context, info->si_addr)) {
-            UNREACHABLE_MSG(
-                "Unhandled access violation in thread '{}' at code address {}: {} address {}",
+            LOG_CRITICAL(
+                Debug, "Skipped access violation in thread '{}' at code address {}: {} address {}",
                 GetThreadName(), fmt::ptr(code_address), is_write ? "Write to" : "Read from",
                 fmt::ptr(info->si_addr));
+        } else if (sig == SIGBUS) {
+            LOG_CRITICAL(Debug, "SIGBUS recieved in thread '{}' at code address {}",
+                         GetThreadName(), fmt::ptr(code_address));
+        } else {
+            break;
         }
+        access_violation_history.push_front(info->si_addr);
+        if (access_violation_history.size() > 10) {
+            access_violation_history.pop_back();
+        }
+        if (access_violation_history.size() >= 3 &&
+            std::ranges::all_of(access_violation_history.begin(), access_violation_history.end(),
+                                [](void* p) { return p == access_violation_history[0]; })) {
+            UNREACHABLE_MSG("Unskippable access violation / SIGBUS detected!");
+        };
         break;
     }
     case SIGILL:
