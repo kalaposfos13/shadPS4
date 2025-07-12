@@ -244,6 +244,30 @@ s32 PS4_SYSV_ABI sceKernelSetGPO() {
     return ORBIS_OK;
 }
 
+u64* get_authinfo(u64 p1, u64 p2, u64 p3) {
+    LOG_INFO(Lib_Kernel, "called, p3: {:#x}", p3);
+    u64* ret = new u64[2](587, p3);
+    return ret;
+}
+
+struct SwVersionStruct {
+    u64 maybe_size;
+    char text_representation[0x1c];
+    u32 hex_representation;
+};
+
+s32 sceKernelGetSystemSwVersion(SwVersionStruct* ret) {
+    if (ret == nullptr) {
+        return ORBIS_OK; // but why?
+    }
+    LOG_INFO(Lib_Kernel, "called, size(?): {}", ret->maybe_size);
+    // u32 fake_fw = 0x09008000;
+    u32 fake_fw = 0x69420000;
+    ret->hex_representation = fake_fw;
+    std::strncpy(ret->text_representation, "0S.HAD.PS4", 24);
+    return ORBIS_OK;
+}
+
 void RegisterKernel(Core::Loader::SymbolsResolver* sym) {
     service_thread = std::jthread{KernelServiceThread};
 
@@ -259,6 +283,8 @@ void RegisterKernel(Core::Loader::SymbolsResolver* sym) {
     Libraries::Kernel::RegisterDebug(sym);
 
     LIB_OBJ("f7uOxY9mM1U", "libkernel", 1, "libkernel", 1, 1, &g_stack_chk_guard);
+    LIB_FUNCTION("Mv1zUObHvXI", "libkernel", 1, "libkernel", 1, 1, sceKernelGetSystemSwVersion);
+    LIB_FUNCTION("igMefp4SAv0", "libkernel", 1, "libkernel", 1, 1, get_authinfo);
     LIB_FUNCTION("PfccT7qURYE", "libkernel", 1, "libkernel", 1, 1, kernel_ioctl);
     LIB_FUNCTION("JGfTMBOdUJo", "libkernel", 1, "libkernel", 1, 1, sceKernelGetFsSandboxRandomWord);
     LIB_FUNCTION("6xVpy0Fdq+I", "libkernel", 1, "libkernel", 1, 1, _sigprocmask);
