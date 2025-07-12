@@ -78,8 +78,8 @@ void InitHLELibs(Core::Loader::SymbolsResolver* sym) {
     Libraries::CommonDialog::RegisterlibSceCommonDialog(sym);
     Libraries::MsgDialog::RegisterlibSceMsgDialog(sym);
     Libraries::AudioOut::RegisterlibSceAudioOut(sym);
-    Libraries::Http::RegisterlibSceHttp(sym);
-    Libraries::Http2::RegisterlibSceHttp2(sym);
+    // Libraries::Http::RegisterlibSceHttp(sym);
+    // Libraries::Http2::RegisterlibSceHttp2(sym);
     Libraries::Net::RegisterlibSceNet(sym);
     Libraries::NetCtl::RegisterlibSceNetCtl(sym);
     Libraries::SaveData::RegisterlibSceSaveData(sym);
