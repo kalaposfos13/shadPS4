@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2024 shadPS4 Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include <common/assert.h>
 #include "common/config.h"
 #include "common/logging/log.h"
 #include "core/libraries/libs.h"
@@ -1866,9 +1867,14 @@ int PS4_SYSV_ABI sceSystemServiceLaunchWebBrowser() {
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceSystemServiceLoadExec() {
-    LOG_ERROR(Lib_SystemService, "(STUBBED) called");
-    return ORBIS_OK;
+int PS4_SYSV_ABI sceSystemServiceLoadExec(const char* path, char* const argv[]) {
+    LOG_ERROR(Lib_SystemService, "(STUBBED) called, path: {}", path);
+    if (argv) {
+        for (int i = 0; argv[i] != nullptr; i++) {
+            LOG_INFO(Lib_SystemService, "Arg {}: {}", i , argv[i]);
+        }
+    }
+    UNREACHABLE();
 }
 
 int PS4_SYSV_ABI sceSystemServiceNavigateToAnotherApp() {
