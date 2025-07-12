@@ -128,7 +128,7 @@ s32 PS4_SYSV_ABI posix_clock_gettime(u32 clock_id, OrbisKernelTimespec* ts) {
     }
     if (clock_id == ORBIS_CLOCK_EXT_NETWORK || clock_id == ORBIS_CLOCK_EXT_DEBUG_NETWORK ||
         clock_id == ORBIS_CLOCK_EXT_AD_NETWORK || clock_id == ORBIS_CLOCK_EXT_RAW_NETWORK) {
-        LOG_ERROR(Lib_Kernel, "Unsupported clock type {}, using CLOCK_MONOTONIC", clock_id);
+        LOG_DEBUG(Lib_Kernel, "Unsupported clock type {}, using CLOCK_MONOTONIC", clock_id);
         clock_id = ORBIS_CLOCK_MONOTONIC;
     }
 
