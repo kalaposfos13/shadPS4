@@ -876,7 +876,7 @@ int PS4_SYSV_ABI sceNetEpollWait(OrbisNetId epollid, OrbisNetEpollEvent* events,
                 .data = it->second.data,
             };
             LOG_INFO(Lib_Net, "event[{}] = ( .events = {:#x}, .ident = {}, .data = {:#x} )", i,
-                     events[i].events, events[i].ident, events[i].data.u64);
+                     events[i].events, events[i].ident, events[i].data._u64);
         }
         return result;
     }
