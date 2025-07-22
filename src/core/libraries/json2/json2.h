@@ -11,236 +11,288 @@ class SymbolsResolver;
 
 namespace Libraries::Json2 {
 
-s32 PS4_SYSV_ABI Json2::Initializer::initialize(Json2::InitParameter const*)();
-s32 PS4_SYSV_ABI Json2::Initializer::initialize(Json2::InitParameter2 const*)();
-s32 PS4_SYSV_ABI Json2::Initializer::setAllocatorInfoCallBack(void (*)(int, Json2::ValueType, void*), void*)();
-s32 PS4_SYSV_ABI
-Json2::Initializer::setGlobalNullAccessCallback(Json2::Value const& (*)(Json2::ValueType, Json2::Value const*, void*), void*)();
-s32 PS4_SYSV_ABI
-Json2::Initializer::setGlobalSpecialFloatHandler(Json2::Value const (*)(Json2::FunctionType, double, Json2::Value const*, void*, bool*), void*)();
-s32 PS4_SYSV_ABI
-Json2::Initializer::setGlobalTypeMismatchHandler(Json2::Value const& (*)(Json2::ValueType, Json2::Value const*, Json2::Value const*, void*), void*)();
-s32 PS4_SYSV_ABI
-Json2::Initializer::setGlobalElementAccessFailureHandler(void (*)(int, Json2::String const*, unsigned long const*, Json2::Value const*, Json2::Value const*, void*), void*)();
-s32 PS4_SYSV_ABI Json2::Initializer::terminate()();
-s32 PS4_SYSV_ABI Json2::Initializer::Initializer()();
-s32 PS4_SYSV_ABI Json2::Initializer::Initializer()();
-s32 PS4_SYSV_ABI Json2::Initializer::~Initializer()();
-s32 PS4_SYSV_ABI Json2::Initializer::~Initializer()();
-s32 PS4_SYSV_ABI Json2::MemAllocator::notifyError(int, unsigned long, void*)();
-s32 PS4_SYSV_ABI Json2::MemAllocator::MemAllocator()();
-s32 PS4_SYSV_ABI Json2::MemAllocator::~MemAllocator()();
-s32 PS4_SYSV_ABI Json2::MemAllocator::~MemAllocator()();
-s32 PS4_SYSV_ABI Json2::MemAllocator::~MemAllocator()();
-s32 PS4_SYSV_ABI Json2::InitParameter2::setAllocator(Json2::MemAllocator*, void*)();
-s32 PS4_SYSV_ABI Json2::InitParameter2::setFileBufferSize(unsigned long)();
-s32 PS4_SYSV_ABI
-Json2::InitParameter2::setSpecialFloatFormatType(Json2::SpecialFloatFormatType)();
-s32 PS4_SYSV_ABI Json2::InitParameter2::InitParameter2()();
-s32 PS4_SYSV_ABI Json2::InitParameter2::InitParameter2()();
-s32 PS4_SYSV_ABI Json2::InitParameterRtti::InitParameterRtti(Json2::AllocParamRtti*, void*, unsigned long)();
-s32 PS4_SYSV_ABI Json2::InitParameterRtti::InitParameterRtti(Json2::AllocParamRtti*, void*, unsigned long)();
-s32 PS4_SYSV_ABI Json2::InitParameterRtti2::setAllocatorRtti(Json2::AllocParamRtti*, void*)();
-s32 PS4_SYSV_ABI Json2::InternalInitializer::terminate_staticlib()();
-s32 PS4_SYSV_ABI
-Json2::InternalInitializer::initialize_staticlib(Json2::InitParameter const*, Json2::InternalInitializer::InitOption)();
-s32 PS4_SYSV_ABI Json2::InternalInitializer::InternalInitializer()();
-s32 PS4_SYSV_ABI Json2::InternalInitializer::InternalInitializer()();
-s32 PS4_SYSV_ABI Json2::InternalInitializer::~InternalInitializer()();
-s32 PS4_SYSV_ABI Json2::InternalInitializer::~InternalInitializer()();
-s32 PS4_SYSV_ABI Json2::Free(void*)();
-s32 PS4_SYSV_ABI Json2::Array::push_front(Json2::Value const&)();
-s32 PS4_SYSV_ABI Json2::Array::clear()();
-s32 PS4_SYSV_ABI Json2::Array::erase(Json2::Array::iterator const&)();
-s32 PS4_SYSV_ABI Json2::Array::insert(Json2::Array::iterator const&, Json2::Value const&)();
-s32 PS4_SYSV_ABI Json2::Array::iterator::advance(unsigned long)();
-s32 PS4_SYSV_ABI Json2::Array::iterator::operator=(Json2::Array::iterator const&)();
-s32 PS4_SYSV_ABI Json2::Array::iterator::iterator(Json2::Array::iterator const&)();
-s32 PS4_SYSV_ABI Json2::Array::iterator::iterator()();
-s32 PS4_SYSV_ABI Json2::Array::iterator::iterator(Json2::Array::iterator const&)();
-s32 PS4_SYSV_ABI Json2::Array::iterator::iterator()();
-s32 PS4_SYSV_ABI Json2::Array::iterator::~iterator()();
-s32 PS4_SYSV_ABI Json2::Array::iterator::~iterator()();
-s32 PS4_SYSV_ABI Json2::Array::iterator::operator++(int)();
-s32 PS4_SYSV_ABI Json2::Array::iterator::operator++()();
-s32 PS4_SYSV_ABI Json2::Array::pop_back()();
-s32 PS4_SYSV_ABI Json2::Array::pop_front()();
-s32 PS4_SYSV_ABI Json2::Array::push_back(Json2::Value const&)();
-s32 PS4_SYSV_ABI Json2::Array::operator=(Json2::Array const&)();
-s32 PS4_SYSV_ABI Json2::Array::Array(Json2::Array const&)();
-s32 PS4_SYSV_ABI Json2::Array::Array()();
-s32 PS4_SYSV_ABI Json2::Array::Array(Json2::Array const&)();
-s32 PS4_SYSV_ABI Json2::Array::Array()();
-s32 PS4_SYSV_ABI Json2::Array::~Array()();
-s32 PS4_SYSV_ABI Json2::Array::~Array()();
-s32 PS4_SYSV_ABI Json2::Value::referArray()();
-s32 PS4_SYSV_ABI Json2::Value::referValue(unsigned long)();
-s32 PS4_SYSV_ABI Json2::Value::referValue(Json2::String const&)();
-s32 PS4_SYSV_ABI Json2::Value::s_nullbool();
-s32 PS4_SYSV_ABI Json2::Value::s_nullreal();
-s32 PS4_SYSV_ABI Json2::Value::referObject()();
-s32 PS4_SYSV_ABI Json2::Value::referString()();
-s32 PS4_SYSV_ABI Json2::Value::s_nullarray();
-s32 PS4_SYSV_ABI Json2::Value::referBoolean()();
-s32 PS4_SYSV_ABI Json2::Value::referInteger()();
-s32 PS4_SYSV_ABI Json2::Value::s_nullobject();
-s32 PS4_SYSV_ABI Json2::Value::s_nullstring();
-s32 PS4_SYSV_ABI Json2::Value::referUInteger()();
-s32 PS4_SYSV_ABI Json2::Value::s_nullinteger();
-s32 PS4_SYSV_ABI Json2::Value::s_nulluinteger();
-s32 PS4_SYSV_ABI Json2::Value::setNullAccessCallBack(Json2::Value const& (*)(Json2::ValueType, Json2::Value const*, void*), void*)();
-s32 PS4_SYSV_ABI
-Json2::Value::setSpecialFloatHandler(Json2::Value const (*)(Json2::FunctionType, double, Json2::Value const*, void*, bool*), void*)();
-s32 PS4_SYSV_ABI Json2::Value::setTypeMismatchHandler(Json2::Value const& (*)(Json2::ValueType, Json2::Value const*, Json2::Value const*, void*), void*)();
-s32 PS4_SYSV_ABI
-Json2::Value::setElementAccessFailureHandler(void (*)(int, Json2::String const*, unsigned long const*, Json2::Value const*, Json2::Value const*, void*), void*)();
-s32 PS4_SYSV_ABI Json2::Value::set(bool)();
-s32 PS4_SYSV_ABI Json2::Value::set(double)();
-s32 PS4_SYSV_ABI Json2::Value::set(long)();
-s32 PS4_SYSV_ABI Json2::Value::set(unsigned long)();
-s32 PS4_SYSV_ABI Json2::Value::set(Json2::ValueType)();
-s32 PS4_SYSV_ABI Json2::Value::set(char const*)();
-s32 PS4_SYSV_ABI Json2::Value::set(Json2::Array const&)();
-s32 PS4_SYSV_ABI Json2::Value::set(Json2::Object const&)();
-s32 PS4_SYSV_ABI Json2::Value::set(Json2::String const&)();
-s32 PS4_SYSV_ABI Json2::Value::set(Json2::Value const&)();
-s32 PS4_SYSV_ABI Json2::Value::swap(Json2::Value&)();
-s32 PS4_SYSV_ABI Json2::Value::clear()();
-s32 PS4_SYSV_ABI Json2::Value::referReal()();
-s32 PS4_SYSV_ABI Json2::Value::serialize(int (*)(Json2::String&, void*), void*)();
-s32 PS4_SYSV_ABI Json2::Value::serialize(Json2::String&)();
-s32 PS4_SYSV_ABI Json2::Value::serialize(Json2::String&, int (*)(Json2::String&, void*), void*)();
-s32 PS4_SYSV_ABI Json2::Value::operator=(Json2::Value const&)();
-s32 PS4_SYSV_ABI Json2::Value::Value(bool)();
-s32 PS4_SYSV_ABI Json2::Value::Value(double)();
-s32 PS4_SYSV_ABI Json2::Value::Value(long)();
-s32 PS4_SYSV_ABI Json2::Value::Value(unsigned long)();
-s32 PS4_SYSV_ABI Json2::Value::Value(Json2::ValueType)();
-s32 PS4_SYSV_ABI Json2::Value::Value(char const*)();
-s32 PS4_SYSV_ABI Json2::Value::Value(Json2::Array const&)();
-s32 PS4_SYSV_ABI Json2::Value::Value(Json2::Object const&)();
-s32 PS4_SYSV_ABI Json2::Value::Value(Json2::String const&)();
-s32 PS4_SYSV_ABI Json2::Value::Value(Json2::Value const&)();
-s32 PS4_SYSV_ABI Json2::Value::Value()();
-s32 PS4_SYSV_ABI Json2::Value::Value(bool)();
-s32 PS4_SYSV_ABI Json2::Value::Value(double)();
-s32 PS4_SYSV_ABI Json2::Value::Value(long)();
-s32 PS4_SYSV_ABI Json2::Value::Value(unsigned long)();
-s32 PS4_SYSV_ABI Json2::Value::Value(Json2::ValueType)();
-s32 PS4_SYSV_ABI Json2::Value::Value(char const*)();
-s32 PS4_SYSV_ABI Json2::Value::Value(Json2::Array const&)();
-s32 PS4_SYSV_ABI Json2::Value::Value(Json2::Object const&)();
-s32 PS4_SYSV_ABI Json2::Value::Value(Json2::String const&)();
-s32 PS4_SYSV_ABI Json2::Value::Value(Json2::Value const&)();
-s32 PS4_SYSV_ABI Json2::Value::Value()();
-s32 PS4_SYSV_ABI Json2::Value::~Value()();
-s32 PS4_SYSV_ABI Json2::Value::~Value()();
-s32 PS4_SYSV_ABI Json2::Malloc(unsigned long)();
-s32 PS4_SYSV_ABI Json2::Object::Pair::Pair(Json2::String const&, Json2::Value const&)();
-s32 PS4_SYSV_ABI Json2::Object::Pair::Pair()();
-s32 PS4_SYSV_ABI Json2::Object::Pair::Pair(Json2::String const&, Json2::Value const&)();
-s32 PS4_SYSV_ABI Json2::Object::Pair::Pair()();
-s32 PS4_SYSV_ABI Json2::Object::Pair::~Pair()();
-s32 PS4_SYSV_ABI Json2::Object::Pair::~Pair()();
-s32 PS4_SYSV_ABI Json2::Object::clear()();
-s32 PS4_SYSV_ABI Json2::Object::erase(Json2::String const&)();
-s32 PS4_SYSV_ABI Json2::Object::insert(Json2::Object::Pair const&)();
-s32 PS4_SYSV_ABI Json2::Object::iterator::advance(unsigned long)();
-s32 PS4_SYSV_ABI Json2::Object::iterator::operator=(Json2::Object::iterator const&)();
-s32 PS4_SYSV_ABI Json2::Object::iterator::iterator(Json2::Object::iterator const&)();
-s32 PS4_SYSV_ABI Json2::Object::iterator::iterator()();
-s32 PS4_SYSV_ABI Json2::Object::iterator::iterator(Json2::Object::iterator const&)();
-s32 PS4_SYSV_ABI Json2::Object::iterator::iterator()();
-s32 PS4_SYSV_ABI Json2::Object::iterator::~iterator()();
-s32 PS4_SYSV_ABI Json2::Object::iterator::~iterator()();
-s32 PS4_SYSV_ABI Json2::Object::iterator::operator++(int)();
-s32 PS4_SYSV_ABI Json2::Object::iterator::operator++()();
-s32 PS4_SYSV_ABI Json2::Object::operator=(Json2::Object const&)();
-s32 PS4_SYSV_ABI Json2::Object::Object(Json2::Object const&)();
-s32 PS4_SYSV_ABI Json2::Object::Object()();
-s32 PS4_SYSV_ABI Json2::Object::Object(Json2::Object const&)();
-s32 PS4_SYSV_ABI Json2::Object::Object()();
-s32 PS4_SYSV_ABI Json2::Object::~Object()();
-s32 PS4_SYSV_ABI Json2::Object::~Object()();
-s32 PS4_SYSV_ABI Json2::Object::operator[](Json2::String const&)();
-s32 PS4_SYSV_ABI Json2::Parser::parse(Json2::Value&, int (*)(char&, void*), void*)();
-s32 PS4_SYSV_ABI Json2::Parser::parse(Json2::Value&, char const*)();
-s32 PS4_SYSV_ABI Json2::Parser::parse(Json2::Value&, char const*, unsigned long)();
-s32 PS4_SYSV_ABI Json2::String::npos();
-s32 PS4_SYSV_ABI Json2::String::clear()();
-s32 PS4_SYSV_ABI Json2::String::append(char const*)();
-s32 PS4_SYSV_ABI Json2::String::append(char const*, unsigned long)();
-s32 PS4_SYSV_ABI Json2::String::append(Json2::String const&)();
-s32 PS4_SYSV_ABI Json2::String::resize(unsigned long)();
-s32 PS4_SYSV_ABI Json2::String::reserve(unsigned long)();
-s32 PS4_SYSV_ABI Json2::String::operator=(Json2::String const&)();
-s32 PS4_SYSV_ABI Json2::String::String(char const*)();
-s32 PS4_SYSV_ABI Json2::String::String(Json2::String const&)();
-s32 PS4_SYSV_ABI Json2::String::String()();
-s32 PS4_SYSV_ABI Json2::String::String(char const*)();
-s32 PS4_SYSV_ABI Json2::String::String(Json2::String const&)();
-s32 PS4_SYSV_ABI Json2::String::String()();
-s32 PS4_SYSV_ABI Json2::String::~String()();
-s32 PS4_SYSV_ABI Json2::String::~String()();
-s32 PS4_SYSV_ABI Json2::String::operator+=(unsigned char)();
-s32 PS4_SYSV_ABI Json2::String::operator+=(char const*)();
-s32 PS4_SYSV_ABI Json2::InitParameter2::getUserData() const();
-s32 PS4_SYSV_ABI Json2::InitParameter2::getAllocator() const();
-s32 PS4_SYSV_ABI Json2::InitParameter2::getFileBufferSize() const();
-s32 PS4_SYSV_ABI Json2::InitParameter2::getSpecialFloatFormatType() const();
-s32 PS4_SYSV_ABI Json2::Array::end() const();
-s32 PS4_SYSV_ABI Json2::Array::back() const();
-s32 PS4_SYSV_ABI Json2::Array::size() const();
-s32 PS4_SYSV_ABI Json2::Array::begin() const();
-s32 PS4_SYSV_ABI Json2::Array::empty() const();
-s32 PS4_SYSV_ABI Json2::Array::front() const();
-s32 PS4_SYSV_ABI Json2::Array::iterator::operator*() const();
-s32 PS4_SYSV_ABI Json2::Array::iterator::operator!=(Json2::Array::iterator const&) const();
-s32 PS4_SYSV_ABI Json2::Array::iterator::operator->() const();
-s32 PS4_SYSV_ABI Json2::Value::getBoolean() const();
-s32 PS4_SYSV_ABI Json2::Value::getInteger() const();
-s32 PS4_SYSV_ABI Json2::Value::getUInteger() const();
-s32 PS4_SYSV_ABI Json2::Value::count() const();
-s32 PS4_SYSV_ABI Json2::Value::getReal() const();
-s32 PS4_SYSV_ABI Json2::Value::getType() const();
-s32 PS4_SYSV_ABI Json2::Value::getArray() const();
-s32 PS4_SYSV_ABI Json2::Value::getValue(unsigned long) const();
-s32 PS4_SYSV_ABI Json2::Value::getValue(Json2::String const&) const();
-s32 PS4_SYSV_ABI Json2::Value::toString(Json2::String&) const();
-s32 PS4_SYSV_ABI Json2::Value::getObject() const();
-s32 PS4_SYSV_ABI Json2::Value::getString() const();
-s32 PS4_SYSV_ABI Json2::Value::operator bool() const();
-s32 PS4_SYSV_ABI Json2::Value::operator[](unsigned long) const();
-s32 PS4_SYSV_ABI Json2::Value::operator[](char const*) const();
-s32 PS4_SYSV_ABI Json2::Value::operator[](Json2::String const&) const();
-s32 PS4_SYSV_ABI Json2::Object::end() const();
-s32 PS4_SYSV_ABI Json2::Object::find(Json2::String const&) const();
-s32 PS4_SYSV_ABI Json2::Object::size() const();
-s32 PS4_SYSV_ABI Json2::Object::begin() const();
-s32 PS4_SYSV_ABI Json2::Object::empty() const();
-s32 PS4_SYSV_ABI Json2::Object::iterator::operator*() const();
-s32 PS4_SYSV_ABI Json2::Object::iterator::operator==(Json2::Object::iterator const&) const();
-s32 PS4_SYSV_ABI Json2::Object::iterator::operator!=(Json2::Object::iterator const&) const();
-s32 PS4_SYSV_ABI Json2::Object::iterator::operator->() const();
-s32 PS4_SYSV_ABI Json2::String::at(unsigned long) const();
-s32 PS4_SYSV_ABI Json2::String::find(char, unsigned long) const();
-s32 PS4_SYSV_ABI Json2::String::find(char const*, unsigned long) const();
-s32 PS4_SYSV_ABI Json2::String::find(char const*, unsigned long, unsigned long) const();
-s32 PS4_SYSV_ABI Json2::String::find(Json2::String const&, unsigned long) const();
-s32 PS4_SYSV_ABI Json2::String::size() const();
-s32 PS4_SYSV_ABI Json2::String::c_str() const();
-s32 PS4_SYSV_ABI Json2::String::empty() const();
-s32 PS4_SYSV_ABI Json2::String::rfind(char, unsigned long) const();
-s32 PS4_SYSV_ABI Json2::String::rfind(char const*, unsigned long) const();
-s32 PS4_SYSV_ABI Json2::String::rfind(char const*, unsigned long, unsigned long) const();
-s32 PS4_SYSV_ABI Json2::String::rfind(Json2::String const&, unsigned long) const();
-s32 PS4_SYSV_ABI Json2::String::length() const();
-s32 PS4_SYSV_ABI Json2::String::substr(unsigned long, unsigned long) const();
-s32 PS4_SYSV_ABI Json2::String::compare(char const*) const();
-s32 PS4_SYSV_ABI Json2::String::compare(Json2::String const&) const();
-s32 PS4_SYSV_ABI Json2::String::capacity() const();
-s32 PS4_SYSV_ABI Json2::String::operator==(char const*) const();
-s32 PS4_SYSV_ABI Json2::String::operator==(Json2::String const&) const();
+s32 PS4_SYSV_ABI Free(void*);
+s32 PS4_SYSV_ABI Malloc(unsigned long);
+
+// some of these might be enums
+struct ValueType {};
+struct FunctionType {};
+struct SpecialFloatFormatType {};
+
+class InitParameter {};
+
+class InitParameter2 {
+    s32 setAllocator(Json2::MemAllocator*, void*);
+    s32 setFileBufferSize(unsigned long);
+    s32 setSpecialFloatFormatType(Json2::SpecialFloatFormatType);
+    InitParameter2();
+    InitParameter2();
+    s32 getUserData() const;
+    s32 getAllocator() const;
+    s32 getFileBufferSize() const;
+    s32 getSpecialFloatFormatType() const;
+};
+
+class Initializer {
+public:
+    s32 PS4_SYSV_ABI initialize(Json2::InitParameter const*);
+    s32 PS4_SYSV_ABI initialize(Json2::InitParameter2 const*);
+    s32 PS4_SYSV_ABI setAllocatorInfoCallBack(void (*)(int, Json2::ValueType, void*), void*);
+    s32 PS4_SYSV_ABI setAllocatorInfoCallBack(void (*)(int, Json2::ValueType, void*), void*);
+    s32 PS4_SYSV_ABI setGlobalNullAccessCallback(Json2::Value const& (*)(Json2::ValueType, Json2::Value const*, void*), void*);
+    s32 PS4_SYSV_ABI setGlobalSpecialFloatHandler(Json2::Value const (*)(Json2::FunctionType, double, Json2::Value const*, void*, bool*), void*);
+    s32 PS4_SYSV_ABI setGlobalTypeMismatchHandler(Json2::Value const& (*)(Json2::ValueType, Json2::Value const*, Json2::Value const*, void*), void*);
+    s32 PS4_SYSV_ABI setGlobalElementAccessFailureHandler(void (*)(int, Json2::String const*, unsigned long const*, Json2::Value const*, Json2::Value const*, void*), void*);
+    s32 PS4_SYSV_ABI terminate();
+    PS4_SYSV_ABI Initializer();
+    PS4_SYSV_ABI Initializer();
+    PS4_SYSV_ABI ~Initializer();
+    PS4_SYSV_ABI ~Initializer();
+};
+
+class MemAllocator {
+public:
+    s32 notifyError(int, unsigned long, void*);
+    MemAllocator();
+    ~MemAllocator();
+    ~MemAllocator();
+    ~MemAllocator();
+};
+
+struct AllocParamRtti {};
+
+class InitParameterRtti {
+public:
+    InitParameterRtti(Json2::AllocParamRtti*, void*, unsigned long);
+    InitParameterRtti(Json2::AllocParamRtti*, void*, unsigned long);
+};
+
+class InitParameterRtti2 {
+public:
+    s32 setAllocatorRtti(Json2::AllocParamRtti*, void*);
+};
+
+class InternalInitializer {
+public:
+    struct InitOption {};
+    s32 terminate_staticlib();
+    s32 initialize_staticlib(Json2::InitParameter const*, Json2::InternalInitializer::InitOption);
+    InternalInitializer();
+    InternalInitializer();
+    ~InternalInitializer();
+    ~InternalInitializer();
+};
+
+class Array {
+public:
+    class iterator {
+        iterator(Json2::Array::iterator const&);
+        iterator();
+        iterator(Json2::Array::iterator const&);
+        iterator();
+        ~iterator();
+        ~iterator();
+        s32 advance(unsigned long);
+        s32 operator=(Json2::Array::iterator const&);
+        s32 operator++(int);
+        s32 operator++();
+        s32 operator*() const;
+        s32 operator!=(Json2::Array::iterator const&) const;
+        s32 operator->() const;
+    };
+    s32 push_front(Json2::Value const&);
+    s32 clear();
+    s32 erase(Json2::Array::iterator const&);
+    s32 insert(Json2::Array::iterator const&, Json2::Value const&);
+    s32 pop_back();
+    s32 pop_front();
+    s32 push_back(Json2::Value const&);
+    s32 operator=(Json2::Array const&);
+    s32 end() const;
+    s32 back() const;
+    s32 size() const;
+    s32 begin() const;
+    s32 empty() const;
+    s32 front() const;
+    Array(Json2::Array const&);
+    Array();
+    Array(Json2::Array const&);
+    Array();
+    ~Array();
+    ~Array();
+};
+
+class Value {
+public:
+    static s32 s_nullbool;
+    static s32 s_nullreal;
+    static s32 s_nullarray;
+    static s32 s_nullobject;
+    static s32 s_nullstring;
+    static s32 s_nullinteger;
+    static s32 s_nulluinteger;
+    s32 referArray();
+    s32 referValue(unsigned long);
+    s32 referValue(Json2::String const&);
+    s32 referObject();
+    s32 referString();
+    s32 referBoolean();
+    s32 referInteger();
+    s32 referUInteger();
+    s32 setNullAccessCallBack(Json2::Value const& (*)(Json2::ValueType, Json2::Value const*, void*), void*);
+    s32 setSpecialFloatHandler(Json2::Value const (*)(Json2::FunctionType, double, Json2::Value const*, void*, bool*), void*);
+    s32 setTypeMismatchHandler(Json2::Value const& (*)(Json2::ValueType, Json2::Value const*, Json2::Value const*, void*), void*);
+    s32 setElementAccessFailureHandler(void (*)(int, Json2::String const*, unsigned long const*, Json2::Value const*, Json2::Value const*, void*), void*);
+    s32 set(bool);
+    s32 set(double);
+    s32 set(long);
+    s32 set(unsigned long);
+    s32 set(Json2::ValueType);
+    s32 set(char const*);
+    s32 set(Json2::Array const&);
+    s32 set(Json2::Object const&);
+    s32 set(Json2::String const&);
+    s32 set(Json2::Value const&);
+    s32 swap(Json2::Value&);
+    s32 clear();
+    s32 referReal();
+    s32 serialize(int (*)(Json2::String&, void*), void*);
+    s32 serialize(Json2::String&);
+    s32 serialize(Json2::String&, int (*)(Json2::String&, void*), void*);
+    s32 getBoolean() const;
+    s32 getInteger() const;
+    s32 getUInteger() const;
+    s32 count() const;
+    s32 getReal() const;
+    s32 getType() const;
+    s32 getArray() const;
+    s32 getValue(unsigned long) const;
+    s32 getValue(Json2::String const&) const;
+    s32 toString(Json2::String&) const;
+    s32 getObject() const;
+    s32 getString() const;
+    s32 operator=(Json2::Value const&);
+    operator bool() const;
+    s32 operator[](unsigned long) const;
+    s32 operator[](char const*) const;
+    s32 operator[](Json2::String const&) const;
+    Value(bool);
+    Value(double);
+    Value(long);
+    Value(unsigned long);
+    Value(Json2::ValueType);
+    Value(char const*);
+    Value(Json2::Array const&);
+    Value(Json2::Object const&);
+    Value(Json2::String const&);
+    Value(Json2::Value const&);
+    Value();
+    Value(bool);
+    Value(double);
+    Value(long);
+    Value(unsigned long);
+    Value(Json2::ValueType);
+    Value(char const*);
+    Value(Json2::Array const&);
+    Value(Json2::Object const&);
+    Value(Json2::String const&);
+    Value(Json2::Value const&);
+    Value();
+    ~Value();
+    ~Value();
+};
+
+class Object {
+public:
+    class Pair {
+    public:
+        Pair(Json2::String const&, Json2::Value const&);
+        Pair();
+        Pair(Json2::String const&, Json2::Value const&);
+        Pair();
+        ~Pair();
+        ~Pair();
+    };
+    class iterator {
+    public:
+        iterator(Json2::Object::iterator const&);
+        iterator();
+        iterator(Json2::Object::iterator const&);
+        iterator();
+        ~iterator();
+        ~iterator();
+        s32 advance(unsigned long);
+        s32 operator=(Json2::Object::iterator const&);
+        s32 operator++(int);
+        s32 operator++();
+        s32 operator*() const;
+        s32 operator==(Json2::Object::iterator const&) const;
+        s32 operator!=(Json2::Object::iterator const&) const;
+        s32 operator->() const;
+    };
+    s32 clear();
+    s32 erase(Json2::String const&);
+    s32 insert(Json2::Object::Pair const&);
+    s32 end() const;
+    s32 find(Json2::String const&) const;
+    s32 size() const;
+    s32 begin() const;
+    s32 empty() const;
+    s32 operator=(Json2::Object const&);
+    s32 operator[](Json2::String const&);
+    Object(Json2::Object const&);
+    Object();
+    Object(Json2::Object const&);
+    Object();
+    ~Object();
+    ~Object();
+};
+
+class Parser {
+    s32 parse(Json2::Value&, int (*)(char&, void*), void*);
+    s32 parse(Json2::Value&, char const*);
+    s32 parse(Json2::Value&, char const*, unsigned long);
+};
+
+class String {
+    s32 npos;
+    s32 clear();
+    s32 append(char const*);
+    s32 append(char const*, unsigned long);
+    s32 append(Json2::String const&);
+    s32 resize(unsigned long);
+    s32 reserve(unsigned long);
+    s32 at(unsigned long) const;
+    s32 find(char, unsigned long) const;
+    s32 find(char const*, unsigned long) const;
+    s32 find(char const*, unsigned long, unsigned long) const;
+    s32 find(Json2::String const&, unsigned long) const;
+    s32 size() const;
+    s32 c_str() const;
+    s32 empty() const;
+    s32 rfind(char, unsigned long) const;
+    s32 rfind(char const*, unsigned long) const;
+    s32 rfind(char const*, unsigned long, unsigned long) const;
+    s32 rfind(Json2::String const&, unsigned long) const;
+    s32 length() const;
+    s32 substr(unsigned long, unsigned long) const;
+    s32 compare(char const*) const;
+    s32 compare(Json2::String const&) const;
+    s32 capacity() const;
+    s32 operator==(char const*) const;
+    s32 operator==(Json2::String const&) const;
+    s32 operator=(Json2::String const&);
+    s32 operator+=(unsigned char);
+    s32 operator+=(char const*);
+    String(char const*);
+    String(Json2::String const&);
+    String();
+    String(char const*);
+    String(Json2::String const&);
+    String();
+    ~String();
+    ~String();
+};
 
 void RegisterLib(Core::Loader::SymbolsResolver* sym);
-} // namespace Libraries::Json
+} // namespace Libraries::Json2
