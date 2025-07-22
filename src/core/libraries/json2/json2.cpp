@@ -9,1120 +9,1120 @@
 namespace Libraries::Json2 {
 
 s32 PS4_SYSV_ABI _ZN3sce4Json11Initializer10initializeEPKNS0_13InitParameterE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json11Initializer10initializeEPKNS0_14InitParameter2E() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json11Initializer24setAllocatorInfoCallBackEPFviNS0_9ValueTypeEPvES3_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI
 _ZN3sce4Json11Initializer27setGlobalNullAccessCallbackEPFRKNS0_5ValueENS0_9ValueTypeEPS3_PvES7_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI
 _ZN3sce4Json11Initializer28setGlobalSpecialFloatHandlerEPFKNS0_5ValueENS0_12FunctionTypeEdPS3_PvPbES6_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI
 _ZN3sce4Json11Initializer28setGlobalTypeMismatchHandlerEPFRKNS0_5ValueENS0_9ValueTypeEPS3_S6_PvES7_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI
 _ZN3sce4Json11Initializer36setGlobalElementAccessFailureHandlerEPFviPKNS0_6StringEPKmPKNS0_5ValueES9_PvESA_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json11Initializer9terminateEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json11InitializerC1Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json11InitializerC2Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json11InitializerD1Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json11InitializerD2Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json12MemAllocator11notifyErrorEimPv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json12MemAllocatorC2Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json12MemAllocatorD0Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json12MemAllocatorD1Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json12MemAllocatorD2Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json14InitParameter212setAllocatorEPNS0_12MemAllocatorEPv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json14InitParameter217setFileBufferSizeEm() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI
 _ZN3sce4Json14InitParameter225setSpecialFloatFormatTypeENS0_22SpecialFloatFormatTypeE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json14InitParameter2C1Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json14InitParameter2C2Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json17InitParameterRttiC1EPNS0_14AllocParamRttiEPvm() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json17InitParameterRttiC2EPNS0_14AllocParamRttiEPvm() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json18InitParameterRtti216setAllocatorRttiEPNS0_14AllocParamRttiEPv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json19InternalInitializer19terminate_staticlibEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI
 _ZN3sce4Json19InternalInitializer20initialize_staticlibEPKNS0_13InitParameterENS1_10InitOptionE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json19InternalInitializerC1Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json19InternalInitializerC2Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json19InternalInitializerD1Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json19InternalInitializerD2Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json4FreeEPv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Array10push_frontERKNS0_5ValueE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Array5clearEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Array5eraseERKNS1_8iteratorE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Array6insertERKNS1_8iteratorERKNS0_5ValueE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Array8iterator7advanceEm() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Array8iteratoraSERKS2_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Array8iteratorC1ERKS2_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Array8iteratorC1Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Array8iteratorC2ERKS2_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Array8iteratorC2Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Array8iteratorD1Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Array8iteratorD2Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Array8iteratorppEi() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Array8iteratorppEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Array8pop_backEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Array9pop_frontEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Array9push_backERKNS0_5ValueE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ArrayaSERKS1_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ArrayC1ERKS1_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ArrayC1Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ArrayC2ERKS1_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ArrayC2Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ArrayD1Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ArrayD2Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value10referArrayEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value10referValueEm() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value10referValueERKNS0_6StringE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value10s_nullboolE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value10s_nullrealE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value11referObjectEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value11referStringEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value11s_nullarrayE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value12referBooleanEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value12referIntegerEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value12s_nullobjectE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value12s_nullstringE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value13referUIntegerEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value13s_nullintegerE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value14s_nulluintegerE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value21setNullAccessCallBackEPFRKS1_NS0_9ValueTypeEPS2_PvES6_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI
 _ZN3sce4Json5Value22setSpecialFloatHandlerEPFKS1_NS0_12FunctionTypeEdPS2_PvPbES5_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value22setTypeMismatchHandlerEPFRKS1_NS0_9ValueTypeEPS2_S5_PvES6_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI
 _ZN3sce4Json5Value30setElementAccessFailureHandlerEPFviPKNS0_6StringEPKmPKS1_S8_PvES9_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value3setEb() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value3setEd() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value3setEl() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value3setEm() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value3setENS0_9ValueTypeE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value3setEPKc() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value3setERKNS0_5ArrayE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value3setERKNS0_6ObjectE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value3setERKNS0_6StringE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value3setERKS1_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value4swapERS1_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value5clearEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value9referRealEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value9serializeEPFiRNS0_6StringEPvES4_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value9serializeERNS0_6StringE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5Value9serializeERNS0_6StringEPFiS3_PvES4_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ValueaSERKS1_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ValueC1Eb() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ValueC1Ed() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ValueC1El() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ValueC1Em() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ValueC1ENS0_9ValueTypeE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ValueC1EPKc() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ValueC1ERKNS0_5ArrayE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ValueC1ERKNS0_6ObjectE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ValueC1ERKNS0_6StringE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ValueC1ERKS1_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ValueC1Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ValueC2Eb() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ValueC2Ed() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ValueC2El() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ValueC2Em() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ValueC2ENS0_9ValueTypeE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ValueC2EPKc() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ValueC2ERKNS0_5ArrayE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ValueC2ERKNS0_6ObjectE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ValueC2ERKNS0_6StringE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ValueC2ERKS1_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ValueC2Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ValueD1Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json5ValueD2Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6MallocEm() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6Object4PairC1ERKNS0_6StringERKNS0_5ValueE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6Object4PairC1Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6Object4PairC2ERKNS0_6StringERKNS0_5ValueE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6Object4PairC2Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6Object4PairD1Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6Object4PairD2Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6Object5clearEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6Object5eraseERKNS0_6StringE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6Object6insertERKNS1_4PairE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6Object8iterator7advanceEm() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6Object8iteratoraSERKS2_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6Object8iteratorC1ERKS2_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6Object8iteratorC1Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6Object8iteratorC2ERKS2_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6Object8iteratorC2Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6Object8iteratorD1Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6Object8iteratorD2Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6Object8iteratorppEi() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6Object8iteratorppEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6ObjectaSERKS1_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6ObjectC1ERKS1_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6ObjectC1Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6ObjectC2ERKS1_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6ObjectC2Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6ObjectD1Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6ObjectD2Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6ObjectixERKNS0_6StringE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6Parser5parseERNS0_5ValueEPFiRcPvES5_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6Parser5parseERNS0_5ValueEPKc() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6Parser5parseERNS0_5ValueEPKcm() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6String4nposE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6String5clearEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6String6appendEPKc() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6String6appendEPKcm() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6String6appendERKS1_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6String6resizeEm() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6String7reserveEm() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6StringaSERKS1_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6StringC1EPKc() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6StringC1ERKS1_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6StringC1Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6StringC2EPKc() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6StringC2ERKS1_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6StringC2Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6StringD1Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6StringD2Ev() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6StringpLEh() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZN3sce4Json6StringpLEPKc() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json14InitParameter211getUserDataEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json14InitParameter212getAllocatorEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json14InitParameter217getFileBufferSizeEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json14InitParameter225getSpecialFloatFormatTypeEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json5Array3endEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json5Array4backEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json5Array4sizeEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json5Array5beginEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json5Array5emptyEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json5Array5frontEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json5Array8iteratordeEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json5Array8iteratorneERKS2_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json5Array8iteratorptEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json5Value10getBooleanEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json5Value10getIntegerEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json5Value11getUIntegerEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json5Value5countEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json5Value7getRealEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json5Value7getTypeEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json5Value8getArrayEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json5Value8getValueEm() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json5Value8getValueERKNS0_6StringE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json5Value8toStringERNS0_6StringE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json5Value9getObjectEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json5Value9getStringEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json5ValuecvbEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json5ValueixEm() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json5ValueixEPKc() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json5ValueixERKNS0_6StringE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6Object3endEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6Object4findERKNS0_6StringE() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6Object4sizeEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6Object5beginEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6Object5emptyEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6Object8iteratordeEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6Object8iteratoreqERKS2_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6Object8iteratorneERKS2_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6Object8iteratorptEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6String2atEm() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6String4findEcm() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6String4findEPKcm() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6String4findEPKcmm() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6String4findERKS1_m() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6String4sizeEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6String5c_strEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6String5emptyEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6String5rfindEcm() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6String5rfindEPKcm() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6String5rfindEPKcmm() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6String5rfindERKS1_m() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6String6lengthEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6String6substrEmm() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6String7compareEPKc() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6String7compareERKS1_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6String8capacityEv() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6StringeqEPKc() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI _ZNK3sce4Json6StringeqERKS1_() {
-    LOG_ERROR(Lib_Json, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
