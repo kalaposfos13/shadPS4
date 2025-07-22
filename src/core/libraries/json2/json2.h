@@ -19,107 +19,43 @@ struct ValueType {};
 struct FunctionType {};
 struct SpecialFloatFormatType {};
 
-class InitParameter {};
+class Object;
+class Array;
 
-class InitParameter2 {
-    s32 setAllocator(Json2::MemAllocator*, void*);
-    s32 setFileBufferSize(unsigned long);
-    s32 setSpecialFloatFormatType(Json2::SpecialFloatFormatType);
-    InitParameter2();
-    InitParameter2();
-    s32 getUserData() const;
-    s32 getAllocator() const;
-    s32 getFileBufferSize() const;
-    s32 getSpecialFloatFormatType() const;
-};
-
-class Initializer {
-public:
-    s32 PS4_SYSV_ABI initialize(Json2::InitParameter const*);
-    s32 PS4_SYSV_ABI initialize(Json2::InitParameter2 const*);
-    s32 PS4_SYSV_ABI setAllocatorInfoCallBack(void (*)(int, Json2::ValueType, void*), void*);
-    s32 PS4_SYSV_ABI setAllocatorInfoCallBack(void (*)(int, Json2::ValueType, void*), void*);
-    s32 PS4_SYSV_ABI setGlobalNullAccessCallback(Json2::Value const& (*)(Json2::ValueType, Json2::Value const*, void*), void*);
-    s32 PS4_SYSV_ABI setGlobalSpecialFloatHandler(Json2::Value const (*)(Json2::FunctionType, double, Json2::Value const*, void*, bool*), void*);
-    s32 PS4_SYSV_ABI setGlobalTypeMismatchHandler(Json2::Value const& (*)(Json2::ValueType, Json2::Value const*, Json2::Value const*, void*), void*);
-    s32 PS4_SYSV_ABI setGlobalElementAccessFailureHandler(void (*)(int, Json2::String const*, unsigned long const*, Json2::Value const*, Json2::Value const*, void*), void*);
-    s32 PS4_SYSV_ABI terminate();
-    PS4_SYSV_ABI Initializer();
-    PS4_SYSV_ABI Initializer();
-    PS4_SYSV_ABI ~Initializer();
-    PS4_SYSV_ABI ~Initializer();
-};
-
-class MemAllocator {
-public:
-    s32 notifyError(int, unsigned long, void*);
-    MemAllocator();
-    ~MemAllocator();
-    ~MemAllocator();
-    ~MemAllocator();
-};
-
-struct AllocParamRtti {};
-
-class InitParameterRtti {
-public:
-    InitParameterRtti(Json2::AllocParamRtti*, void*, unsigned long);
-    InitParameterRtti(Json2::AllocParamRtti*, void*, unsigned long);
-};
-
-class InitParameterRtti2 {
-public:
-    s32 setAllocatorRtti(Json2::AllocParamRtti*, void*);
-};
-
-class InternalInitializer {
-public:
-    struct InitOption {};
-    s32 terminate_staticlib();
-    s32 initialize_staticlib(Json2::InitParameter const*, Json2::InternalInitializer::InitOption);
-    InternalInitializer();
-    InternalInitializer();
-    ~InternalInitializer();
-    ~InternalInitializer();
-};
-
-class Array {
-public:
-    class iterator {
-        iterator(Json2::Array::iterator const&);
-        iterator();
-        iterator(Json2::Array::iterator const&);
-        iterator();
-        ~iterator();
-        ~iterator();
-        s32 advance(unsigned long);
-        s32 operator=(Json2::Array::iterator const&);
-        s32 operator++(int);
-        s32 operator++();
-        s32 operator*() const;
-        s32 operator!=(Json2::Array::iterator const&) const;
-        s32 operator->() const;
-    };
-    s32 push_front(Json2::Value const&);
+class String {
+    s32 npos;
     s32 clear();
-    s32 erase(Json2::Array::iterator const&);
-    s32 insert(Json2::Array::iterator const&, Json2::Value const&);
-    s32 pop_back();
-    s32 pop_front();
-    s32 push_back(Json2::Value const&);
-    s32 operator=(Json2::Array const&);
-    s32 end() const;
-    s32 back() const;
+    s32 append(char const*);
+    s32 append(char const*, unsigned long);
+    s32 append(Json2::String const&);
+    s32 resize(unsigned long);
+    s32 reserve(unsigned long);
+    s32 at(unsigned long) const;
+    s32 find(char, unsigned long) const;
+    s32 find(char const*, unsigned long) const;
+    s32 find(char const*, unsigned long, unsigned long) const;
+    s32 find(Json2::String const&, unsigned long) const;
     s32 size() const;
-    s32 begin() const;
+    s32 c_str() const;
     s32 empty() const;
-    s32 front() const;
-    Array(Json2::Array const&);
-    Array();
-    Array(Json2::Array const&);
-    Array();
-    ~Array();
-    ~Array();
+    s32 rfind(char, unsigned long) const;
+    s32 rfind(char const*, unsigned long) const;
+    s32 rfind(char const*, unsigned long, unsigned long) const;
+    s32 rfind(Json2::String const&, unsigned long) const;
+    s32 length() const;
+    s32 substr(unsigned long, unsigned long) const;
+    s32 compare(char const*) const;
+    s32 compare(Json2::String const&) const;
+    s32 capacity() const;
+    s32 operator==(char const*) const;
+    s32 operator==(Json2::String const&) const;
+    s32 operator=(Json2::String const&);
+    s32 operator+=(unsigned char);
+    s32 operator+=(char const*);
+    String(char const*);
+    String(Json2::String const&);
+    String();
+    ~String();
 };
 
 class Value {
@@ -187,19 +123,95 @@ public:
     Value(Json2::String const&);
     Value(Json2::Value const&);
     Value();
-    Value(bool);
-    Value(double);
-    Value(long);
-    Value(unsigned long);
-    Value(Json2::ValueType);
-    Value(char const*);
-    Value(Json2::Array const&);
-    Value(Json2::Object const&);
-    Value(Json2::String const&);
-    Value(Json2::Value const&);
-    Value();
     ~Value();
-    ~Value();
+};
+
+class MemAllocator {
+public:
+    s32 notifyError(int, unsigned long, void*);
+    MemAllocator();
+    ~MemAllocator();
+};
+
+class InitParameter {};
+
+class InitParameter2 {
+    s32 setAllocator(Json2::MemAllocator*, void*);
+    s32 setFileBufferSize(unsigned long);
+    s32 setSpecialFloatFormatType(Json2::SpecialFloatFormatType);
+    s32 getUserData() const;
+    s32 getAllocator() const;
+    s32 getFileBufferSize() const;
+    s32 getSpecialFloatFormatType() const;
+    InitParameter2();
+};
+
+class Initializer {
+public:
+    s32 PS4_SYSV_ABI initialize(Json2::InitParameter const*);
+    s32 PS4_SYSV_ABI initialize(Json2::InitParameter2 const*);
+    s32 PS4_SYSV_ABI setAllocatorInfoCallBack(void (*)(int, Json2::ValueType, void*), void*);
+    s32 PS4_SYSV_ABI setGlobalNullAccessCallback(Json2::Value const& (*)(Json2::ValueType, Json2::Value const*, void*), void*);
+    s32 PS4_SYSV_ABI setGlobalSpecialFloatHandler(Json2::Value const (*)(Json2::FunctionType, double, Json2::Value const*, void*, bool*), void*);
+    s32 PS4_SYSV_ABI setGlobalTypeMismatchHandler(Json2::Value const& (*)(Json2::ValueType, Json2::Value const*, Json2::Value const*, void*), void*);
+    s32 PS4_SYSV_ABI setGlobalElementAccessFailureHandler(void (*)(int, Json2::String const*, unsigned long const*, Json2::Value const*, Json2::Value const*, void*), void*);
+    s32 PS4_SYSV_ABI terminate();
+    PS4_SYSV_ABI Initializer();
+    PS4_SYSV_ABI ~Initializer();
+};
+
+struct AllocParamRtti {};
+
+class InitParameterRtti {
+public:
+    InitParameterRtti(Json2::AllocParamRtti*, void*, unsigned long);
+};
+
+class InitParameterRtti2 {
+public:
+    s32 setAllocatorRtti(Json2::AllocParamRtti*, void*);
+};
+
+class InternalInitializer {
+public:
+    struct InitOption {};
+    s32 terminate_staticlib();
+    s32 initialize_staticlib(Json2::InitParameter const*, Json2::InternalInitializer::InitOption);
+    InternalInitializer();
+    ~InternalInitializer();
+};
+
+class Array {
+public:
+    class iterator {
+        s32 advance(unsigned long);
+        s32 operator=(Json2::Array::iterator const&);
+        s32 operator++(int);
+        s32 operator++();
+        s32 operator*() const;
+        s32 operator!=(Json2::Array::iterator const&) const;
+        s32 operator->() const;
+        iterator(Json2::Array::iterator const&);
+        iterator();
+        ~iterator();
+    };
+    s32 push_front(Json2::Value const&);
+    s32 clear();
+    s32 erase(Json2::Array::iterator const&);
+    s32 insert(Json2::Array::iterator const&, Json2::Value const&);
+    s32 pop_back();
+    s32 pop_front();
+    s32 push_back(Json2::Value const&);
+    s32 operator=(Json2::Array const&);
+    s32 end() const;
+    s32 back() const;
+    s32 size() const;
+    s32 begin() const;
+    s32 empty() const;
+    s32 front() const;
+    Array(Json2::Array const&);
+    Array();
+    ~Array();
 };
 
 class Object {
@@ -208,18 +220,12 @@ public:
     public:
         Pair(Json2::String const&, Json2::Value const&);
         Pair();
-        Pair(Json2::String const&, Json2::Value const&);
-        Pair();
-        ~Pair();
         ~Pair();
     };
     class iterator {
     public:
         iterator(Json2::Object::iterator const&);
         iterator();
-        iterator(Json2::Object::iterator const&);
-        iterator();
-        ~iterator();
         ~iterator();
         s32 advance(unsigned long);
         s32 operator=(Json2::Object::iterator const&);
@@ -242,9 +248,6 @@ public:
     s32 operator[](Json2::String const&);
     Object(Json2::Object const&);
     Object();
-    Object(Json2::Object const&);
-    Object();
-    ~Object();
     ~Object();
 };
 
@@ -252,46 +255,6 @@ class Parser {
     s32 parse(Json2::Value&, int (*)(char&, void*), void*);
     s32 parse(Json2::Value&, char const*);
     s32 parse(Json2::Value&, char const*, unsigned long);
-};
-
-class String {
-    s32 npos;
-    s32 clear();
-    s32 append(char const*);
-    s32 append(char const*, unsigned long);
-    s32 append(Json2::String const&);
-    s32 resize(unsigned long);
-    s32 reserve(unsigned long);
-    s32 at(unsigned long) const;
-    s32 find(char, unsigned long) const;
-    s32 find(char const*, unsigned long) const;
-    s32 find(char const*, unsigned long, unsigned long) const;
-    s32 find(Json2::String const&, unsigned long) const;
-    s32 size() const;
-    s32 c_str() const;
-    s32 empty() const;
-    s32 rfind(char, unsigned long) const;
-    s32 rfind(char const*, unsigned long) const;
-    s32 rfind(char const*, unsigned long, unsigned long) const;
-    s32 rfind(Json2::String const&, unsigned long) const;
-    s32 length() const;
-    s32 substr(unsigned long, unsigned long) const;
-    s32 compare(char const*) const;
-    s32 compare(Json2::String const&) const;
-    s32 capacity() const;
-    s32 operator==(char const*) const;
-    s32 operator==(Json2::String const&) const;
-    s32 operator=(Json2::String const&);
-    s32 operator+=(unsigned char);
-    s32 operator+=(char const*);
-    String(char const*);
-    String(Json2::String const&);
-    String();
-    String(char const*);
-    String(Json2::String const&);
-    String();
-    ~String();
-    ~String();
 };
 
 void RegisterLib(Core::Loader::SymbolsResolver* sym);
