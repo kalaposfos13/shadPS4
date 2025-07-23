@@ -24,7 +24,7 @@ class Array;
 
 class String {
 public:
-    s32 npos;
+    static s32 npos;
     s32 PS4_SYSV_ABI clear();
     s32 PS4_SYSV_ABI append(char const*);
     s32 PS4_SYSV_ABI append(char const*, unsigned long);

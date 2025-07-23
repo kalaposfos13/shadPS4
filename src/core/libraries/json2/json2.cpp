@@ -9,6 +9,15 @@
 
 namespace Libraries::Json2 {
 
+s32 Json2::String::npos = 0;
+s32 Json2::Value::s_nullbool = 0;
+s32 Json2::Value::s_nullreal = 0;
+s32 Json2::Value::s_nullarray = 0;
+s32 Json2::Value::s_nullobject = 0;
+s32 Json2::Value::s_nullstring = 0;
+s32 Json2::Value::s_nullinteger = 0;
+s32 Json2::Value::s_nulluinteger = 0;
+
 s32 PS4_SYSV_ABI Json2::Initializer::initialize(Json2::InitParameter const*) {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
@@ -891,6 +900,15 @@ s32 PS4_SYSV_ABI Json2::String::operator==(Json2::String const&) {
 void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     constexpr const char* j = "libSceJson";
     constexpr const char* j2 = "libSceJson2";
+
+    LIB_OBJ("bUw2Go-rxtE", "libSceJson2", 1, "libSceJson", 1, 1, &Json2::Value::s_nullbool);
+    LIB_OBJ("GpEG1IcP86s", "libSceJson2", 1, "libSceJson", 1, 1, &Json2::Value::s_nullreal);
+    LIB_OBJ("zwDiN3-CRTA", "libSceJson2", 1, "libSceJson", 1, 1, &Json2::Value::s_nullarray);
+    LIB_OBJ("3YODFwSqgtc", "libSceJson2", 1, "libSceJson", 1, 1, &Json2::Value::s_nullobject);
+    LIB_OBJ("24kDIV0aDzs", "libSceJson2", 1, "libSceJson", 1, 1, &Json2::Value::s_nullstring);
+    LIB_OBJ("dJSD90mnj1w", "libSceJson2", 1, "libSceJson", 1, 1, &Json2::Value::s_nullinteger);
+    LIB_OBJ("xxBnIBiUVzY", "libSceJson2", 1, "libSceJson", 1, 1, &Json2::Value::s_nulluinteger);
+    LIB_OBJ("pCF8Ohwre44", "libSceJson2", 1, "libSceJson", 1, 1, &Json2::String::npos);
 
     LF("bnk+edDbqMk", j2, 1, j, 1, 1, Json2::Free);
     LF("Xzy0onDzSAc", j2, 1, j, 1, 1, Json2::Malloc);
