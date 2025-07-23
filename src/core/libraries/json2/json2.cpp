@@ -19,7 +19,7 @@ s32 Json2::Value::s_nullinteger = 0;
 s32 Json2::Value::s_nulluinteger = 0;
 
 s32 PS4_SYSV_ABI Json2::Initializer::initialize(Json2::InitParameter const*) {
-    LOG_ERROR(Lib_Json2, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called, this: {}", fmt::ptr(this));
     return ORBIS_OK;
 }
 
@@ -74,7 +74,7 @@ s32 PS4_SYSV_ABI Json2::MemAllocator::notifyError(int, unsigned long, void*) {
 }
 
 PS4_SYSV_ABI Json2::MemAllocator::MemAllocator() {
-    LOG_ERROR(Lib_Json2, "(STUBBED) called");
+    LOG_ERROR(Lib_Json2, "(STUBBED) called, this: {}", fmt::ptr(this));
     return;
 }
 
