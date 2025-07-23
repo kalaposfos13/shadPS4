@@ -599,287 +599,287 @@ s32 PS4_SYSV_ABI Json2::String::operator+=(char const*) {
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::InitParameter2::getUserData() const {
+s32 PS4_SYSV_ABI Json2::InitParameter2::getUserData() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::InitParameter2::getAllocator() const {
+s32 PS4_SYSV_ABI Json2::InitParameter2::getAllocator() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::InitParameter2::getFileBufferSize() const {
+s32 PS4_SYSV_ABI Json2::InitParameter2::getFileBufferSize() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::InitParameter2::getSpecialFloatFormatType() const {
+s32 PS4_SYSV_ABI Json2::InitParameter2::getSpecialFloatFormatType() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Array::end() const {
+s32 PS4_SYSV_ABI Json2::Array::end() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Array::back() const {
+s32 PS4_SYSV_ABI Json2::Array::back() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Array::size() const {
+s32 PS4_SYSV_ABI Json2::Array::size() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Array::begin() const {
+s32 PS4_SYSV_ABI Json2::Array::begin() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Array::empty() const {
+s32 PS4_SYSV_ABI Json2::Array::empty() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Array::front() const {
+s32 PS4_SYSV_ABI Json2::Array::front() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Array::iterator::operator*() const {
+s32 PS4_SYSV_ABI Json2::Array::iterator::operator*() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Array::iterator::operator!=(Json2::Array::iterator const&) const {
+s32 PS4_SYSV_ABI Json2::Array::iterator::operator!=(Json2::Array::iterator const&) {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Array::iterator::operator->() const {
+s32 PS4_SYSV_ABI Json2::Array::iterator::operator->() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Value::getBoolean() const {
+s32 PS4_SYSV_ABI Json2::Value::getBoolean() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Value::getInteger() const {
+s32 PS4_SYSV_ABI Json2::Value::getInteger() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Value::getUInteger() const {
+s32 PS4_SYSV_ABI Json2::Value::getUInteger() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Value::count() const {
+s32 PS4_SYSV_ABI Json2::Value::count() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Value::getReal() const {
+s32 PS4_SYSV_ABI Json2::Value::getReal() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Value::getType() const {
+s32 PS4_SYSV_ABI Json2::Value::getType() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Value::getArray() const {
+s32 PS4_SYSV_ABI Json2::Value::getArray() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Value::getValue(unsigned long) const {
+s32 PS4_SYSV_ABI Json2::Value::getValue(unsigned long) {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Value::getValue(Json2::String const&) const {
+s32 PS4_SYSV_ABI Json2::Value::getValue(Json2::String const&) {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Value::toString(Json2::String&) const {
+s32 PS4_SYSV_ABI Json2::Value::toString(Json2::String&) {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Value::getObject() const {
+s32 PS4_SYSV_ABI Json2::Value::getObject() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Value::getString() const {
+s32 PS4_SYSV_ABI Json2::Value::getString() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-PS4_SYSV_ABI Json2::Value::operator bool() const {
+PS4_SYSV_ABI Json2::Value::operator bool() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return true;
 }
 
-s32 PS4_SYSV_ABI Json2::Value::operator[](unsigned long) const {
+s32 PS4_SYSV_ABI Json2::Value::operator[](unsigned long) {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Value::operator[](char const*) const {
+s32 PS4_SYSV_ABI Json2::Value::operator[](char const*) {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Value::operator[](Json2::String const&) const {
+s32 PS4_SYSV_ABI Json2::Value::operator[](Json2::String const&) {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Object::end() const {
+s32 PS4_SYSV_ABI Json2::Object::end() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Object::find(Json2::String const&) const {
+s32 PS4_SYSV_ABI Json2::Object::find(Json2::String const&) {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Object::size() const {
+s32 PS4_SYSV_ABI Json2::Object::size() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Object::begin() const {
+s32 PS4_SYSV_ABI Json2::Object::begin() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Object::empty() const {
+s32 PS4_SYSV_ABI Json2::Object::empty() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Object::iterator::operator*() const {
+s32 PS4_SYSV_ABI Json2::Object::iterator::operator*() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Object::iterator::operator==(Json2::Object::iterator const&) const {
+s32 PS4_SYSV_ABI Json2::Object::iterator::operator==(Json2::Object::iterator const&) {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Object::iterator::operator!=(Json2::Object::iterator const&) const {
+s32 PS4_SYSV_ABI Json2::Object::iterator::operator!=(Json2::Object::iterator const&) {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::Object::iterator::operator->() const {
+s32 PS4_SYSV_ABI Json2::Object::iterator::operator->() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::String::at(unsigned long) const {
+s32 PS4_SYSV_ABI Json2::String::at(unsigned long) {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::String::find(char, unsigned long) const {
+s32 PS4_SYSV_ABI Json2::String::find(char, unsigned long) {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::String::find(char const*, unsigned long) const {
+s32 PS4_SYSV_ABI Json2::String::find(char const*, unsigned long) {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::String::find(char const*, unsigned long, unsigned long) const {
+s32 PS4_SYSV_ABI Json2::String::find(char const*, unsigned long, unsigned long) {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::String::find(Json2::String const&, unsigned long) const {
+s32 PS4_SYSV_ABI Json2::String::find(Json2::String const&, unsigned long) {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::String::size() const {
+s32 PS4_SYSV_ABI Json2::String::size() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::String::c_str() const {
+s32 PS4_SYSV_ABI Json2::String::c_str() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::String::empty() const {
+s32 PS4_SYSV_ABI Json2::String::empty() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::String::rfind(char, unsigned long) const {
+s32 PS4_SYSV_ABI Json2::String::rfind(char, unsigned long) {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::String::rfind(char const*, unsigned long) const {
+s32 PS4_SYSV_ABI Json2::String::rfind(char const*, unsigned long) {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::String::rfind(char const*, unsigned long, unsigned long) const {
+s32 PS4_SYSV_ABI Json2::String::rfind(char const*, unsigned long, unsigned long) {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::String::rfind(Json2::String const&, unsigned long) const {
+s32 PS4_SYSV_ABI Json2::String::rfind(Json2::String const&, unsigned long) {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::String::length() const {
+s32 PS4_SYSV_ABI Json2::String::length() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::String::substr(unsigned long, unsigned long) const {
+s32 PS4_SYSV_ABI Json2::String::substr(unsigned long, unsigned long) {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::String::compare(char const*) const {
+s32 PS4_SYSV_ABI Json2::String::compare(char const*) {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::String::compare(Json2::String const&) const {
+s32 PS4_SYSV_ABI Json2::String::compare(Json2::String const&) {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::String::capacity() const {
+s32 PS4_SYSV_ABI Json2::String::capacity() {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::String::operator==(char const*) const {
+s32 PS4_SYSV_ABI Json2::String::operator==(char const*) {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI Json2::String::operator==(Json2::String const&) const {
+s32 PS4_SYSV_ABI Json2::String::operator==(Json2::String const&) {
     LOG_ERROR(Lib_Json2, "(STUBBED) called");
     return ORBIS_OK;
 }
@@ -895,52 +895,37 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LF("bnk+edDbqMk", j2, 1, j, 1, 1, Json2::Free);
     LF("Xzy0onDzSAc", j2, 1, j, 1, 1, Json2::Malloc);
 
-    // LF("Cxwy7wHq4J0", j2, 1, j, 1, 1, Json2::Initializer::initialize(Json2::InitParameter const*));
     LOMF("Cxwy7wHq4J0", j2, 1, j, 1, 1, Json2::Initializer, initialize, s32 (Json2::Initializer::*)(Json2::InitParameter const*));
-    // LF("IXW-z8pggfg", j2, 1, j, 1, 1, Json2::Initializer::initialize(Json2::InitParameter2 const*));
     LOMF("IXW-z8pggfg", j2, 1, j, 1, 1, Json2::Initializer, initialize, s32 (Json2::Initializer::*)(Json2::InitParameter2 const*));
-
-    // LF("R996H0YIhiQ", j2, 1, j, 1, 1, Json2::Initializer::setAllocatorInfoCallBack(void (*)(int, Json2::ValueType, void*), void*));
     LMF("R996H0YIhiQ", j2, 1, j, 1, 1, Json2::Initializer, setAllocatorInfoCallBack);
-
-    // LF("cK6bYHf-Q5E", j2, 1, j, 1, 1, Json2::Initializer::Initializer());
-    LF("cK6bYHf-Q5E", j2, 1, j, 1, 1, (ctor_wrapper<Json2::Initializer>));
-    // LF("RujUxbr3haM", j2, 1, j, 1, 1, Json2::Initializer::~Initializer());
-    LF("RujUxbr3haM", j2, 1, j, 1, 1, (dtor_wrapper<Json2::Initializer>));
-
-    // LF("+drDFyAS6u4", j2, 1, j, 1, 1, Json2::Initializer::setGlobalNullAccessCallback(Json2::Value const& (*)(Json2::ValueType, Json2::Value const*, void*), void*));
     LMF("+drDFyAS6u4", j2, 1, j, 1, 1, Json2::Initializer, setGlobalNullAccessCallback);
-
-    // LF("UeuWT+yNdCQ", j2, 1, j, 1, 1, Json2::Value::Value(bool));
-    LF("UeuWT+yNdCQ", j2, 1, j, 1, 1, (ctor_wrapper<Json2::Value, bool>));
     LMF("i1393UBWu1U", j2, 1, j, 1, 1, Json2::Initializer, setGlobalSpecialFloatHandler);
     LMF("tck9g-yOqPg", j2, 1, j, 1, 1, Json2::Initializer, setGlobalTypeMismatchHandler);
     LMF("j8Q7SBgMm28", j2, 1, j, 1, 1, Json2::Initializer, setGlobalElementAccessFailureHandler);
-    LOMF("PR5k1penBLM", j2, 1, j, 1, 1, Json2::Initializer, terminate, s32 (Json2::Initializer::*)());
+    LMF("PR5k1penBLM", j2, 1, j, 1, 1, Json2::Initializer, terminate);
     LF("cK6bYHf-Q5E", j2, 1, j, 1, 1, (ctor_wrapper<Json2::Initializer>));
     LF("6qFqND4iwPA", j2, 1, j, 1, 1, (ctor_wrapper<Json2::Initializer>));
     LF("RujUxbr3haM", j2, 1, j, 1, 1, (dtor_wrapper<Json2::Initializer>));
     LF("qQZGdYkEytk", j2, 1, j, 1, 1, (dtor_wrapper<Json2::Initializer>));
-    LOMF("i-XwZjw0OOY", j2, 1, j, 1, 1, Json2::MemAllocator, notifyError, s32 (Json2::MemAllocator::*)(int, unsigned long, void*));
+    LMF("i-XwZjw0OOY", j2, 1, j, 1, 1, Json2::MemAllocator, notifyError);
     LF("-hJRce8wn1U", j2, 1, j, 1, 1, (ctor_wrapper<Json2::MemAllocator>));
     LF("ypazoTrKYhE", j2, 1, j, 1, 1, (dtor_wrapper<Json2::MemAllocator>));
     LF("O1uwoqazS2A", j2, 1, j, 1, 1, (dtor_wrapper<Json2::MemAllocator>));
     LF("OcAgPxcq5Vk", j2, 1, j, 1, 1, (dtor_wrapper<Json2::MemAllocator>));
-    LOMF("I2QC8PYhJWY", j2, 1, j, 1, 1, Json2::InitParameter2, setAllocator, s32 (Json2::InitParameter2::*)(Json2::MemAllocator*, void*));
-    LOMF("Eu95jmqn5Rw", j2, 1, j, 1, 1, Json2::InitParameter2, setFileBufferSize, s32 (Json2::InitParameter2::*)(unsigned long));
-    LOMF("WVZBP4IyM+E", j2, 1, j, 1, 1, Json2::InitParameter2, setSpecialFloatFormatType, s32 (Json2::InitParameter2::*)(Json2::SpecialFloatFormatType));
+    LMF("I2QC8PYhJWY", j2, 1, j, 1, 1, Json2::InitParameter2, setAllocator);
+    LMF("Eu95jmqn5Rw", j2, 1, j, 1, 1, Json2::InitParameter2, setFileBufferSize);
+    LMF("WVZBP4IyM+E", j2, 1, j, 1, 1, Json2::InitParameter2, setSpecialFloatFormatType);
     LF("WSOuge5IsCg", j2, 1, j, 1, 1, (ctor_wrapper<Json2::InitParameter2>));
     LF("GvGvswb0v34", j2, 1, j, 1, 1, (ctor_wrapper<Json2::InitParameter2>));
     LF("6i18OJSvFWk", j2, 1, j, 1, 1, (ctor_wrapper<Json2::InitParameterRtti, Json2::AllocParamRtti*, void*, unsigned long>));
     LF("Mp8DPb3M4I0", j2, 1, j, 1, 1, (ctor_wrapper<Json2::InitParameterRtti, Json2::AllocParamRtti*, void*, unsigned long>));
-    LOMF("W72B9ylU2JA", j2, 1, j, 1, 1, Json2::InitParameterRtti2, setAllocatorRtti, s32 (Json2::InitParameterRtti2::*)(Json2::AllocParamRtti*, void*));
-    LOMF("dvp2zGSQzMs", j2, 1, j, 1, 1, Json2::InternalInitializer, terminate_staticlib, s32 (Json2::InternalInitializer::*)());
-    LOMF("BPSPc3pUMJo", j2, 1, j, 1, 1, Json2::InternalInitializer, initialize_staticlib, s32 (Json2::InternalInitializer::*)(Json2::InitParameter const*, Json2::InternalInitializer::InitOption));
+    LMF("W72B9ylU2JA", j2, 1, j, 1, 1, Json2::InitParameterRtti2, setAllocatorRtti);
+    LMF("dvp2zGSQzMs", j2, 1, j, 1, 1, Json2::InternalInitializer, terminate_staticlib);
+    LMF("BPSPc3pUMJo", j2, 1, j, 1, 1, Json2::InternalInitializer, initialize_staticlib);
     LF("WntRKhYTmZw", j2, 1, j, 1, 1, (ctor_wrapper<Json2::InternalInitializer>));
     LF("2n+fxNdSZfs", j2, 1, j, 1, 1, (ctor_wrapper<Json2::InternalInitializer>));
     LF("yudT4-bglko", j2, 1, j, 1, 1, (dtor_wrapper<Json2::InternalInitializer>));
     LF("caP-y4fH-zQ", j2, 1, j, 1, 1, (dtor_wrapper<Json2::InternalInitializer>));
-
     LOMF("MQxDxBzWz40", j2, 1, j, 1, 1, Json2::Array, push_front, s32 (Json2::Array::*)(Json2::Value const&));
     LOMF("qVOSuDRHCpA", j2, 1, j, 1, 1, Json2::Array, clear, s32 (Json2::Array::*)());
     LOMF("2mbVAtshWRI", j2, 1, j, 1, 1, Json2::Array, erase, s32 (Json2::Array::*)(Json2::Array::iterator const&));
@@ -965,7 +950,6 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LF("t6AHhkWu4mY", j2, 1, j, 1, 1, (ctor_wrapper<Json2::Array>));
     LF("HJ8GpRT1aiw", j2, 1, j, 1, 1, (dtor_wrapper<Json2::Array>));
     LF("MIyMPw7YTGM", j2, 1, j, 1, 1, (dtor_wrapper<Json2::Array>));
-
     LMF("nM5XqdeXFPw", j2, 1, j, 1, 1, Json2::Value, referArray);
     LOMF("gLzCc67aTbw", j2, 1, j, 1, 1, Json2::Value, referValue, s32 (Json2::Value::*)(unsigned long));
     LOMF("wLsJlmgEIaI", j2, 1, j, 1, 1, Json2::Value, referValue, s32 (Json2::Value::*)(Json2::String const&));
@@ -994,7 +978,7 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LOMF("PyMbL9F2oBY", j2, 1, j, 1, 1, Json2::Value, serialize, s32 (Json2::Value::*)(int (*)(Json2::String&, void*), void*));
     LOMF("R7FDWtcN6f8", j2, 1, j, 1, 1, Json2::Value, serialize, s32 (Json2::Value::*)(Json2::String&));
     LOMF("l1URiQJlSoU", j2, 1, j, 1, 1, Json2::Value, serialize, s32 (Json2::Value::*)(Json2::String&, int (*)(Json2::String&, void*), void*));
-    LOMF("4zrm6VrgIAw", j2, 1, j, 1, 1, Json2::Value, operator=, s32 (Json2::Value::*)(Json2::Value const&));
+    LMF("4zrm6VrgIAw", j2, 1, j, 1, 1, Json2::Value, operator=);
     LF("UeuWT+yNdCQ", j2, 1, j, 1, 1, (ctor_wrapper<Json2::Value, bool>));
     LF("sOmU4vnx3s0", j2, 1, j, 1, 1, (ctor_wrapper<Json2::Value, double>));
     LF("0lLK8+kDqmE", j2, 1, j, 1, 1, (ctor_wrapper<Json2::Value, long>));
@@ -1019,112 +1003,110 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LF("-wa17B7TGnw", j2, 1, j, 1, 1, (ctor_wrapper<Json2::Value>));
     LF("WTtYf+cNnXI", j2, 1, j, 1, 1, (dtor_wrapper<Json2::Value>));
     LF("0eUrW9JAxM0", j2, 1, j, 1, 1, (dtor_wrapper<Json2::Value>));
-
-    // LF("+hYsagaV-Ug", j2, 1, j, 1, 1, Json2::Object::Pair::Pair(Json2::String const&, Json2::Value const&));
-    // LF("-uQnUEENfpk", j2, 1, j, 1, 1, Json2::Object::Pair::Pair());
-    // LF("lt3J4dPvEtM", j2, 1, j, 1, 1, Json2::Object::Pair::Pair(Json2::String const&, Json2::Value const&));
-    // LF("Wu-urs6MMpQ", j2, 1, j, 1, 1, Json2::Object::Pair::Pair());
-    // LF("Q0ng4sWj2E8", j2, 1, j, 1, 1, Json2::Object::Pair::~Pair());
-    // LF("TM0Sj+Ebins", j2, 1, j, 1, 1, Json2::Object::Pair::~Pair());
-    // LF("oH8aBmLU+fc", j2, 1, j, 1, 1, Json2::Object::clear());
-    // LF("3ZhL-MkICwI", j2, 1, j, 1, 1, Json2::Object::erase(Json2::String const&));
-    // LF("ol7KhQl8kfw", j2, 1, j, 1, 1, Json2::Object::insert(Json2::Object::Pair const&));
-    // LF("h-V8r4EF7bo", j2, 1, j, 1, 1, Json2::Object::iterator::advance(unsigned long));
-    // LF("w7nqTT3zgxU", j2, 1, j, 1, 1, Json2::Object::iterator::operator=(Json2::Object::iterator const&));
-    // LF("JATlaeBu+lU", j2, 1, j, 1, 1, Json2::Object::iterator::iterator(Json2::Object::iterator const&));
-    // LF("a2Zv3idT0sU", j2, 1, j, 1, 1, Json2::Object::iterator::iterator());
-    // LF("r5CShmcua+M", j2, 1, j, 1, 1, Json2::Object::iterator::iterator(Json2::Object::iterator const&));
-    // LF("OxO+V0ouoS4", j2, 1, j, 1, 1, Json2::Object::iterator::iterator());
-    // LF("hoINmSMlYjI", j2, 1, j, 1, 1, Json2::Object::iterator::~iterator());
-    // LF("patTzc7zBjw", j2, 1, j, 1, 1, Json2::Object::iterator::~iterator());
-    // LF("dIVxrrdpS9M", j2, 1, j, 1, 1, Json2::Object::iterator::operator++(int));
-    // LF("DlWmn2ZQuWY", j2, 1, j, 1, 1, Json2::Object::iterator::operator++());
-    // LF("urOpESTBZmo", j2, 1, j, 1, 1, Json2::Object::operator=(Json2::Object const&));
-    // LF("a+W7HHlwpBs", j2, 1, j, 1, 1, Json2::Object::Object(Json2::Object const&));
-    // LF("OJPTonqdg0I", j2, 1, j, 1, 1, Json2::Object::Object());
-    // LF("tSRqQ-+Y4PE", j2, 1, j, 1, 1, Json2::Object::Object(Json2::Object const&));
-    // LF("SkKczWHdklc", j2, 1, j, 1, 1, Json2::Object::Object());
-    // LF("5JmzZt8twAo", j2, 1, j, 1, 1, Json2::Object::~Object());
-    // LF("1siRBursJjw", j2, 1, j, 1, 1, Json2::Object::~Object());
-    // LF("ERuf9y0DY84", j2, 1, j, 1, 1, Json2::Object::operator[](Json2::String const&));
-    // LF("itqj2YmuAa8", j2, 1, j, 1, 1, Json2::Parser::parse(Json2::Value&, int (*)(char&, void*), void*));
-    // LF("LB3jxppxyKU", j2, 1, j, 1, 1, Json2::Parser::parse(Json2::Value&, char const*));
-    // LF("S5JxQnoGF3E", j2, 1, j, 1, 1, Json2::Parser::parse(Json2::Value&, char const*, unsigned long));
-    // LF("pCF8Ohwre44", j2, 1, j, 1, 1, Json2::String::npos);
-    // LF("A+FhGENHV-E", j2, 1, j, 1, 1, Json2::String::clear());
-    // LF("Va5FJ6TmNCw", j2, 1, j, 1, 1, Json2::String::append(char const*));
-    // LF("bREqDgXlqDU", j2, 1, j, 1, 1, Json2::String::append(char const*, unsigned long));
-    // LF("Rz00kiTKypo", j2, 1, j, 1, 1, Json2::String::append(Json2::String const&));
-    // LF("PiR0tiTnNbM", j2, 1, j, 1, 1, Json2::String::resize(unsigned long));
-    // LF("Z9tyi1-LrQg", j2, 1, j, 1, 1, Json2::String::reserve(unsigned long));
-    // LF("cn9svYGWKDQ", j2, 1, j, 1, 1, Json2::String::operator=(Json2::String const&));
-    // LF("9KUZFjI1IxA", j2, 1, j, 1, 1, Json2::String::String(char const*));
-    // LF("0CAesfH963Q", j2, 1, j, 1, 1, Json2::String::String(Json2::String const&));
-    // LF("qSmqLXXCPas", j2, 1, j, 1, 1, Json2::String::String());
-    // LF("N78gkQzXRL4", j2, 1, j, 1, 1, Json2::String::String(char const*));
-    // LF("gALFgNfF+9I", j2, 1, j, 1, 1, Json2::String::String(Json2::String const&));
-    // LF("eG9E9M6XvTM", j2, 1, j, 1, 1, Json2::String::String());
-    // LF("cG1VE2HMl6c", j2, 1, j, 1, 1, Json2::String::~String());
-    // LF("Ui7YFnSTCBw", j2, 1, j, 1, 1, Json2::String::~String());
-    // LF("-Wek6mFXOrc", j2, 1, j, 1, 1, Json2::String::operator+=(unsigned char));
-    // LF("aVDQZGAqOo8", j2, 1, j, 1, 1, Json2::String::operator+=(char const*));
-    // LF("GWtzpTKbZ+0", j2, 1, j, 1, 1, Json2::InitParameter2::getUserData() const);
-    // LF("BykPm1ajcM0", j2, 1, j, 1, 1, Json2::InitParameter2::getAllocator() const);
-    // LF("Pcg6xQUhq9E", j2, 1, j, 1, 1, Json2::InitParameter2::getFileBufferSize() const);
-    // LF("PDkib0zyABg", j2, 1, j, 1, 1, Json2::InitParameter2::getSpecialFloatFormatType() const);
-    // LF("WXF2ihRF+B8", j2, 1, j, 1, 1, Json2::Array::end() const);
-    // LF("bAM9Qwofus0", j2, 1, j, 1, 1, Json2::Array::back() const);
-    // LF("rQGJeNjOuUk", j2, 1, j, 1, 1, Json2::Array::size() const);
-    // LF("bcH5EnFE2xY", j2, 1, j, 1, 1, Json2::Array::begin() const);
-    // LF("9uP25i6ipno", j2, 1, j, 1, 1, Json2::Array::empty() const);
-    // LF("zcfZQyM7eAE", j2, 1, j, 1, 1, Json2::Array::front() const);
-    // LF("wcgr5mte7T8", j2, 1, j, 1, 1, Json2::Array::iterator::operator*() const);
-    // LF("5AZPp99ogrc", j2, 1, j, 1, 1, Json2::Array::iterator::operator!=(Json2::Array::iterator const&) const);
-    // LF("iAIYn4oAWvI", j2, 1, j, 1, 1, Json2::Array::iterator::operator->() const);
-    // LF("zTwZdI8AZ5Y", j2, 1, j, 1, 1, Json2::Value::getBoolean() const);
-    // LF("DIxvoy7Ngvk", j2, 1, j, 1, 1, Json2::Value::getInteger() const);
-    // LF("sn4HNCtNRzY", j2, 1, j, 1, 1, Json2::Value::getUInteger() const);
-    // LF("RBw+4NukeGQ", j2, 1, j, 1, 1, Json2::Value::count() const);
-    // LF("3qrge7L-AU4", j2, 1, j, 1, 1, Json2::Value::getReal() const);
-    // LF("SHtAad20YYM", j2, 1, j, 1, 1, Json2::Value::getType() const);
-    // LF("ONT8As5R1ug", j2, 1, j, 1, 1, Json2::Value::getArray() const);
-    // LF("0YqYAoO-+Uo", j2, 1, j, 1, 1, Json2::Value::getValue(unsigned long) const);
-    // LF("MsMOdxWfbwQ", j2, 1, j, 1, 1, Json2::Value::getValue(Json2::String const&) const);
-    // LF("Ncel8t2Rrpc", j2, 1, j, 1, 1, Json2::Value::toString(Json2::String&) const);
-    // LF("IlsmvBtMkak", j2, 1, j, 1, 1, Json2::Value::getObject() const);
-    // LF("epJ6x2LV0kU", j2, 1, j, 1, 1, Json2::Value::getString() const);
-    // LF("a-aMMUXqrN0", j2, 1, j, 1, 1, Json2::Value::operator bool() const);
-    // LF("XlWbvieLj2M", j2, 1, j, 1, 1, Json2::Value::operator[](unsigned long) const);
-    // LF("HwDt5lD9Bfo", j2, 1, j, 1, 1, Json2::Value::operator[](char const*) const);
-    // LF("clF7J7N9xXE", j2, 1, j, 1, 1, Json2::Value::operator[](Json2::String const&) const);
-    // LF("ivMCitpSQNk", j2, 1, j, 1, 1, Json2::Object::end() const);
-    // LF("ehN1Biw3tw8", j2, 1, j, 1, 1, Json2::Object::find(Json2::String const&) const);
-    // LF("fSGHm9RjN5U", j2, 1, j, 1, 1, Json2::Object::size() const);
-    // LF("xhAcaIwnrgk", j2, 1, j, 1, 1, Json2::Object::begin() const);
-    // LF("i2l3IYvQ9UE", j2, 1, j, 1, 1, Json2::Object::empty() const);
-    // LF("ZCd6IYoD3Bc", j2, 1, j, 1, 1, Json2::Object::iterator::operator*() const);
-    // LF("q3YO1c0RqFo", j2, 1, j, 1, 1, Json2::Object::iterator::operator==(Json2::Object::iterator const&) const);
-    // LF("+isUKw4zud4", j2, 1, j, 1, 1, Json2::Object::iterator::operator!=(Json2::Object::iterator const&) const);
-    // LF("EnesV4gXDtE", j2, 1, j, 1, 1, Json2::Object::iterator::operator->() const);
-    // LF("KrKM-5SdQrA", j2, 1, j, 1, 1, Json2::String::at(unsigned long) const);
-    // LF("x4SuxMR26I4", j2, 1, j, 1, 1, Json2::String::find(char, unsigned long) const);
-    // LF("yjsf6SvXA08", j2, 1, j, 1, 1, Json2::String::find(char const*, unsigned long) const);
-    // LF("wwDnDDsQVc0", j2, 1, j, 1, 1, Json2::String::find(char const*, unsigned long, unsigned long) const);
-    // LF("awkeNR6Ukp8", j2, 1, j, 1, 1, Json2::String::find(Json2::String const&, unsigned long) const);
-    // LF("UVBkipSD2sw", j2, 1, j, 1, 1, Json2::String::size() const);
-    // LF("L1KAkYWml-M", j2, 1, j, 1, 1, Json2::String::c_str() const);
-    // LF("wM4LO2iK3s8", j2, 1, j, 1, 1, Json2::String::empty() const);
-    // LF("t+Dx3eQtBPQ", j2, 1, j, 1, 1, Json2::String::rfind(char, unsigned long) const);
-    // LF("VpQBXbaHXOo", j2, 1, j, 1, 1, Json2::String::rfind(char const*, unsigned long) const);
-    // LF("A29RHrlfTM0", j2, 1, j, 1, 1, Json2::String::rfind(char const*, unsigned long, unsigned long) const);
-    // LF("-R9mdXBspeQ", j2, 1, j, 1, 1, Json2::String::rfind(Json2::String const&, unsigned long) const);
-    // LF("EUH+EmT-v9E", j2, 1, j, 1, 1, Json2::String::length() const);
-    // LF("8OCexW9qJgQ", j2, 1, j, 1, 1, Json2::String::substr(unsigned long, unsigned long) const);
-    // LF("Yfw63FVJgtU", j2, 1, j, 1, 1, Json2::String::compare(char const*) const);
-    // LF("PXIHOuLUN40", j2, 1, j, 1, 1, Json2::String::compare(Json2::String const&) const);
-    // LF("q0qeup2r7hA", j2, 1, j, 1, 1, Json2::String::capacity() const);
-    // LF("VbFjEs--uiA", j2, 1, j, 1, 1, Json2::String::operator==(char const*) const);
-    // LF("DM43TNBBfb0", j2, 1, j, 1, 1, Json2::String::operator==(Json2::String const&) const);
+    LF("+hYsagaV-Ug", j2, 1, j, 1, 1, (ctor_wrapper<Json2::Object::Pair, Json2::String const&, Json2::Value const&>));
+    LF("-uQnUEENfpk", j2, 1, j, 1, 1, (ctor_wrapper<Json2::Object::Pair>));
+    LF("lt3J4dPvEtM", j2, 1, j, 1, 1, (ctor_wrapper<Json2::Object::Pair, Json2::String const&, Json2::Value const&>));
+    LF("Wu-urs6MMpQ", j2, 1, j, 1, 1, (ctor_wrapper<Json2::Object::Pair>));
+    LF("Q0ng4sWj2E8", j2, 1, j, 1, 1, (dtor_wrapper<Json2::Object::Pair>));
+    LF("TM0Sj+Ebins", j2, 1, j, 1, 1, (dtor_wrapper<Json2::Object::Pair>));
+    LMF("oH8aBmLU+fc", j2, 1, j, 1, 1, Json2::Object, clear);
+    LMF("3ZhL-MkICwI", j2, 1, j, 1, 1, Json2::Object, erase);
+    LMF("ol7KhQl8kfw", j2, 1, j, 1, 1, Json2::Object, insert);
+    LMF("h-V8r4EF7bo", j2, 1, j, 1, 1, Json2::Object::iterator, advance);
+    LMF("w7nqTT3zgxU", j2, 1, j, 1, 1, Json2::Object::iterator, operator=);
+    LF("JATlaeBu+lU", j2, 1, j, 1, 1, (ctor_wrapper<Json2::Object::iterator, Json2::Object::iterator const&>));
+    LF("a2Zv3idT0sU", j2, 1, j, 1, 1, (ctor_wrapper<Json2::Object::iterator>));
+    LF("r5CShmcua+M", j2, 1, j, 1, 1, (ctor_wrapper<Json2::Object::iterator, Json2::Object::iterator const&>));
+    LF("OxO+V0ouoS4", j2, 1, j, 1, 1, (ctor_wrapper<Json2::Object::iterator>));
+    LF("hoINmSMlYjI", j2, 1, j, 1, 1, (dtor_wrapper<Json2::Object::iterator>));
+    LF("patTzc7zBjw", j2, 1, j, 1, 1, (dtor_wrapper<Json2::Object::iterator>));
+    LOMF("dIVxrrdpS9M", j2, 1, j, 1, 1, Json2::Object::iterator, operator++, s32 (Json2::Object::iterator::*)(int));
+    LOMF("DlWmn2ZQuWY", j2, 1, j, 1, 1, Json2::Object::iterator, operator++, s32 (Json2::Object::iterator::*)());
+    LMF("urOpESTBZmo", j2, 1, j, 1, 1, Json2::Object, operator=);
+    LF("a+W7HHlwpBs", j2, 1, j, 1, 1, (ctor_wrapper<Json2::Object, Json2::Object const&>));
+    LF("OJPTonqdg0I", j2, 1, j, 1, 1, (ctor_wrapper<Json2::Object>));
+    LF("tSRqQ-+Y4PE", j2, 1, j, 1, 1, (ctor_wrapper<Json2::Object, Json2::Object const&>));
+    LF("SkKczWHdklc", j2, 1, j, 1, 1, (ctor_wrapper<Json2::Object>));
+    LF("5JmzZt8twAo", j2, 1, j, 1, 1, (dtor_wrapper<Json2::Object>));
+    LF("1siRBursJjw", j2, 1, j, 1, 1, (dtor_wrapper<Json2::Object>));
+    LMF("ERuf9y0DY84", j2, 1, j, 1, 1, Json2::Object, operator[]);
+    LOMF("itqj2YmuAa8", j2, 1, j, 1, 1, Json2::Parser, parse, s32 (Json2::Parser::*)(Json2::Value&, int (*)(char&, void*), void*));
+    LOMF("LB3jxppxyKU", j2, 1, j, 1, 1, Json2::Parser, parse, s32 (Json2::Parser::*)(Json2::Value&, char const*));
+    LOMF("S5JxQnoGF3E", j2, 1, j, 1, 1, Json2::Parser, parse, s32 (Json2::Parser::*)(Json2::Value&, char const*, unsigned long));
+    LMF("A+FhGENHV-E", j2, 1, j, 1, 1, Json2::String, clear);
+    LOMF("Va5FJ6TmNCw", j2, 1, j, 1, 1, Json2::String, append, s32 (Json2::String::*)(char const*));
+    LOMF("bREqDgXlqDU", j2, 1, j, 1, 1, Json2::String, append, s32 (Json2::String::*)(char const*, unsigned long));
+    LOMF("Rz00kiTKypo", j2, 1, j, 1, 1, Json2::String, append, s32 (Json2::String::*)(Json2::String const&));
+    LMF("PiR0tiTnNbM", j2, 1, j, 1, 1, Json2::String, resize);
+    LMF("Z9tyi1-LrQg", j2, 1, j, 1, 1, Json2::String, reserve);
+    LMF("cn9svYGWKDQ", j2, 1, j, 1, 1, Json2::String, operator=);
+    LF("9KUZFjI1IxA", j2, 1, j, 1, 1, (ctor_wrapper<Json2::String, char const*>));
+    LF("0CAesfH963Q", j2, 1, j, 1, 1, (ctor_wrapper<Json2::String, Json2::String const&>));
+    LF("qSmqLXXCPas", j2, 1, j, 1, 1, (ctor_wrapper<Json2::String>));
+    LF("N78gkQzXRL4", j2, 1, j, 1, 1, (ctor_wrapper<Json2::String, char const*>));
+    LF("gALFgNfF+9I", j2, 1, j, 1, 1, (ctor_wrapper<Json2::String, Json2::String const&>));
+    LF("eG9E9M6XvTM", j2, 1, j, 1, 1, (ctor_wrapper<Json2::String>));
+    LF("cG1VE2HMl6c", j2, 1, j, 1, 1, (dtor_wrapper<Json2::String>));
+    LF("Ui7YFnSTCBw", j2, 1, j, 1, 1, (dtor_wrapper<Json2::String>));
+    LOMF("-Wek6mFXOrc", j2, 1, j, 1, 1, Json2::String, operator+=, s32 (Json2::String::*)(unsigned char));
+    LOMF("aVDQZGAqOo8", j2, 1, j, 1, 1, Json2::String, operator+=, s32 (Json2::String::*)(char const*));
+    LOMF("GWtzpTKbZ+0", j2, 1, j, 1, 1, Json2::InitParameter2, getUserData, s32 (Json2::InitParameter2::*)());
+    LOMF("BykPm1ajcM0", j2, 1, j, 1, 1, Json2::InitParameter2, getAllocator, s32 (Json2::InitParameter2::*)());
+    LOMF("Pcg6xQUhq9E", j2, 1, j, 1, 1, Json2::InitParameter2, getFileBufferSize, s32 (Json2::InitParameter2::*)());
+    LOMF("PDkib0zyABg", j2, 1, j, 1, 1, Json2::InitParameter2, getSpecialFloatFormatType, s32 (Json2::InitParameter2::*)());
+    LMF("WXF2ihRF+B8", j2, 1, j, 1, 1, Json2::Array, end);
+    LMF("bAM9Qwofus0", j2, 1, j, 1, 1, Json2::Array, back);
+    LMF("rQGJeNjOuUk", j2, 1, j, 1, 1, Json2::Array, size);
+    LMF("bcH5EnFE2xY", j2, 1, j, 1, 1, Json2::Array, begin);
+    LMF("9uP25i6ipno", j2, 1, j, 1, 1, Json2::Array, empty);
+    LMF("zcfZQyM7eAE", j2, 1, j, 1, 1, Json2::Array, front);
+    LMF("wcgr5mte7T8", j2, 1, j, 1, 1, Json2::Array::iterator, operator*);
+    LMF("5AZPp99ogrc", j2, 1, j, 1, 1, Json2::Array::iterator, operator!=);
+    LMF("iAIYn4oAWvI", j2, 1, j, 1, 1, Json2::Array::iterator, operator->);
+    LMF("zTwZdI8AZ5Y", j2, 1, j, 1, 1, Json2::Value, getBoolean);
+    LMF("DIxvoy7Ngvk", j2, 1, j, 1, 1, Json2::Value, getInteger);
+    LMF("sn4HNCtNRzY", j2, 1, j, 1, 1, Json2::Value, getUInteger);
+    LMF("RBw+4NukeGQ", j2, 1, j, 1, 1, Json2::Value, count);
+    LMF("3qrge7L-AU4", j2, 1, j, 1, 1, Json2::Value, getReal);
+    LMF("SHtAad20YYM", j2, 1, j, 1, 1, Json2::Value, getType);
+    LMF("ONT8As5R1ug", j2, 1, j, 1, 1, Json2::Value, getArray);
+    LOMF("0YqYAoO-+Uo", j2, 1, j, 1, 1, Json2::Value, getValue, s32 (Json2::Value::*)(unsigned long));
+    LOMF("MsMOdxWfbwQ", j2, 1, j, 1, 1, Json2::Value, getValue, s32 (Json2::Value::*)(Json2::String const&));
+    LMF("Ncel8t2Rrpc", j2, 1, j, 1, 1, Json2::Value, toString);
+    LMF("IlsmvBtMkak", j2, 1, j, 1, 1, Json2::Value, getObject);
+    LMF("epJ6x2LV0kU", j2, 1, j, 1, 1, Json2::Value, getString);
+    LMF("a-aMMUXqrN0", j2, 1, j, 1, 1, Json2::Value, operator bool);
+    LOMF("XlWbvieLj2M", j2, 1, j, 1, 1, Json2::Value, operator[], s32 (Json2::Value::*)(unsigned long));
+    LOMF("HwDt5lD9Bfo", j2, 1, j, 1, 1, Json2::Value, operator[], s32 (Json2::Value::*)(char const*));
+    LOMF("clF7J7N9xXE", j2, 1, j, 1, 1, Json2::Value, operator[], s32 (Json2::Value::*)(Json2::String const&));
+    LMF("ivMCitpSQNk", j2, 1, j, 1, 1, Json2::Object, end);
+    LMF("ehN1Biw3tw8", j2, 1, j, 1, 1, Json2::Object, find);
+    LMF("fSGHm9RjN5U", j2, 1, j, 1, 1, Json2::Object, size);
+    LMF("xhAcaIwnrgk", j2, 1, j, 1, 1, Json2::Object, begin);
+    LMF("i2l3IYvQ9UE", j2, 1, j, 1, 1, Json2::Object, empty);
+    LMF("ZCd6IYoD3Bc", j2, 1, j, 1, 1, Json2::Object::iterator, operator*);
+    LMF("q3YO1c0RqFo", j2, 1, j, 1, 1, Json2::Object::iterator, operator==);
+    LMF("+isUKw4zud4", j2, 1, j, 1, 1, Json2::Object::iterator, operator!=);
+    LMF("EnesV4gXDtE", j2, 1, j, 1, 1, Json2::Object::iterator, operator->);
+    LMF("KrKM-5SdQrA", j2, 1, j, 1, 1, Json2::String, at);
+    LOMF("x4SuxMR26I4", j2, 1, j, 1, 1, Json2::String, find, s32 (Json2::String::*)(char, unsigned long));
+    LOMF("yjsf6SvXA08", j2, 1, j, 1, 1, Json2::String, find, s32 (Json2::String::*)(char const*, unsigned long));
+    LOMF("wwDnDDsQVc0", j2, 1, j, 1, 1, Json2::String, find, s32 (Json2::String::*)(char const*, unsigned long, unsigned long));
+    LOMF("awkeNR6Ukp8", j2, 1, j, 1, 1, Json2::String, find, s32 (Json2::String::*)(Json2::String const&, unsigned long));
+    LMF("UVBkipSD2sw", j2, 1, j, 1, 1, Json2::String, size);
+    LMF("L1KAkYWml-M", j2, 1, j, 1, 1, Json2::String, c_str);
+    LMF("wM4LO2iK3s8", j2, 1, j, 1, 1, Json2::String, empty);
+    LOMF("t+Dx3eQtBPQ", j2, 1, j, 1, 1, Json2::String, rfind, s32 (Json2::String::*)(char, unsigned long));
+    LOMF("VpQBXbaHXOo", j2, 1, j, 1, 1, Json2::String, rfind, s32 (Json2::String::*)(char const*, unsigned long));
+    LOMF("A29RHrlfTM0", j2, 1, j, 1, 1, Json2::String, rfind, s32 (Json2::String::*)(char const*, unsigned long, unsigned long));
+    LOMF("-R9mdXBspeQ", j2, 1, j, 1, 1, Json2::String, rfind, s32 (Json2::String::*)(Json2::String const&, unsigned long));
+    LMF("EUH+EmT-v9E", j2, 1, j, 1, 1, Json2::String, length);
+    LMF("8OCexW9qJgQ", j2, 1, j, 1, 1, Json2::String, substr);
+    LOMF("Yfw63FVJgtU", j2, 1, j, 1, 1, Json2::String, compare, s32 (Json2::String::*)(char const*));
+    LOMF("PXIHOuLUN40", j2, 1, j, 1, 1, Json2::String, compare, s32 (Json2::String::*)(Json2::String const&));
+    LMF("q0qeup2r7hA", j2, 1, j, 1, 1, Json2::String, capacity);
+    LOMF("VbFjEs--uiA", j2, 1, j, 1, 1, Json2::String, operator==, s32 (Json2::String::*)(char const*));
+    LOMF("DM43TNBBfb0", j2, 1, j, 1, 1, Json2::String, operator==, s32 (Json2::String::*)(Json2::String const&));
 };
 
 } // namespace Libraries::Json2
