@@ -136,6 +136,7 @@ public:
 class InitParameter {};
 
 class InitParameter2 {
+public:
     s32 setAllocator(Json2::MemAllocator*, void*);
     s32 setFileBufferSize(unsigned long);
     s32 setSpecialFloatFormatType(Json2::SpecialFloatFormatType);
@@ -184,6 +185,7 @@ public:
 class Array {
 public:
     class iterator {
+    public:
         s32 advance(unsigned long);
         s32 operator=(Json2::Array::iterator const&);
         s32 operator++(int);
@@ -258,13 +260,13 @@ class Parser {
 };
 
 template <typename T, typename... Args>
-T* PS4_SYSV_ABI ctor_wrapper(void* memory, Args&&... args) {
-    return new (memory) T(std::forward<Args>(args)...);
+void ctor_wrapper(void* _this, Args... args) {
+    new (_this) T(std::forward<Args>(args)...);
 }
 
 template <typename T>
-void PS4_SYSV_ABI dtor_wrapper(T* ptr) {
-    ptr->~T();
+void dtor_wrapper(T* _this) {
+    _this->~T();
 }
 
 void RegisterLib(Core::Loader::SymbolsResolver* sym);
