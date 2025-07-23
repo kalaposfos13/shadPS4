@@ -257,5 +257,15 @@ class Parser {
     s32 parse(Json2::Value&, char const*, unsigned long);
 };
 
+template <typename T, typename... Args>
+T* PS4_SYSV_ABI ctor_wrapper(void* memory, Args&&... args) {
+    return new (memory) T(std::forward<Args>(args)...);
+}
+
+template <typename T>
+void PS4_SYSV_ABI dtor_wrapper(T* ptr) {
+    ptr->~T();
+}
+
 void RegisterLib(Core::Loader::SymbolsResolver* sym);
 } // namespace Libraries::Json2

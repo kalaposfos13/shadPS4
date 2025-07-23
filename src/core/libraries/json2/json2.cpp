@@ -879,9 +879,22 @@ s32 PS4_SYSV_ABI Json2::String::operator==(Json2::String const&) const {
 }
 
 void RegisterLib(Core::Loader::SymbolsResolver* sym) {
+    constexpr const char* j = "libSceJson";
+    constexpr const char* j2 = "libSceJson2";
+
     // LIB_FUNCTION("Cxwy7wHq4J0", "libSceJson2", 1, "libSceJson", 1, 1, Json2::Initializer::initialize(Json2::InitParameter const*));
+    LIB_OVERLOADED_MEMBER_FUNCTION("Cxwy7wHq4J0", "libSceJson2", 1, "libSceJson", 1, 1, Json2::Initializer, initialize, s32 (Json2::Initializer::*)(Json2::InitParameter const*));
     // LIB_FUNCTION("IXW-z8pggfg", "libSceJson2", 1, "libSceJson", 1, 1, Json2::Initializer::initialize(Json2::InitParameter2 const*));
+    LIB_OVERLOADED_MEMBER_FUNCTION("IXW-z8pggfg", "libSceJson2", 1, "libSceJson", 1, 1, Json2::Initializer, initialize, s32 (Json2::Initializer::*)(Json2::InitParameter2 const*));
+
     // LIB_FUNCTION("R996H0YIhiQ", "libSceJson2", 1, "libSceJson", 1, 1, Json2::Initializer::setAllocatorInfoCallBack(void (*)(int, Json2::ValueType, void*), void*));
+    LIB_OVERLOADED_MEMBER_FUNCTION("R996H0YIhiQ", "libSceJson2", 1, "libSceJson", 1, 1, Json2::Initializer, setAllocatorInfoCallBack, s32 (Json2::Initializer::*)(void (*)(int, Json2::ValueType, void*), void*));
+
+    // LIB_FUNCTION("cK6bYHf-Q5E", "libSceJson2", 1, "libSceJson", 1, 1, Json2::Initializer::Initializer());
+    LIB_FUNCTION("cK6bYHf-Q5E", "libSceJson2", 1, "libSceJson", 1, 1, (ctor_wrapper<Json2::Initializer>));
+    // LIB_FUNCTION("RujUxbr3haM", "libSceJson2", 1, "libSceJson", 1, 1, Json2::Initializer::~Initializer());
+    LIB_FUNCTION("RujUxbr3haM", "libSceJson2", 1, "libSceJson", 1, 1, (dtor_wrapper<Json2::Initializer>));
+
     // LIB_FUNCTION("+drDFyAS6u4", "libSceJson2", 1, "libSceJson", 1, 1, Json2::Initializer::setGlobalNullAccessCallback(Json2::Value const& (*)(Json2::ValueType, Json2::Value const*, void*), void*));
     // LIB_FUNCTION("i1393UBWu1U", "libSceJson2", 1, "libSceJson", 1, 1, Json2::Initializer::setGlobalSpecialFloatHandler(Json2::Value const (*)(Json2::FunctionType, double, Json2::Value const*, void*, bool*), void*));
     // LIB_FUNCTION("tck9g-yOqPg", "libSceJson2", 1, "libSceJson", 1, 1, Json2::Initializer::setGlobalTypeMismatchHandler(Json2::Value const& (*)(Json2::ValueType, Json2::Value const*, Json2::Value const*, void*), void*));
