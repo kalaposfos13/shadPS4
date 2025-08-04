@@ -391,7 +391,7 @@ bool Hotkeys::eventFilter(QObject* obj, QEvent* event) {
 #ifdef _WIN32
                     pressedButtons.insert(7, "lwin");
 #else
-                    pressedKeys.insert(7, "lmeta");
+                    pressedButtons.insert(7, "lmeta");
 #endif
                     break;
 
