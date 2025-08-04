@@ -9,7 +9,6 @@
 #include "common/path_util.h"
 #include "control_settings.h"
 #include "input/input_handler.h"
-#include "sdl_window.h"
 #include "ui_control_settings.h"
 
 ControlSettings::ControlSettings(std::shared_ptr<GameInfoClass> game_info_get, bool isGameRunning,
