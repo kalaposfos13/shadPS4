@@ -161,6 +161,33 @@ void Hotkeys::SaveHotkeys(bool CloseOnSave) {
     add_mapping(ui->mouseJoystickButton->text(), "hotkey_toggle_mouse_to_joystick");
     add_mapping(ui->mouseGyroButton->text(), "hotkey_toggle_mouse_to_gyro");
 
+    auto hotkey_file = Config::GetFoolproofInputConfigFile("global");
+    std::fstream file(hotkey_file);
+    int lineCount = 0;
+    std::string line;
+    while (std::getline(file, line)) {
+        lineCount++;
+
+        std::size_t comment_pos = line.find('#');
+        if (comment_pos != std::string::npos) {
+            if (!line.contains("Anything put here will be loaded for all games") &&
+                !line.contains("alongside the game's config or default.ini depending on your"))
+                lines.push_back(line);
+            continue;
+        }
+
+        std::size_t equal_pos = line.find('=');
+        if (equal_pos == std::string::npos) {
+            lines.push_back(line);
+            continue;
+        }
+
+        if (!line.contains("hotkey")) {
+            lines.push_back(line);
+        }
+    }
+    file.close();
+
     // Prevent duplicate inputs that break the input engine
     bool duplicateFound = false;
     QSet<QString> duplicateMappings;
@@ -193,9 +220,17 @@ void Hotkeys::SaveHotkeys(bool CloseOnSave) {
         return;
     }
 
-    auto hotkey_file = Config::GetFoolproofInputConfigFile("global");
+    std::vector<std::string> save;
+    bool CurrentLineEmpty = false, LastLineEmpty = false;
+    for (auto const& line : lines) {
+        LastLineEmpty = CurrentLineEmpty ? true : false;
+        CurrentLineEmpty = line.empty() ? true : false;
+        if (!CurrentLineEmpty || !LastLineEmpty)
+            save.push_back(line);
+    }
+
     std::ofstream output_file(hotkey_file);
-    for (const std::string& line : lines) {
+    for (auto const& line : save) {
         output_file << line << '\n';
     }
     output_file.close();
