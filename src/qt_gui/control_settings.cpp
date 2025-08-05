@@ -207,6 +207,11 @@ void ControlSettings::SaveControllerConfig(bool CloseOnSave) {
         output_string = line.substr(0, equal_pos - 1);
         input_string = line.substr(equal_pos + 2);
 
+        if (output_string.contains("hotkey")) {
+            lines.push_back(line);
+            continue;
+        }
+
         bool controllerInputdetected = false;
         for (std::string input : ControllerInputs) {
             // Needed to avoid detecting backspace while detecting back
