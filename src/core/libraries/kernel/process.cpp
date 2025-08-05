@@ -200,6 +200,14 @@ s32 PS4_SYSV_ABI exit(s32 status) {
     return 0;
 }
 
+void PS4_SYSV_ABI _sceKernelSetThreadAtexitCount(void* p1) {
+    LOG_WARNING(Lib_Kernel, "(DUMMY) called");
+}
+
+void PS4_SYSV_ABI _sceKernelSetThreadAtexitReport(void* p1) {
+    LOG_WARNING(Lib_Kernel, "(DUMMY) called");
+}
+
 void RegisterProcess(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("WB66evu8bsU", "libkernel", 1, "libkernel", 1, 1, sceKernelGetCompiledSdkVersion);
     LIB_FUNCTION("WslcK1FQcGI", "libkernel", 1, "libkernel", 1, 1, sceKernelIsNeoMode);
@@ -213,6 +221,8 @@ void RegisterProcess(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("HZO7xOos4xc", "libkernel", 1, "libkernel", 1, 1, sceKernelGetModuleInfoInternal);
     LIB_FUNCTION("IuxnUuXk6Bg", "libkernel", 1, "libkernel", 1, 1, sceKernelGetModuleList);
     LIB_FUNCTION("6Z83sYWFlA8", "libkernel", 1, "libkernel", 1, 1, exit);
+    LIB_FUNCTION("pB-yGZ2nQ9o", "libkernel", 1, "libkernel", 1, 1, _sceKernelSetThreadAtexitCount);
+    LIB_FUNCTION("WhCc1w3EhSI", "libkernel", 1, "libkernel", 1, 1, _sceKernelSetThreadAtexitReport);
 }
 
 } // namespace Libraries::Kernel
