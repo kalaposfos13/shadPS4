@@ -3,6 +3,14 @@ SPDX-FileCopyrightText: 2024 shadPS4 Emulator Project
 SPDX-License-Identifier: GPL-2.0-or-later
 -->
 
+This branch is a version of the emulator made to work on PS4 Linux. Changes include:
+- Changing the march to a version that is still supported by the PS4's CPU, because shadPS4 by default uses a too modern instruction set.
+- Removing a hard-coded Assembly instruction and replacing it with a syscall which does the same thing but internally it can handle less compatible setups too. This has since been upstreamed to the main builds.
+- Removing FSR, to increase compatibility with older Vulkan versions.
+- Merging the gc2 PR to reduce VRAM load.
+
+From my testing, 3 by of VRAM is enough for most games. If you use a software renderer, you can get better compatibility, but abysmal framerates. If you use the GPU, you get worse compatibility, and almost tolerable levels of performance. You will likely run into a lot of issues, and you might crash your GPU, run out of memory and hang your system etc, but if you're running Linux on a PS4 you are most likely already used to it. Further fixes and workarounds are welcome, but issues, unless it's not about game compatibility, aren't going to be useful for either me or you, therefore you need not bother yourself with it. This branch might also be useful for a very samll subset of older CPUs on other platforms as well, which have the PS4 instruction set, but not the newer ones that this branch removes.
+
 <h1 align="center">
   <br>
   <a href="https://shadps4.net/"><img src="https://github.com/shadps4-emu/shadPS4/blob/main/.github/shadps4.png" width="220"></a>
