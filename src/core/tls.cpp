@@ -155,30 +155,11 @@ Tcb* GetTcbBase() {
     return tcb;
 }
 
-#elif defined(ARCH_X86_64) && false
+#elif defined(ARCH_X86_64)
 
 // Other POSIX x86_64
 
 void SetTcbBase(void* image_address) {
-    const int ret = syscall(SYS_arch_prctl, ARCH_SET_GS, (unsigned long)image_address);
-    ASSERT_MSG(ret == 0, "Failed to set GS base: errno {}", errno);
-}
-
-Tcb* GetTcbBase() {
-    void* tcb = nullptr;
-    const int ret = syscall(SYS_arch_prctl, ARCH_GET_GS, &tcb);
-    ASSERT_MSG(ret == 0, "Failed to get GS base: errno {}", errno);
-    return static_cast<Tcb*>(tcb);
-}
-
-#elif true // ps4
-
-#include <sys/prctl.h>
-#include <asm/prctl.h>
-#include <unistd.h>
-
-void SetTcbBase(void* image_address) {
-    // SYS_arch_prctl sets FS or GS
     const int ret = syscall(SYS_arch_prctl, ARCH_SET_GS, (unsigned long)image_address);
     ASSERT_MSG(ret == 0, "Failed to set GS base: errno {}", errno);
 }
