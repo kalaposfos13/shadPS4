@@ -39,6 +39,7 @@
 #include "core/libraries/np_score/np_score.h"
 #include "core/libraries/np_trophy/np_trophy.h"
 #include "core/libraries/np_web_api/np_web_api.h"
+#include "core/libraries/nputility/nputility.h"
 #include "core/libraries/pad/pad.h"
 #include "core/libraries/playgo/playgo.h"
 #include "core/libraries/playgo/playgo_dialog.h"
@@ -127,6 +128,7 @@ void InitHLELibs(Core::Loader::SymbolsResolver* sym) {
     Libraries::Mouse::RegisterLib(sym);
     Libraries::WebBrowserDialog::RegisterLib(sym);
     Libraries::NpParty::RegisterLib(sym);
+    Libraries::NpUtility::RegisterLib(sym);
     Libraries::Zlib::RegisterLib(sym);
     Libraries::Hmd::RegisterLib(sym);
     Libraries::HmdSetupDialog::RegisterLib(sym);

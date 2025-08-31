@@ -598,6 +598,8 @@ set(NP_LIBS src/core/libraries/np_common/np_common.cpp
             src/core/libraries/np_auth/np_auth.h
             src/core/libraries/np_profiledialog/np_profiledialog.cpp
             src/core/libraries/np_profiledialog/np_profiledialog.h
+            src/core/libraries/nputility/nputility.cpp
+            src/core/libraries/nputility/nputility.h
 )
 
 set(ZLIB_LIB src/core/libraries/zlib/zlib.cpp
