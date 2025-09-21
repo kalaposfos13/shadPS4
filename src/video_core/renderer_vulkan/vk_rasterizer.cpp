@@ -34,8 +34,9 @@ Rasterizer::Rasterizer(const Instance& instance_, Scheduler& scheduler_,
                        AmdGpu::Liverpool* liverpool_)
     : instance{instance_}, scheduler{scheduler_}, page_manager{this},
       buffer_cache{instance, scheduler, liverpool_, texture_cache, page_manager},
-      texture_cache{instance, scheduler, buffer_cache, page_manager}, liverpool{liverpool_},
-      memory{Core::Memory::Instance()}, pipeline_cache{instance, scheduler, liverpool} {
+      texture_cache{instance, scheduler, liverpool_, buffer_cache, page_manager},
+      liverpool{liverpool_}, memory{Core::Memory::Instance()},
+      pipeline_cache{instance, scheduler, liverpool} {
     if (!Config::nullGpu()) {
         liverpool->BindRasterizer(this);
     }
@@ -251,15 +252,14 @@ void Rasterizer::EliminateFastClear() {
     if (!col_buf || !col_buf.info.fast_clear) {
         return;
     }
+    VideoCore::TextureCache::RenderTargetDesc desc(col_buf, liverpool->last_cb_extent[0]);
+    const auto& image_view = texture_cache.FindRenderTarget(desc);
     if (!texture_cache.IsMetaCleared(col_buf.CmaskAddress(), col_buf.view.slice_start)) {
         return;
     }
     for (u32 slice = col_buf.view.slice_start; slice <= col_buf.view.slice_max; ++slice) {
         texture_cache.TouchMeta(col_buf.CmaskAddress(), slice, false);
     }
-    const auto& hint = liverpool->last_cb_extent[0];
-    VideoCore::TextureCache::RenderTargetDesc desc(col_buf, hint);
-    const auto& image_view = texture_cache.FindRenderTarget(desc);
     auto& image = texture_cache.GetImage(image_view.image_id);
     const vk::ImageSubresourceRange range = {
         .aspectMask = vk::ImageAspectFlagBits::eColor,
@@ -304,7 +304,7 @@ void Rasterizer::Draw(bool is_indexed, u32 index_offset) {
     }
 
     BeginRendering(*pipeline, state);
-    UpdateDynamicState(*pipeline);
+    UpdateDynamicState(*pipeline, is_indexed);
 
     const auto& vs_info = pipeline->GetStage(Shader::LogicalStage::Vertex);
     const auto& fetch_shader = pipeline->GetFetchShader();
@@ -350,16 +350,16 @@ void Rasterizer::DrawIndirect(bool is_indexed, VAddr arg_address, u32 offset, u3
     }
 
     const auto& [buffer, base] =
-        buffer_cache.ObtainBuffer(arg_address + offset, stride * max_count, false);
+        buffer_cache.ObtainBuffer(arg_address + offset, stride * max_count);
 
     VideoCore::Buffer* count_buffer{};
     u32 count_base{};
     if (count_address != 0) {
-        std::tie(count_buffer, count_base) = buffer_cache.ObtainBuffer(count_address, 4, false);
+        std::tie(count_buffer, count_base) = buffer_cache.ObtainBuffer(count_address, 4);
     }
 
     BeginRendering(*pipeline, state);
-    UpdateDynamicState(*pipeline);
+    UpdateDynamicState(*pipeline, is_indexed);
 
     // We can safely ignore both SGPR UD indices and results of fetch shader parsing, as vertex and
     // instance offsets will be automatically applied by Vulkan from indirect args buffer.
@@ -436,7 +436,7 @@ void Rasterizer::DispatchIndirect(VAddr address, u32 offset, u32 size) {
 
     scheduler.EndRendering();
 
-    const auto [buffer, base] = buffer_cache.ObtainBuffer(address + offset, size, false);
+    const auto [buffer, base] = buffer_cache.ObtainBuffer(address + offset, size);
 
     const auto cmdbuf = scheduler.CommandBuffer();
     cmdbuf.bindPipeline(vk::PipelineBindPoint::eCompute, pipeline->Handle());
@@ -661,8 +661,15 @@ void Rasterizer::BindBuffers(const Shader::Info& stage, Shader::Backend::Binding
                 buffer_infos.emplace_back(null_buffer.Handle(), 0, VK_WHOLE_SIZE);
             }
         } else {
-            const auto [vk_buffer, offset] = buffer_cache.ObtainBuffer(
-                vsharp.base_address, size, desc.is_written, desc.is_formatted, buffer_id);
+            VideoCore::ObtainBufferFlags flags = {};
+            if (desc.is_written) {
+                flags |= VideoCore::ObtainBufferFlags::IsWritten;
+            }
+            if (desc.is_formatted) {
+                flags |= VideoCore::ObtainBufferFlags::IsTexelBuffer;
+            }
+            const auto [vk_buffer, offset] =
+                buffer_cache.ObtainBuffer(vsharp.base_address, size, flags, buffer_id);
             const u32 alignment =
                 is_storage ? instance.StorageMinAlignment() : instance.UniformMinAlignment();
             const u32 offset_aligned = Common::AlignDown(offset, alignment);
@@ -723,11 +730,6 @@ void Rasterizer::BindTextures(const Shader::Info& stage, Shader::Backend::Bindin
             // to force general layout on it.
             image->binding.force_general |= image_desc.is_written;
         }
-        if (image->binding.is_target) {
-            // The image is already bound as target. Since we read and output to it need to force
-            // general layout too.
-            image->binding.force_general = 1u;
-        }
         image->binding.is_bound = 1u;
     }
 
@@ -754,8 +756,15 @@ void Rasterizer::BindTextures(const Shader::Info& stage, Shader::Backend::Bindin
             auto& image = texture_cache.GetImage(image_id);
             auto& image_view = texture_cache.FindTexture(image_id, desc);
 
-            if (image.binding.force_general || image.binding.is_target) {
-                image.Transit(vk::ImageLayout::eGeneral,
+            // The image is either bound as storage in a separate descriptor or bound as render
+            // target in feedback loop. Depth images are excluded because they can't be bound as
+            // storage and feedback loop doesn't make sense for them
+            if ((image.binding.force_general || image.binding.is_target) &&
+                !image.info.props.is_depth) {
+                image.Transit(instance.IsAttachmentFeedbackLoopLayoutSupported() &&
+                                      image.binding.is_target
+                                  ? vk::ImageLayout::eAttachmentFeedbackLoopOptimalEXT
+                                  : vk::ImageLayout::eGeneral,
                               vk::AccessFlagBits2::eShaderRead |
                                   (image.info.props.is_depth
                                        ? vk::AccessFlagBits2::eDepthStencilAttachmentWrite
@@ -816,6 +825,7 @@ void Rasterizer::BindTextures(const Shader::Info& stage, Shader::Backend::Bindin
 
 void Rasterizer::BeginRendering(const GraphicsPipeline& pipeline, RenderState& state) {
     int cb_index = 0;
+    attachment_feedback_loop = false;
     for (auto attach_idx = 0u; attach_idx < state.num_color_attachments; ++attach_idx) {
         if (state.color_attachments[attach_idx].imageView == VK_NULL_HANDLE) {
             continue;
@@ -835,11 +845,14 @@ void Rasterizer::BeginRendering(const GraphicsPipeline& pipeline, RenderState& s
             state.height = std::min<u32>(state.height, std::max(image.info.size.height >> mip, 1u));
         }
         auto& image = texture_cache.GetImage(image_id);
-        if (image.binding.force_general) {
-            image.Transit(
-                vk::ImageLayout::eGeneral,
-                vk::AccessFlagBits2::eColorAttachmentWrite | vk::AccessFlagBits2::eShaderRead, {});
-
+        if (image.binding.is_bound) {
+            ASSERT_MSG(!image.binding.force_general,
+                       "Having image both as storage and render target is unsupported");
+            image.Transit(instance.IsAttachmentFeedbackLoopLayoutSupported()
+                              ? vk::ImageLayout::eAttachmentFeedbackLoopOptimalEXT
+                              : vk::ImageLayout::eGeneral,
+                          vk::AccessFlagBits2::eColorAttachmentWrite, {});
+            attachment_feedback_loop = true;
         } else {
             image.Transit(vk::ImageLayout::eColorAttachmentOptimal,
                           vk::AccessFlagBits2::eColorAttachmentWrite |
@@ -859,23 +872,15 @@ void Rasterizer::BeginRendering(const GraphicsPipeline& pipeline, RenderState& s
         if (has_stencil) {
             image.aspect_mask |= vk::ImageAspectFlagBits::eStencil;
         }
-        if (image.binding.force_general) {
-            image.Transit(vk::ImageLayout::eGeneral,
-                          vk::AccessFlagBits2::eDepthStencilAttachmentWrite |
-                              vk::AccessFlagBits2::eShaderRead,
-                          {});
-        } else {
-            const auto new_layout = desc.view_info.is_storage
-                                        ? has_stencil
-                                              ? vk::ImageLayout::eDepthStencilAttachmentOptimal
-                                              : vk::ImageLayout::eDepthAttachmentOptimal
-                                    : has_stencil ? vk::ImageLayout::eDepthStencilReadOnlyOptimal
-                                                  : vk::ImageLayout::eDepthReadOnlyOptimal;
-            image.Transit(new_layout,
-                          vk::AccessFlagBits2::eDepthStencilAttachmentWrite |
-                              vk::AccessFlagBits2::eDepthStencilAttachmentRead,
-                          desc.view_info.range);
-        }
+        const auto new_layout = desc.view_info.is_storage
+                                    ? has_stencil ? vk::ImageLayout::eDepthStencilAttachmentOptimal
+                                                  : vk::ImageLayout::eDepthAttachmentOptimal
+                                : has_stencil ? vk::ImageLayout::eDepthStencilReadOnlyOptimal
+                                              : vk::ImageLayout::eDepthReadOnlyOptimal;
+        image.Transit(new_layout,
+                      vk::AccessFlagBits2::eDepthStencilAttachmentWrite |
+                          vk::AccessFlagBits2::eDepthStencilAttachmentRead,
+                      desc.view_info.range);
         state.depth_attachment.imageLayout = image.last_state.layout;
         state.stencil_attachment.imageLayout = image.last_state.layout;
         image.usage.depth_target = true;
@@ -963,6 +968,9 @@ void Rasterizer::Resolve() {
             vk::ImageLayout::eTransferDstOptimal, region);
     }
 
+    mrt1_image.flags |= VideoCore::ImageFlagBits::GpuModified;
+    mrt1_image.flags &= ~VideoCore::ImageFlagBits::Dirty;
+
     ScopeMarkerEnd();
 }
 
@@ -1046,7 +1054,7 @@ bool Rasterizer::InvalidateMemory(VAddr addr, u64 size) {
         // Not GPU mapped memory, can skip invalidation logic entirely.
         return false;
     }
-    buffer_cache.InvalidateMemory(addr, size);
+    buffer_cache.InvalidateMemory(addr, size, true);
     texture_cache.InvalidateMemory(addr, size);
     return true;
 }
@@ -1080,7 +1088,7 @@ void Rasterizer::MapMemory(VAddr addr, u64 size) {
 }
 
 void Rasterizer::UnmapMemory(VAddr addr, u64 size) {
-    buffer_cache.InvalidateMemory(addr, size);
+    buffer_cache.InvalidateMemory(addr, size, true);
     texture_cache.UnmapMemory(addr, size);
     page_manager.OnGpuUnmap(addr, size);
     {
@@ -1089,15 +1097,16 @@ void Rasterizer::UnmapMemory(VAddr addr, u64 size) {
     }
 }
 
-void Rasterizer::UpdateDynamicState(const GraphicsPipeline& pipeline) const {
+void Rasterizer::UpdateDynamicState(const GraphicsPipeline& pipeline, const bool is_indexed) const {
     UpdateViewportScissorState();
     UpdateDepthStencilState();
-    UpdatePrimitiveState();
+    UpdatePrimitiveState(is_indexed);
     UpdateRasterizationState();
 
     auto& dynamic_state = scheduler.GetDynamicState();
     dynamic_state.SetBlendConstants(liverpool->regs.blend_constants);
     dynamic_state.SetColorWriteMasks(pipeline.GetWriteMasks());
+    dynamic_state.SetAttachmentFeedbackLoopEnabled(attachment_feedback_loop);
 
     // Commit new dynamic state to the command buffer.
     dynamic_state.Commit(instance, scheduler.CommandBuffer());
@@ -1292,12 +1301,12 @@ void Rasterizer::UpdateDepthStencilState() const {
     }
 }
 
-void Rasterizer::UpdatePrimitiveState() const {
+void Rasterizer::UpdatePrimitiveState(const bool is_indexed) const {
     const auto& regs = liverpool->regs;
     auto& dynamic_state = scheduler.GetDynamicState();
 
     const auto prim_restart = (regs.enable_primitive_restart & 1) != 0;
-    ASSERT_MSG(!prim_restart || regs.primitive_restart_index == 0xFFFF ||
+    ASSERT_MSG(!is_indexed || !prim_restart || regs.primitive_restart_index == 0xFFFF ||
                    regs.primitive_restart_index == 0xFFFFFFFF,
                "Primitive restart index other than -1 is not supported yet");
 

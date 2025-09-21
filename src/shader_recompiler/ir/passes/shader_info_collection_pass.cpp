@@ -73,6 +73,7 @@ void Visit(Info& info, const IR::Inst& inst) {
         break;
     case IR::Opcode::ConvertF16F32:
     case IR::Opcode::ConvertF32F16:
+    case IR::Opcode::BitCastU16F16:
     case IR::Opcode::BitCastF16U16:
         info.uses_fp16 = true;
         break;
@@ -158,10 +159,6 @@ void CollectShaderInfoPass(IR::Program& program, const Profile& profile) {
         for (IR::Inst& inst : block->Instructions()) {
             Visit(info, inst);
         }
-    }
-
-    if (info.stores.GetAny(IR::Attribute::RenderTargetId)) {
-        info.has_layer_output = true;
     }
 
     // In case Flatbuf has not already been bound by IR and is needed

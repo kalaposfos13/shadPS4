@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2024 shadPS4 Emulator Project
+// SPDX-FileCopyrightText: Copyright 2025 shadPS4 Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #pragma once
@@ -17,8 +17,8 @@
 #include "video_core/texture_cache/sampler.h"
 #include "video_core/texture_cache/tile_manager.h"
 
-namespace Core::Libraries::VideoOut {
-struct BufferAttributeGroup;
+namespace AmdGpu {
+struct Liverpool;
 }
 
 namespace VideoCore {
@@ -89,7 +89,8 @@ public:
 
 public:
     TextureCache(const Vulkan::Instance& instance, Vulkan::Scheduler& scheduler,
-                 BufferCache& buffer_cache, PageManager& tracker);
+                 AmdGpu::Liverpool* liverpool, BufferCache& buffer_cache,
+                 PageManager& page_manager);
     ~TextureCache();
 
     TileManager& GetTileManager() noexcept {
@@ -101,6 +102,9 @@ public:
 
     /// Marks an image as dirty if it exists at the provided address.
     void InvalidateMemoryFromGPU(VAddr address, size_t max_size);
+
+    /// Marks an image as maybe reused if it exists within the provided range.
+    void MarkAsMaybeReused(VAddr addr, size_t size);
 
     /// Evicts any images that overlap the unmapped range.
     void UnmapMemory(VAddr cpu_addr, size_t size);
@@ -276,6 +280,9 @@ private:
     /// Copies image memory back to CPU.
     void DownloadImageMemory(ImageId image_id);
 
+    /// Thread function for copying downloaded images out to CPU memory.
+    void DownloadedImagesThread(const std::stop_token& token);
+
     /// Create an image from the given parameters
     [[nodiscard]] ImageId InsertImage(const ImageInfo& info, VAddr cpu_addr);
 
@@ -301,7 +308,7 @@ private:
     void DeleteImage(ImageId image_id);
 
     /// Touch the image in the LRU cache.
-    void TouchImage(const Image& image);
+    void TouchImage(Image& image);
 
     void FreeImage(ImageId image_id) {
         UntrackImage(image_id);
@@ -312,8 +319,9 @@ private:
 private:
     const Vulkan::Instance& instance;
     Vulkan::Scheduler& scheduler;
+    AmdGpu::Liverpool* liverpool;
     BufferCache& buffer_cache;
-    PageManager& tracker;
+    PageManager& page_manager;
     BlitHelper blit_helper;
     TileManager tile_manager;
     Common::SlotVector<Image> slot_images;
@@ -329,6 +337,17 @@ private:
     Common::LeastRecentlyUsedCache<ImageId, u64> lru_cache;
     PageTable page_table;
     std::mutex mutex;
+
+    struct DownloadedImage {
+        u64 tick;
+        VAddr device_addr;
+        void* download;
+        size_t download_size;
+    };
+    std::queue<DownloadedImage> downloaded_images_queue;
+    std::mutex downloaded_images_mutex;
+    std::condition_variable_any downloaded_images_cv;
+    std::jthread downloaded_images_thread;
 
     struct MetaDataInfo {
         enum class Type {

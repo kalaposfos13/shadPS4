@@ -118,6 +118,7 @@ struct Liverpool {
         u32 address_lo;
         BitField<0, 8, u32> address_hi;
         union {
+            // SPI_SHADER_PGM_RSRC1_XX
             BitField<0, 6, u64> num_vgprs;
             BitField<6, 4, u64> num_sgprs;
             BitField<10, 2, u64> priority;
@@ -127,7 +128,12 @@ struct Liverpool {
             BitField<18, 2, FpDenormMode> fp_denorm_mode64;
             BitField<12, 8, u64> float_mode;
             BitField<24, 2, u64> vgpr_comp_cnt; // SPI provided per-thread inputs
+            // SPI_SHADER_PGM_RSRC2_XX
+            BitField<32, 1, u64> scratch_en;
             BitField<33, 5, u64> num_user_regs;
+            union {
+                BitField<39, 1, u64> oc_lds_en;
+            } rsrc2_hs;
         } settings;
         UserData user_data;
 
@@ -332,7 +338,7 @@ struct Liverpool {
         GreaterThanZ = 2,
     };
 
-    union DepthBufferControl {
+    union DepthShaderControl {
         u32 raw;
         BitField<0, 1, u32> z_export_enable;
         BitField<1, 1, u32> stencil_test_val_export_enable;
@@ -1404,7 +1410,7 @@ struct Liverpool {
             DepthControl depth_control;
             INSERT_PADDING_WORDS(1);
             ColorControl color_control;
-            DepthBufferControl depth_buffer_control;
+            DepthShaderControl depth_shader_control;
             ClipperControl clipper_control;
             PolygonControl polygon_control;
             ViewportControl viewport_control;
@@ -1660,6 +1666,8 @@ private:
     u32 num_mapped_queues{1u}; // GFX is always available
 
     VAddr indirect_args_addr{};
+    u32 num_counter_pairs{};
+    u64 pixel_counter{};
 
     struct ConstantEngine {
         void Reset() {

@@ -89,6 +89,11 @@ public:
         return features.depthBounds;
     }
 
+    /// Returns true if 16-bit floats are supported in shaders
+    bool IsShaderFloat16Supported() const {
+        return vk12_features.shaderFloat16;
+    }
+
     /// Returns true if 64-bit floats are supported in shaders
     bool IsShaderFloat64Supported() const {
         return features.shaderFloat64;
@@ -112,6 +117,11 @@ public:
     /// Returns true if VK_KHR_maintenance8 is supported
     bool IsMaintenance8Supported() const {
         return maintenance_8;
+    }
+
+    /// Returns true if VK_EXT_attachment_feedback_loop_layout is supported
+    bool IsAttachmentFeedbackLoopLayoutSupported() const {
+        return attachment_feedback_loop;
     }
 
     /// Returns true when VK_EXT_custom_border_color is supported
@@ -406,7 +416,8 @@ public:
 
     /// Returns the total memory budget available to the device.
     [[nodiscard]] u64 GetTotalMemoryBudget() const {
-        return total_memory_budget;
+        return 2_GB; // TODO: this is for better garbage collection testing, temporary
+        // return total_memory_budget;
     }
 
     /// Determines if a format is supported for a set of feature flags.
@@ -475,6 +486,7 @@ private:
     bool workgroup_memory_explicit_layout{};
     bool portability_subset{};
     bool maintenance_8{};
+    bool attachment_feedback_loop{};
     bool supports_memory_budget{};
     u64 total_memory_budget{};
     std::vector<size_t> valid_heaps;

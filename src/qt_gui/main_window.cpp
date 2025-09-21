@@ -21,6 +21,7 @@
 #include "control_settings.h"
 #include "game_install_dialog.h"
 #include "hotkeys.h"
+#include "input/input_handler.h"
 #include "kbm_gui.h"
 #include "main_window.h"
 #include "settings_dialog.h"
@@ -406,7 +407,8 @@ void MainWindow::CreateConnects() {
             &MainWindow::StartGame);
 
     connect(ui->configureAct, &QAction::triggered, this, [this]() {
-        auto settingsDialog = new SettingsDialog(m_gui_settings, m_compat_info, this);
+        auto settingsDialog =
+            new SettingsDialog(m_gui_settings, m_compat_info, this, isGameRunning);
 
         connect(settingsDialog, &SettingsDialog::LanguageChanged, this,
                 &MainWindow::OnLanguageChanged);
@@ -440,7 +442,8 @@ void MainWindow::CreateConnects() {
     });
 
     connect(ui->settingsButton, &QPushButton::clicked, this, [this]() {
-        auto settingsDialog = new SettingsDialog(m_gui_settings, m_compat_info, this);
+        auto settingsDialog =
+            new SettingsDialog(m_gui_settings, m_compat_info, this, isGameRunning);
 
         connect(settingsDialog, &SettingsDialog::LanguageChanged, this,
                 &MainWindow::OnLanguageChanged);
@@ -497,7 +500,7 @@ void MainWindow::CreateConnects() {
     });
 
     connect(ui->configureHotkeys, &QAction::triggered, this, [this]() {
-        auto hotkeyDialog = new hotkeys(isGameRunning, this);
+        auto hotkeyDialog = new Hotkeys(isGameRunning, this);
         hotkeyDialog->exec();
     });
 

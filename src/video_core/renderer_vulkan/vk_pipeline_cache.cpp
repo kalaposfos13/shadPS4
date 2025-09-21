@@ -42,14 +42,15 @@ static u32 MapOutputs(std::span<Shader::OutputMap, 3> outputs,
 
     if (ctl.vs_out_misc_enable) {
         auto& misc_vec = outputs[num_outputs++];
-        misc_vec[0] = ctl.use_vtx_point_size ? Output::PointSprite : Output::None;
+        misc_vec[0] = ctl.use_vtx_point_size ? Output::PointSize : Output::None;
         misc_vec[1] = ctl.use_vtx_edge_flag
                           ? Output::EdgeFlag
                           : (ctl.use_vtx_gs_cut_flag ? Output::GsCutFlag : Output::None);
-        misc_vec[2] = ctl.use_vtx_kill_flag
-                          ? Output::KillFlag
-                          : (ctl.use_vtx_render_target_idx ? Output::GsMrtIndex : Output::None);
-        misc_vec[3] = ctl.use_vtx_viewport_idx ? Output::GsVpIndex : Output::None;
+        misc_vec[2] =
+            ctl.use_vtx_kill_flag
+                ? Output::KillFlag
+                : (ctl.use_vtx_render_target_idx ? Output::RenderTargetIndex : Output::None);
+        misc_vec[3] = ctl.use_vtx_viewport_idx ? Output::ViewportIndex : Output::None;
     }
 
     if (ctl.vs_out_ccdist0_enable) {
@@ -112,6 +113,7 @@ const Shader::RuntimeInfo& PipelineCache::BuildRuntimeInfo(Stage stage, LogicalS
         info.hs_info.num_input_control_points = regs.ls_hs_config.hs_input_control_points.Value();
         info.hs_info.num_threads = regs.ls_hs_config.hs_output_control_points.Value();
         info.hs_info.tess_type = regs.tess_config.type;
+        info.hs_info.offchip_lds_enable = regs.hs_program.settings.rsrc2_hs.oc_lds_en.Value();
 
         // We need to initialize most hs_info fields after finding the V# with tess constants
         break;
@@ -165,17 +167,28 @@ const Shader::RuntimeInfo& PipelineCache::BuildRuntimeInfo(Stage stage, LogicalS
         BuildCommon(regs.ps_program);
         info.fs_info.en_flags = regs.ps_input_ena;
         info.fs_info.addr_flags = regs.ps_input_addr;
-        const auto& ps_inputs = regs.ps_inputs;
         info.fs_info.num_inputs = regs.num_interp;
+        info.fs_info.z_export_format = regs.z_export_format;
+        u8 stencil_ref_export_enable = regs.depth_shader_control.stencil_op_val_export_enable |
+                                       regs.depth_shader_control.stencil_test_val_export_enable;
+        info.fs_info.mrtz_mask = regs.depth_shader_control.z_export_enable |
+                                 (stencil_ref_export_enable << 1) |
+                                 (regs.depth_shader_control.mask_export_enable << 2) |
+                                 (regs.depth_shader_control.coverage_to_mask_enable << 3);
         const auto& cb0_blend = regs.blend_control[0];
-        info.fs_info.dual_source_blending =
-            LiverpoolToVK::IsDualSourceBlendFactor(cb0_blend.color_dst_factor) ||
-            LiverpoolToVK::IsDualSourceBlendFactor(cb0_blend.color_src_factor);
-        if (cb0_blend.separate_alpha_blend) {
-            info.fs_info.dual_source_blending |=
-                LiverpoolToVK::IsDualSourceBlendFactor(cb0_blend.alpha_dst_factor) ||
-                LiverpoolToVK::IsDualSourceBlendFactor(cb0_blend.alpha_src_factor);
+        if (cb0_blend.enable) {
+            info.fs_info.dual_source_blending =
+                LiverpoolToVK::IsDualSourceBlendFactor(cb0_blend.color_dst_factor) ||
+                LiverpoolToVK::IsDualSourceBlendFactor(cb0_blend.color_src_factor);
+            if (cb0_blend.separate_alpha_blend) {
+                info.fs_info.dual_source_blending |=
+                    LiverpoolToVK::IsDualSourceBlendFactor(cb0_blend.alpha_dst_factor) ||
+                    LiverpoolToVK::IsDualSourceBlendFactor(cb0_blend.alpha_src_factor);
+            }
+        } else {
+            info.fs_info.dual_source_blending = false;
         }
+        const auto& ps_inputs = regs.ps_inputs;
         for (u32 i = 0; i < regs.num_interp; i++) {
             info.fs_info.inputs[i] = {
                 .param_index = u8(ps_inputs[i].input_offset.Value()),
@@ -217,6 +230,7 @@ PipelineCache::PipelineCache(const Instance& instance_, Scheduler& scheduler_,
         .support_int8 = instance.IsShaderInt8Supported(),
         .support_int16 = instance.IsShaderInt16Supported(),
         .support_int64 = instance.IsShaderInt64Supported(),
+        .support_float16 = instance.IsShaderFloat16Supported(),
         .support_float64 = instance.IsShaderFloat64Supported(),
         .support_fp32_denorm_preserve = bool(vk12_props.shaderDenormPreserveFloat32),
         .support_fp32_denorm_flush = bool(vk12_props.shaderDenormFlushToZeroFloat32),
@@ -268,6 +282,9 @@ const GraphicsPipeline* PipelineCache::GetGraphicsPipeline() {
     }
     const auto [it, is_new] = graphics_pipelines.try_emplace(graphics_key);
     if (is_new) {
+        const auto pipeline_hash = std::hash<GraphicsPipelineKey>{}(graphics_key);
+        LOG_INFO(Render_Vulkan, "Compiling graphics pipeline {:#x}", pipeline_hash);
+
         it.value() = std::make_unique<GraphicsPipeline>(instance, scheduler, desc_heap, profile,
                                                         graphics_key, *pipeline_cache, infos,
                                                         runtime_infos, fetch_shader, modules);
@@ -289,6 +306,9 @@ const ComputePipeline* PipelineCache::GetComputePipeline() {
     }
     const auto [it, is_new] = compute_pipelines.try_emplace(compute_key);
     if (is_new) {
+        const auto pipeline_hash = std::hash<ComputePipelineKey>{}(compute_key);
+        LOG_INFO(Render_Vulkan, "Compiling compute pipeline {:#x}", pipeline_hash);
+
         it.value() =
             std::make_unique<ComputePipeline>(instance, scheduler, desc_heap, profile,
                                               *pipeline_cache, compute_key, *infos[0], modules[0]);
@@ -344,9 +364,9 @@ bool PipelineCache::RefreshGraphicsKey() {
         };
 
         // Fill color blending information
-        key.blend_controls[cb] = regs.blend_control[cb];
-        key.blend_controls[cb].enable.Assign(regs.blend_control[cb].enable &&
-                                             !col_buf.info.blend_bypass);
+        if (regs.blend_control[cb].enable && !col_buf.info.blend_bypass) {
+            key.blend_controls[cb] = regs.blend_control[cb];
+        }
 
         // Apply swizzle to target mask
         key.write_masks[cb] =
