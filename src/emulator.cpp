@@ -8,7 +8,7 @@
 #include <sstream>
 #include <fmt/core.h>
 #include <fmt/xchar.h>
-#include <hwinfo/hwinfo.h>
+// #include <hwinfo/hwinfo.h>
 
 #include "common/config.h"
 #include "common/debug.h"
@@ -183,16 +183,16 @@ void Emulator::Run(std::filesystem::path file, std::vector<std::string> args,
     LOG_INFO(Config, "Vulkan guestMarkers: {}", Config::getVkGuestMarkersEnabled());
     LOG_INFO(Config, "Vulkan rdocEnable: {}", Config::isRdocEnabled());
 
-    hwinfo::Memory ram;
-    hwinfo::OS os;
-    const auto cpus = hwinfo::getAllCPUs();
-    for (const auto& cpu : cpus) {
-        LOG_INFO(Config, "CPU Model: {}", cpu.modelName());
-        LOG_INFO(Config, "CPU Physical Cores: {}, Logical Cores: {}", cpu.numPhysicalCores(),
-                 cpu.numLogicalCores());
-    }
-    LOG_INFO(Config, "Total RAM: {} GB", std::round(ram.total_Bytes() / pow(1024, 3)));
-    LOG_INFO(Config, "Operating System: {}", os.name());
+    // hwinfo::Memory ram;
+    // hwinfo::OS os;
+    // const auto cpus = hwinfo::getAllCPUs();
+    // for (const auto& cpu : cpus) {
+    //     LOG_INFO(Config, "CPU Model: {}", cpu.modelName());
+    //     LOG_INFO(Config, "CPU Physical Cores: {}, Logical Cores: {}", cpu.numPhysicalCores(),
+    //              cpu.numLogicalCores());
+    // }
+    // LOG_INFO(Config, "Total RAM: {} GB", std::round(ram.total_Bytes() / pow(1024, 3)));
+    // LOG_INFO(Config, "Operating System: {}", os.name());
 
     if (param_sfo_exists) {
         LOG_INFO(Loader, "Game id: {} Title: {}", id, title);
