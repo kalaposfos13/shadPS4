@@ -81,7 +81,7 @@ struct ImageResource {
 using ImageResourceList = boost::container::small_vector<ImageResource, NumImages>;
 
 struct SamplerResource {
-    SamplerResource() = default;
+    // SamplerResource() = default;
     u32 sharp_idx;
     AmdGpu::Sampler inline_sampler;
     u32 is_inline_sampler : 1;

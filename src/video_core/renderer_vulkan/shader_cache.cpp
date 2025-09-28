@@ -92,7 +92,7 @@ u64 CalculateSpecializationHash(const Shader::StageSpecialization& spec) {
             hash = HashCombine(hash, static_cast<u32>(color_buffer.num_format));
             hash = HashCombine(hash, static_cast<u32>(color_buffer.num_conversion));
             hash = HashCombine(hash, static_cast<u32>(color_buffer.export_format));
-            hash = HashCombine(hash, color_buffer.needs_unorm_fixup);
+            // hash = HashCombine(hash, color_buffer.needs_unorm_fixup);
             hash = HashCombine(hash, color_buffer.swizzle.r);
             hash = HashCombine(hash, color_buffer.swizzle.g);
             hash = HashCombine(hash, color_buffer.swizzle.b);

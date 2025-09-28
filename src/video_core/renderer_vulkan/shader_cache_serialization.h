@@ -56,7 +56,7 @@ void serialize(Archive& ar, AmdGpu::Sampler& sampler) {
 // Shader::SamplerResource
 template <class Archive>
 void serialize(Archive& ar, Shader::SamplerResource& sampler) {
-    ar(sampler.sampler);
+    ar(sampler.inline_sampler);
     ar(static_cast<u32>(sampler.associated_image), static_cast<u32>(sampler.disable_aniso));
 }
 
