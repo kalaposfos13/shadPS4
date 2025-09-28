@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2024 shadPS4 Emulator Project
+// SPDX-FileCopyrightText: Copyright 2025 shadPS4 Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #pragma once
@@ -17,25 +17,14 @@
 #include "video_core/texture_cache/sampler.h"
 #include "video_core/texture_cache/tile_manager.h"
 
-namespace Core::Libraries::VideoOut {
-struct BufferAttributeGroup;
+namespace AmdGpu {
+struct Liverpool;
 }
 
 namespace VideoCore {
 
 class BufferCache;
 class PageManager;
-
-enum class FindFlags {
-    NoCreate = 1 << 0,  ///< Do not create an image if searching for one fails.
-    RelaxDim = 1 << 1,  ///< Do not check the dimentions of image, only address.
-    RelaxSize = 1 << 2, ///< Do not check that the size matches exactly.
-    RelaxFmt = 1 << 3,  ///< Do not check that format is compatible.
-    ExactFmt = 1 << 4,  ///< Require the format to be exactly the same.
-};
-DECLARE_ENUM_FLAG_OPERATORS(FindFlags)
-
-static constexpr u32 MaxInvalidateDist = 12_MB;
 
 class TextureCache {
     // Default values for garbage collection
@@ -100,8 +89,12 @@ public:
 
 public:
     TextureCache(const Vulkan::Instance& instance, Vulkan::Scheduler& scheduler,
-                 BufferCache& buffer_cache, PageManager& tracker);
+                 AmdGpu::Liverpool* liverpool, BufferCache& buffer_cache, PageManager& tracker);
     ~TextureCache();
+
+    TileManager& GetTileManager() noexcept {
+        return tile_manager;
+    }
 
     /// Invalidates any image in the logical page range.
     void InvalidateMemory(VAddr addr, size_t size);
@@ -116,7 +109,10 @@ public:
     void ProcessDownloadImages();
 
     /// Retrieves the image handle of the image with the provided attributes.
-    [[nodiscard]] ImageId FindImage(BaseDesc& desc, FindFlags flags = {});
+    [[nodiscard]] ImageId FindImage(BaseDesc& desc, bool exact_fmt = false);
+
+    /// Retrieves image whose address matches provided
+    [[nodiscard]] ImageId FindImageFromRange(VAddr address, size_t size, bool ensure_valid = true);
 
     /// Retrieves an image view with the properties of the specified image id.
     [[nodiscard]] ImageView& FindTexture(ImageId image_id, const BaseDesc& desc);
@@ -145,6 +141,7 @@ public:
     [[nodiscard]] ImageId ResolveDepthOverlap(const ImageInfo& requested_info, BindingType binding,
                                               ImageId cache_img_id);
 
+    /// Creates a new image with provided image info and copies subresources from image_id
     [[nodiscard]] ImageId ExpandImage(const ImageInfo& info, ImageId image_id);
 
     /// Reuploads image contents.
@@ -279,6 +276,9 @@ private:
     /// Copies image memory back to CPU.
     void DownloadImageMemory(ImageId image_id);
 
+    /// Thread function for copying downloaded images out to CPU memory.
+    void DownloadedImagesThread(const std::stop_token& token);
+
     /// Create an image from the given parameters
     [[nodiscard]] ImageId InsertImage(const ImageInfo& info, VAddr cpu_addr);
 
@@ -315,6 +315,7 @@ private:
 private:
     const Vulkan::Instance& instance;
     Vulkan::Scheduler& scheduler;
+    AmdGpu::Liverpool* liverpool;
     BufferCache& buffer_cache;
     PageManager& tracker;
     BlitHelper blit_helper;
@@ -332,6 +333,17 @@ private:
     Common::LeastRecentlyUsedCache<ImageId, u64> lru_cache;
     PageTable page_table;
     std::mutex mutex;
+
+    struct DownloadedImage {
+        u64 tick;
+        VAddr device_addr;
+        void* download;
+        size_t download_size;
+    };
+    std::queue<DownloadedImage> downloaded_images_queue;
+    std::mutex downloaded_images_mutex;
+    std::condition_variable_any downloaded_images_cv;
+    std::jthread downloaded_images_thread;
 
     struct MetaDataInfo {
         enum class Type {

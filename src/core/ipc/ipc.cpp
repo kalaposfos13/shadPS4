@@ -1,4 +1,4 @@
-//  SPDX-FileCopyrightText: Copyright 2024 shadPS4 Emulator Project
+//  SPDX-FileCopyrightText: Copyright 2025 shadPS4 Emulator Project
 //  SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "ipc.h"
@@ -6,9 +6,15 @@
 #include <iostream>
 #include <string>
 
+#include <SDL3/SDL.h>
+
 #include "common/memory_patcher.h"
 #include "common/thread.h"
 #include "common/types.h"
+#include "core/debug_state.h"
+#include "core/debugger.h"
+#include "input/input_handler.h"
+#include "sdl_window.h"
 
 /**
  * Protocol summary:
@@ -28,13 +34,14 @@
  *   and ended by
  *   #IPC_END
  *   In between, it will send the current capabilities and commands before the emulator start
- * - The IPC client(e.g., launcher) will send RUN then START to conintue the execution
+ * - The IPC client(e.g., launcher) will send RUN then START to continue the execution
  **/
 
 /**
  * Command list:
  * - CAPABILITIES:
  *   - ENABLE_MEMORY_PATCH: enables PATCH_MEMORY command
+ *   - ENABLE_EMU_CONTROL: enables PAUSE, RESUME, STOP, TOGGLE_FULLSCREEN commands
  * - INPUT CMD:
  *   - RUN: start the emulator execution
  *   - START: start the game execution
@@ -43,8 +50,12 @@
  *       target: str, size: str, isOffset: number, littleEndian: number,
  *       patchMask: number, maskOffset: number
  *     ): add a memory patch, check @ref MemoryPatcher::PatchMemory for details
+ *   - PAUSE: pause the game execution
+ *   - RESUME: resume the game execution
+ *   - STOP: stop and quit the emulator
+ *   - TOGGLE_FULLSCREEN: enable / disable fullscreen
  * - OUTPUT CMD:
- *   - N/A
+ *   - RESTART(argn: number, argv: ...string): Request restart of the emulator, must call STOP
  **/
 
 void IPC::Init() {
@@ -61,6 +72,7 @@ void IPC::Init() {
 
     std::cerr << ";#IPC_ENABLED\n";
     std::cerr << ";ENABLE_MEMORY_PATCH\n";
+    std::cerr << ";ENABLE_EMU_CONTROL\n";
     std::cerr << ";#IPC_END\n";
     std::cerr.flush();
 
@@ -69,6 +81,15 @@ void IPC::Init() {
         std::cerr << "IPC: Failed to acquire run semaphore, closing process.\n";
         exit(1);
     }
+}
+
+void IPC::SendRestart(const std::vector<std::string>& args) {
+    std::cerr << ";RESTART\n";
+    std::cerr << ";" << args.size() << "\n";
+    for (const auto& arg : args) {
+        std::cerr << ";" << arg << "\n";
+    }
+    std::cerr.flush();
 }
 
 void IPC::InputLoop() {
@@ -106,8 +127,22 @@ void IPC::InputLoop() {
             entry.patchMask = static_cast<MemoryPatcher::PatchMask>(next_u64());
             entry.maskOffset = static_cast<int>(next_u64());
             MemoryPatcher::AddPatchToQueue(entry);
+        } else if (cmd == "PAUSE") {
+            DebugState.PauseGuestThreads();
+        } else if (cmd == "RESUME") {
+            DebugState.ResumeGuestThreads();
+        } else if (cmd == "STOP") {
+            SDL_Event event;
+            SDL_memset(&event, 0, sizeof(event));
+            event.type = SDL_EVENT_QUIT;
+            SDL_PushEvent(&event);
+        } else if (cmd == "TOGGLE_FULLSCREEN") {
+            SDL_Event event;
+            SDL_memset(&event, 0, sizeof(event));
+            event.type = SDL_EVENT_TOGGLE_FULLSCREEN;
+            SDL_PushEvent(&event);
         } else {
-            std::cerr << "UNKNOWN CMD: " << cmd << std::endl;
+            std::cerr << ";UNKNOWN CMD: " << cmd << std::endl;
         }
     }
 }
