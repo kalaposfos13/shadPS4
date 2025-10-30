@@ -391,6 +391,12 @@ void L::Draw() {
         ImGui::GetForegroundDrawList()->AddText(pos, color, "Emulation Paused");
     }
 
+    if (Config::nullGpu()) {
+        ImVec2 pos = ImVec2(10, 30);
+        ImU32 color = IM_COL32(255, 255, 255, 255);
+        ImGui::GetForegroundDrawList()->AddText(pos, color, "NullGPU");
+    }
+
     if (show_simple_fps) {
         if (Begin("Video Info", nullptr,
                   ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoDecoration |
