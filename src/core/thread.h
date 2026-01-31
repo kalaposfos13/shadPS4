@@ -4,6 +4,7 @@
 #pragma once
 
 #include "common/types.h"
+#include "common/thread.h"
 
 namespace Libraries::Kernel {
 struct PthreadAttr;
@@ -30,6 +31,10 @@ public:
 
     u64 GetTid() {
         return tid;
+    }
+
+    void SetName(char const* name) {
+        Common::SetThreadName(native_handle, name);
     }
 
 private:

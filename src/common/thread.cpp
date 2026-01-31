@@ -211,8 +211,8 @@ void SetCurrentThreadName(const char* name) {
 #endif
 }
 
-void SetThreadName(void* thread, const char* name) {
-    // TODO
+void SetThreadName(uintptr_t thread, const char* name) {
+    pthread_setname_np(thread, name);
 }
 #endif
 

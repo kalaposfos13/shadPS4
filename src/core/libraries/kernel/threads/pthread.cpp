@@ -326,7 +326,7 @@ PthreadT PS4_SYSV_ABI posix_pthread_self() {
 
 void PS4_SYSV_ABI posix_pthread_set_name_np(PthreadT thread, const char* name) {
     LOG_INFO(Kernel_Pthread, "called, new name: {}", name);
-    Common::SetCurrentThreadName(name);
+    thread->native_thr.SetName(name);
 }
 
 void PS4_SYSV_ABI posix_pthread_yield() {
@@ -408,7 +408,7 @@ int PS4_SYSV_ABI posix_pthread_rename_np(PthreadT thread, const char* name) {
         return 0;
     }
     LOG_INFO(Kernel_Pthread, "name = {}", name);
-    Common::SetThreadName(reinterpret_cast<void*>(thread->native_thr.GetHandle()), name);
+    Common::SetThreadName(thread->native_thr.GetHandle(), name);
     thread->name = name;
     return ORBIS_OK;
 }

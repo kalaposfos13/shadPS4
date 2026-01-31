@@ -24,7 +24,11 @@ void SetCurrentThreadPriority(ThreadPriority new_priority);
 
 void SetCurrentThreadName(const char* name);
 
+#ifdef _WIN32
 void SetThreadName(void* thread, const char* name);
+#else
+void SetThreadName(uintptr_t thread, const char* name);
+#endif
 
 bool AccurateSleep(std::chrono::nanoseconds duration, std::chrono::nanoseconds* remaining,
                    bool interruptible);
