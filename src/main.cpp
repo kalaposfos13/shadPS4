@@ -55,6 +55,7 @@ int main(int argc, char* argv[]) {
 
     // ---- CLI state ----
     std::optional<std::string> gamePath;
+    std::optional<std::filesystem::path> overlay_mount;
     std::vector<std::string> gameArgs;
     std::optional<std::filesystem::path> overrideRoot;
     std::optional<int> waitPid;
@@ -73,11 +74,12 @@ int main(int argc, char* argv[]) {
 
     // ---- Options ----
     app.add_option("-g,--game", gamePath, "Game path or ID");
+    app.add_option("-o,--overlay-mount", overlay_mount, "Path to the game's sce_sys/ folder.")
+        ->check(CLI::ExistingDirectory);
     app.add_option("-p,--patch", patchFile, "Patch file to apply");
     app.add_flag("-i,--ignore-game-patch", ignoreGamePatch,
                  "Disable automatic loading of game patches");
 
-    // FULLSCREEN: behavior-identical
     app.add_option("-f,--fullscreen", fullscreenStr, "Fullscreen mode (true|false)");
 
     app.add_option("--override-root", overrideRoot)->check(CLI::ExistingDirectory);
@@ -197,7 +199,7 @@ int main(int argc, char* argv[]) {
     auto* emulator = Common::Singleton<Core::Emulator>::Instance();
     emulator->executableName = argv[0];
     emulator->waitForDebuggerBeforeRun = waitForDebugger;
-    emulator->Run(ebootPath, gameArgs, overrideRoot);
+    emulator->Run(ebootPath, gameArgs, overrideRoot, overlay_mount);
 
     return 0;
 }

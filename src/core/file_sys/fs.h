@@ -60,10 +60,21 @@ public:
 
     const MntPair* GetMount(const std::string& guest_path) {
         std::scoped_lock lock{m_mutex};
+
         const auto it = std::ranges::find_if(m_mnt_pairs, [&](const auto& mount) {
             // When doing starts-with check, add a trailing slash to make sure we don't match
             // against only part of the mount path.
-            return guest_path == mount.mount || guest_path.starts_with(mount.mount + "/");
+            if (guest_path == mount.mount || guest_path.starts_with(mount.mount + "/")) {
+                const std::string relative = guest_path.size() > mount.mount.size()
+                                                 ? guest_path.substr(mount.mount.size() + 1)
+                                                 : "";
+                const std::filesystem::path host =
+                    std::filesystem::path(mount.host_path) / relative;
+                if (std::filesystem::exists(host)) {
+                    return true;
+                }
+            }
+            return false;
         });
         return it == m_mnt_pairs.end() ? nullptr : &*it;
     }

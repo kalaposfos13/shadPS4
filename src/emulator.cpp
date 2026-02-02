@@ -96,7 +96,8 @@ s32 ReadCompiledSdkVersion(const std::filesystem::path& file) {
 }
 
 void Emulator::Run(std::filesystem::path file, std::vector<std::string> args,
-                   std::optional<std::filesystem::path> p_game_folder) {
+                   std::optional<std::filesystem::path> p_game_folder,
+                   std::optional<std::filesystem::path> overlay_mount) {
     Common::SetCurrentThreadName("shadPS4:Main");
     if (waitForDebuggerBeforeRun) {
         Debugger::WaitForDebuggerAttach();
@@ -127,6 +128,9 @@ void Emulator::Run(std::filesystem::path file, std::vector<std::string> args,
 
     // Applications expect to be run from /app0 so mount the file's parent path as app0.
     auto* mnt = Common::Singleton<Core::FileSys::MntPoints>::Instance();
+    if (overlay_mount.has_value()) {
+        mnt->Mount(*overlay_mount, "/app0", true);
+    }
     mnt->Mount(game_folder, "/app0", true);
     // Certain games may use /hostapp as well such as CUSA001100
     mnt->Mount(game_folder, "/hostapp", true);
