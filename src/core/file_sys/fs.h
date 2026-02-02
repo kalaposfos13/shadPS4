@@ -61,10 +61,13 @@ public:
     const MntPair* GetMount(const std::string& guest_path) {
         std::scoped_lock lock{m_mutex};
 
+        const MntPair* temp = nullptr;
+
         const auto it = std::ranges::find_if(m_mnt_pairs, [&](const auto& mount) {
             // When doing starts-with check, add a trailing slash to make sure we don't match
             // against only part of the mount path.
             if (guest_path == mount.mount || guest_path.starts_with(mount.mount + "/")) {
+                temp = &mount;
                 const std::string relative = guest_path.size() > mount.mount.size()
                                                  ? guest_path.substr(mount.mount.size() + 1)
                                                  : "";
@@ -76,7 +79,7 @@ public:
             }
             return false;
         });
-        return it == m_mnt_pairs.end() ? nullptr : &*it;
+        return it == m_mnt_pairs.end() ? temp : &*it;
     }
 
 private:
