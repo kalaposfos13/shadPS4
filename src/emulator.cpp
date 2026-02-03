@@ -304,8 +304,10 @@ void Emulator::Run(std::filesystem::path file, std::vector<std::string> args,
             Common::FS::GetUserPath(Common::FS::PathType::MetaDataDir) / id / "TrophyFiles";
         if (!std::filesystem::exists(trophyDir)) {
             TRP trp;
-            if (!trp.Extract(game_folder, id)) {
-                LOG_ERROR(Loader, "Couldn't extract trophies");
+            if (!overlay_mount.has_value() || !trp.Extract(*overlay_mount, id)) {
+                if (!trp.Extract(game_folder, id)) {
+                    LOG_ERROR(Loader, "Couldn't extract trophies");
+                }
             }
         }
     }
