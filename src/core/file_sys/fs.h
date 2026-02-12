@@ -40,6 +40,8 @@ public:
 
     void Mount(const std::filesystem::path& host_folder, const std::string& guest_folder,
                bool read_only = false);
+    void MountFront(const std::filesystem::path& host_folder, const std::string& guest_folder,
+               bool read_only = false);
     void Unmount(const std::filesystem::path& host_folder, const std::string& guest_folder);
     void UnmountAll();
 

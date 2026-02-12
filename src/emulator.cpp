@@ -361,6 +361,7 @@ void Emulator::Run(std::filesystem::path file, std::vector<std::string> args,
         std::filesystem::create_directory(mount_download_dir);
     }
     mnt->Mount(mount_download_dir, "/download0");
+    mnt->MountFront(mount_download_dir, "/app0/../download0");
 
     const auto& mount_captures_dir = Common::FS::GetUserPath(Common::FS::PathType::CapturesDir);
     if (!std::filesystem::exists(mount_captures_dir)) {

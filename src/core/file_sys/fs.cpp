@@ -27,6 +27,12 @@ void MntPoints::Mount(const std::filesystem::path& host_folder, const std::strin
     const auto guest_folder_sanitized = RemoveTrailingSlashes(guest_folder);
     m_mnt_pairs.emplace_back(host_folder, guest_folder_sanitized, read_only);
 }
+void MntPoints::MountFront(const std::filesystem::path& host_folder, const std::string& guest_folder,
+                      bool read_only) {
+    std::scoped_lock lock{m_mutex};
+    const auto guest_folder_sanitized = RemoveTrailingSlashes(guest_folder);
+    m_mnt_pairs.insert(m_mnt_pairs.begin(), {host_folder, guest_folder_sanitized, read_only});
+}
 
 void MntPoints::Unmount(const std::filesystem::path& host_folder, const std::string& guest_folder) {
     std::scoped_lock lock{m_mutex};
