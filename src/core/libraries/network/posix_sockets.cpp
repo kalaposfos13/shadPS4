@@ -468,6 +468,7 @@ int PosixSocket::SetSocketOptions(int level, int optname, const void* optval, u3
     std::scoped_lock lock{m_mutex};
     s32 native_level = ConvertLevels(level);
     ::linger native_linger;
+    int dummy = 0;
     if (native_level == SOL_SOCKET) {
         switch (optname) {
             CASE_SETSOCKOPT(SO_REUSEADDR);
@@ -476,6 +477,7 @@ int PosixSocket::SetSocketOptions(int level, int optname, const void* optval, u3
             CASE_SETSOCKOPT(SO_SNDBUF);
             CASE_SETSOCKOPT(SO_RCVBUF);
             CASE_SETSOCKOPT_VALUE(ORBIS_NET_SO_CONNECTTIMEO, &sockopt_so_connecttimeo);
+            CASE_SETSOCKOPT_VALUE(ORBIS_NET_SO_ACCEPTTIMEO, &dummy);
             CASE_SETSOCKOPT_VALUE(ORBIS_NET_SO_REUSEPORT, &sockopt_so_reuseport);
             CASE_SETSOCKOPT_VALUE(ORBIS_NET_SO_USECRYPTO, &sockopt_so_usecrypto);
             CASE_SETSOCKOPT_VALUE(ORBIS_NET_SO_USESIGNATURE, &sockopt_so_usesignature);
