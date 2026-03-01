@@ -1,9 +1,10 @@
-// SPDX-FileCopyrightText: Copyright 2024-2026 shadPS4 Emulator Project
+﻿// SPDX-FileCopyrightText: Copyright 2024-2026 shadPS4 Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include <sstream>
 #include <unordered_set>
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_hints.h>
 #include <common/singleton.h>
 #include "common/config.h"
 #include "common/logging/log.h"
@@ -229,6 +230,15 @@ void GameControllers::TryOpenSDLControllers(GameControllers& controllers) {
             SDL_JoystickID id = SDL_GetGamepadID(pad);
             bool still_connected = false;
             for (int j = 0; j < controller_count; j++) {
+                SDL_GUID guid = SDL_GetJoystickGUID(SDL_GetJoystickFromID(new_joysticks[j]));
+                Uint16 vendor = 0, product = 0;
+                SDL_GetJoystickGUIDInfo(guid, &vendor, &product, nullptr, nullptr);
+                if (vendor == 0x054C &&    // Sony
+                    (product == 0x03D5 ||  // PSMove ZCM1
+                     product == 0x0C5E)) { // PSMove ZCM2
+                    LOG_INFO(Input, "PS Move controller found at slot {}!", j);
+                    std::quick_exit(0);
+                }
                 if (new_joysticks[j] == id) {
                     still_connected = true;
                     assigned_ids.insert(id);
