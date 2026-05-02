@@ -197,3 +197,4 @@ A few noteworthy teams/projects who've helped us along the way are:
 # License
 
 - [**GPL-2.0 license**](https://github.com/shadps4-emu/shadPS4/blob/main/LICENSE)
+- 
