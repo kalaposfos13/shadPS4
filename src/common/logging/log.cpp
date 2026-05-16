@@ -71,6 +71,7 @@ std::unordered_map<std::string_view, std::shared_ptr<spdlog::logger>> ALL_LOGGER
     {Class::Lib_GnmDriver, nullptr},
     {Class::Lib_Hmd, nullptr},
     {Class::Lib_HmdSetupDialog, nullptr},
+    {Class::Lib_VrServiceDialog, nullptr},
     {Class::Lib_Http, nullptr},
     {Class::Lib_Http2, nullptr},
     {Class::Lib_Ime, nullptr},
