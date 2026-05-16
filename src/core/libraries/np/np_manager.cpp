@@ -762,6 +762,11 @@ struct LegacyNpStateCallback {
 
 LegacyNpStateCallback LegacyNpStateCb;
 
+struct {
+    OrbisNpGamePresenceCallback func;
+    void* userdata;
+} LegacyNpGamePresenceCb{};
+
 struct NpStateCallbackAEntry {
     OrbisNpStateCallbackA func;
     void* userdata;
@@ -895,6 +900,12 @@ static void DispatchPendingNpStateCallbacks() {
             NpStateCbForNp.func(event.user_id, event.state, NpStateCbForNp.userdata);
         }
     }
+    {
+        if (LegacyNpGamePresenceCb.func) {
+            LegacyNpGamePresenceCb.func(UserManagement.GetDefaultUser().user_id, 0, LegacyNpGamePresenceCb.userdata);
+            LegacyNpGamePresenceCb.func = nullptr;
+        }
+    }
 }
 
 s32 PS4_SYSV_ABI sceNpCheckCallback() {
@@ -1013,6 +1024,16 @@ void DeregisterNpCallback(std::string key) {
     g_np_callbacks.erase(key);
 }
 
+s32 PS4_SYSV_ABI sceNpRegisterGamePresenceCallback(OrbisNpGamePresenceCallback f, void* u) {
+    LOG_WARNING(Lib_NpCommon, "(DUMMY) called");
+    if (!f) {
+        return ORBIS_NP_ERROR_INVALID_ARGUMENT;
+    }
+    LegacyNpGamePresenceCb.func = f;
+    LegacyNpGamePresenceCb.userdata = u;
+    return ORBIS_OK;
+}
+
 void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     g_shadnet_enabled = EmulatorSettings.IsShadNetEnabled();
 
@@ -1056,6 +1077,8 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("A2CQ3kgSopQ", "libSceNpManager", 1, "libSceNpManager",
                  sceNpSetContentRestriction);
     LIB_FUNCTION("Ec63y59l9tw", "libSceNpManager", 1, "libSceNpManager", sceNpSetNpTitleId);
+    LIB_FUNCTION("uFJpaKNBAj4", "libSceNpManager", 1, "libSceNpManager",
+                 sceNpRegisterGamePresenceCallback);
 
     LIB_FUNCTION("3Zl8BePTh9Y", "libSceNpManager", 1, "libSceNpManager", sceNpCheckCallback);
     LIB_FUNCTION("JELHf4xPufo", "libSceNpManager", 1, "libSceNpManager", sceNpCheckCallbackForLib);

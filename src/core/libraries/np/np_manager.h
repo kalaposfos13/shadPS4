@@ -41,6 +41,8 @@ using OrbisNpStateCallbackForNpToolkit = PS4_SYSV_ABI void (*)(
 using OrbisNpReachabilityStateCallback =
     PS4_SYSV_ABI void (*)(Libraries::UserService::OrbisUserServiceUserId userId,
                           OrbisNpReachabilityState state, void* userdata);
+using OrbisNpGamePresenceCallback = PS4_SYSV_ABI void (*)(
+    Libraries::UserService::OrbisUserServiceUserId userId, s32 status, void* userdata);
 
 enum class OrbisNpGamePresenseStatus {
     Offline = 0,
