@@ -48,6 +48,7 @@ constexpr auto Lib_GameLiveStreaming = "Lib.GameLiveStreaming";     ///< The Lib
 constexpr auto Lib_GnmDriver = "Lib.GnmDriver";                     ///< The LibSceGnmDriver implementation.
 constexpr auto Lib_Hmd = "Lib.Hmd";                                 ///< The LibSceHmd implementation.
 constexpr auto Lib_HmdSetupDialog = "Lib.HmdSetupDialog";           ///< The LibSceHmdSetupDialog implementation.
+constexpr auto Lib_VrServiceDialog = "Lib.VrServiceDialog";         ///< The LibSceVrServiceDialog implementation.
 constexpr auto Lib_Http = "Lib.Http";                               ///< The LibSceHttp implementation.
 constexpr auto Lib_Http2 = "Lib.Http2";                             ///< The LibSceHttp2 implementation.
 constexpr auto Lib_Ime = "Lib.Ime";                                 ///< The LibSceIme implementation

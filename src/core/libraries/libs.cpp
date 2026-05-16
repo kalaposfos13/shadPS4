@@ -17,6 +17,7 @@
 #include "core/libraries/gnmdriver/gnmdriver.h"
 #include "core/libraries/hmd/hmd.h"
 #include "core/libraries/hmd/hmd_setup_dialog.h"
+#include "core/libraries/hmd/vrservicedialog.h"
 #include "core/libraries/ime/error_dialog.h"
 #include "core/libraries/ime/ime.h"
 #include "core/libraries/ime/ime_dialog.h"
@@ -144,6 +145,7 @@ void InitHLELibs(Core::Loader::SymbolsResolver* sym) {
     Libraries::Zlib::RegisterLib(sym);
     Libraries::Hmd::RegisterLib(sym);
     Libraries::HmdSetupDialog::RegisterLib(sym);
+    Libraries::VrServiceDialog::RegisterLib(sym);
     Libraries::DiscMap::RegisterLib(sym);
     Libraries::Ulobjmgr::RegisterLib(sym);
     Libraries::SigninDialog::RegisterLib(sym);
