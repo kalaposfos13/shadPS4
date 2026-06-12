@@ -27,6 +27,7 @@
 #include "SDL3/SDL_metal.h"
 #endif
 #include <core/emulator_settings.h>
+#include "core/libraries/mouse/sdl_mouse.h"
 
 namespace Frontend {
 
@@ -168,6 +169,8 @@ WindowSDL::WindowSDL(s32 width_, s32 height_, Input::GameControllers* controller
     if (EmulatorSettings.IsBackgroundControllerInput()) {
         SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
     }
+
+    SDL_SetWindowRelativeMouseMode(window, true);
 }
 
 WindowSDL::~WindowSDL() = default;
@@ -181,6 +184,11 @@ void WindowSDL::WaitEvent() {
     }
 
     if (ImGui::Core::ProcessEvent(&event)) {
+        return;
+    }
+
+
+    if (Libraries::Mouse::PushSDLEvent(event)) {
         return;
     }
 
