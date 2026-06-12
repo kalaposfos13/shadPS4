@@ -7,6 +7,7 @@
 #include "common/signal_context.h"
 #include "core/libraries/kernel/threads/exception.h"
 #include "core/signals.h"
+#include "emulator.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -31,9 +32,16 @@ namespace Core {
 
 static LONG WINAPI SignalHandler(EXCEPTION_POINTERS* pExp) noexcept {
     const auto* signals = Signals::Instance();
+    DWORD code = 0;
+    PVOID address = nullptr;
+
+    if (pExp != nullptr && pExp->ExceptionRecord != nullptr) {
+        code = pExp->ExceptionRecord->ExceptionCode;
+        address = pExp->ExceptionRecord->ExceptionAddress;
+    }
 
     bool handled = false;
-    switch (pExp->ExceptionRecord->ExceptionCode) {
+    switch (code) {
     case EXCEPTION_ACCESS_VIOLATION:
         handled = signals->DispatchAccessViolation(
             pExp, reinterpret_cast<void*>(pExp->ExceptionRecord->ExceptionInformation[1]));
@@ -49,7 +57,17 @@ static LONG WINAPI SignalHandler(EXCEPTION_POINTERS* pExp) noexcept {
         break;
     }
 
-    return handled ? EXCEPTION_CONTINUE_EXECUTION : EXCEPTION_CONTINUE_SEARCH;
+    if (handled) {
+        return EXCEPTION_CONTINUE_EXECUTION;
+    }
+
+    // Breakpoints almost certainly come from our asserts/unreachables, no need to log it again.
+    if (code != EXCEPTION_BREAKPOINT) {
+        LOG_CRITICAL(Debug, "Unhandled Exception code {:#x} at {}", code, address);
+        Common::Singleton<Core::Emulator>::Instance()->Shutdown();
+    }
+
+    return EXCEPTION_CONTINUE_SEARCH;
 }
 
 #else
