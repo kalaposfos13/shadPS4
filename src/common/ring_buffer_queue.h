@@ -38,6 +38,10 @@ public:
         return m_storage[m_begin];
     }
 
+    u64 const Size() const {
+        return m_size;
+    }
+
 private:
     u64 m_begin = 0;
     u64 m_size = 0;
