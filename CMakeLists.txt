@@ -9,8 +9,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 if(APPLE)
     list(APPEND ADDITIONAL_LANGUAGES OBJC)
-    # Starting with 15.4, Rosetta 2 has support for all the necessary instruction sets.
-    set(CMAKE_OSX_DEPLOYMENT_TARGET 15.4 CACHE STRING "")
+    # Minimum OS version for KosmicKrisp
+    set(CMAKE_OSX_DEPLOYMENT_TARGET 26.0 CACHE STRING "")
 endif()
 
 if (NOT CMAKE_BUILD_TYPE)
@@ -33,9 +33,13 @@ if(UNIX AND NOT APPLE)
     endif()
 endif()
 
+include(CMakeDependentOption)
+cmake_dependent_option(ENABLE_SYSTEM_VULKAN "Enable the system Vulkan driver" OFF APPLE OFF)
+
 option(ENABLE_DISCORD_RPC "Enable the Discord RPC integration" ON)
 option(ENABLE_UPDATER "Enables the options to updater" ON)
 option(ENABLE_TESTS "Build unit tests (requires GTest)" OFF)
+option(ENABLE_SYSTEM_LIBRARIES "Enable building against system libraries" OFF)
 
 # First, determine whether to use CMAKE_OSX_ARCHITECTURES or CMAKE_SYSTEM_PROCESSOR.
 if (APPLE AND CMAKE_OSX_ARCHITECTURES)
@@ -214,7 +218,8 @@ set(EMULATOR_VERSION_PATCH "1")
 
 set_source_files_properties(src/shadps4.rc PROPERTIES COMPILE_DEFINITIONS "EMULATOR_VERSION_MAJOR=${EMULATOR_VERSION_MAJOR};EMULATOR_VERSION_MINOR=${EMULATOR_VERSION_MINOR};EMULATOR_VERSION_PATCH=${EMULATOR_VERSION_PATCH}")
 
-set(APP_VERSION "${EMULATOR_VERSION_MAJOR}.${EMULATOR_VERSION_MINOR}.${EMULATOR_VERSION_PATCH} WIP")
+set(APP_VERSION_NUM "${EMULATOR_VERSION_MAJOR}.${EMULATOR_VERSION_MINOR}.${EMULATOR_VERSION_PATCH}")
+set(APP_VERSION "${APP_VERSION_NUM} WIP")
 set(APP_IS_RELEASE false)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/common/scm_rev.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/src/common/scm_rev.cpp" @ONLY)
 
@@ -226,45 +231,39 @@ if(NOT (GIT_REMOTE_URL_LOWER MATCHES "shadps4-emu/shadps4" AND (GIT_BRANCH STREQ
     set(ENABLE_UPDATER OFF)
 endif()
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-find_package(Boost 1.84.0 CONFIG)
-find_package(CLI11 2.6.1 CONFIG)
-find_package(FFmpeg 5.1.2 MODULE)
-find_package(fmt 12.0.0 CONFIG)
-find_package(Freetype 2.14.1 MODULE)
-find_package(glslang 15 CONFIG)
-find_package(half 1.12.0 MODULE)
-find_package(magic_enum 0.9.7 CONFIG)
-find_package(miniz 3.1 CONFIG)
-find_package(nlohmann_json 3.12 CONFIG)
-find_package(PNG 1.6 MODULE)
-find_package(OpenAL CONFIG)
-find_package(LibreSSL 4.3.1 MODULE)
-find_package(RenderDoc 1.6.0 MODULE)
-find_package(SDL3 3.1.2 CONFIG)
-find_package(stb MODULE)
-find_package(toml11 4.2.0 CONFIG)
-find_package(tsl-robin-map 1.3.0 CONFIG)
-find_package(VulkanHeaders 1.4.329 CONFIG)
-find_package(VulkanMemoryAllocator 3.1.0 CONFIG)
-find_package(xbyak 7.07 CONFIG)
-find_package(xxHash 0.8.2 MODULE)
-find_package(ZLIB 1.3 MODULE)
-find_package(Zydis 5.0.0 MODULE)
-find_package(pugixml 1.14 CONFIG)
-if (APPLE)
-    find_package(date 3.0.1 CONFIG)
-    find_package(epoll-shim 3.14 CONFIG)
-endif()
-list(POP_BACK CMAKE_MODULE_PATH)
-
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-    # libc++ requires -fexperimental-library to enable std::jthread and std::stop_token support.
-    include(CheckCXXSymbolExists)
-    check_cxx_symbol_exists(_LIBCPP_VERSION version LIBCPP)
-    if(LIBCPP)
-        add_compile_options(-fexperimental-library)
+if (ENABLE_SYSTEM_LIBRARIES)
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+    find_package(Boost 1.84.0 CONFIG)
+    find_package(CLI11 2.6.1 CONFIG)
+    find_package(FFmpeg 5.1.2 MODULE)
+    find_package(fmt 12.0.0 CONFIG)
+    find_package(Freetype 2.14.1 MODULE)
+    find_package(glslang 15 CONFIG)
+    find_package(half 1.12.0 MODULE)
+    find_package(magic_enum 0.9.7 CONFIG)
+    find_package(miniupnpc 2.3.3 MODULE)
+    find_package(miniz 3.1 CONFIG)
+    find_package(nlohmann_json 3.12 CONFIG)
+    find_package(PNG 1.6 MODULE)
+    find_package(OpenAL CONFIG)
+    find_package(LibreSSL 4.3.1 MODULE)
+    find_package(RenderDoc 1.6.0 MODULE)
+    find_package(SDL3 3.1.2 CONFIG)
+    find_package(stb MODULE)
+    find_package(toml11 4.2.0 CONFIG)
+    find_package(tsl-robin-map 1.3.0 CONFIG)
+    find_package(VulkanHeaders 1.4.330 CONFIG)
+    find_package(VulkanMemoryAllocator 3.1.0 CONFIG)
+    find_package(xbyak 7.07 CONFIG)
+    find_package(xxHash 0.8.2 MODULE)
+    find_package(ZLIB 1.3 MODULE)
+    find_package(Zydis 5.0.0 MODULE)
+    find_package(pugixml 1.14 CONFIG)
+    if (APPLE)
+        find_package(date 3.0.1 CONFIG)
+        find_package(epoll-shim 3.14 CONFIG)
     endif()
+    list(POP_BACK CMAKE_MODULE_PATH)
 endif()
 
 add_subdirectory(externals)
@@ -814,6 +813,10 @@ set(COMMON src/common/logging/classes.h
            src/common/key_manager.h
 )
 
+if (APPLE)
+    list(APPEND COMMON src/common/apple.h src/common/apple.mm)
+endif()
+
 if (ENABLE_DISCORD_RPC)
     list(APPEND COMMON src/common/discord_rpc_handler.cpp src/common/discord_rpc_handler.h)
 endif()
@@ -1191,7 +1194,7 @@ create_target_directory_groups(shadps4)
 target_link_libraries(shadps4 PRIVATE spdlog::spdlog)
 target_link_libraries(shadps4 PRIVATE magic_enum::magic_enum fmt::fmt toml11::toml11 tsl::robin_map xbyak::xbyak Tracy::TracyClient RenderDoc::API FFmpeg::ffmpeg Dear_ImGui ImGuiFileDialog gcn half::half ZLIB::ZLIB PNG::PNG minimp3)
 target_link_libraries(shadps4 PRIVATE Boost::headers GPUOpen::VulkanMemoryAllocator LibAtrac9 sirit Vulkan::Headers xxHash::xxhash Zydis::Zydis glslang::glslang SDL3::SDL3 pugixml::pugixml)
-target_link_libraries(shadps4 PRIVATE stb::headers lfreist-hwinfo::hwinfo nlohmann_json::nlohmann_json miniz::miniz fdk-aac CLI11::CLI11 OpenAL::OpenAL Cpp_Httplib libminiupnpc-static)
+target_link_libraries(shadps4 PRIVATE stb::headers lfreist-hwinfo::hwinfo nlohmann_json::nlohmann_json miniz::miniz fdk-aac CLI11::CLI11 OpenAL::OpenAL Cpp_Httplib miniupnpc::miniupnpc)
 target_link_libraries(shadps4 PRIVATE Freetype::Freetype)
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD")
@@ -1218,25 +1221,30 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 endif()
 
 if (APPLE)
-    # Include MoltenVK, along with an ICD file so it can be found by the system Vulkan loader if used for loading layers.
-    set_property(TARGET shadps4 APPEND PROPERTY BUILD_RPATH "@executable_path")
-    set(MVK_DST ${CMAKE_CURRENT_BINARY_DIR})
-    set(MVK_DYLIB_SRC ${CMAKE_CURRENT_BINARY_DIR}/externals/MoltenVK/MoltenVK/libMoltenVK.dylib)
-    set(MVK_DYLIB_DST ${MVK_DST}/libMoltenVK.dylib)
-    set(MVK_ICD_SRC ${CMAKE_CURRENT_SOURCE_DIR}/externals/MoltenVK/MoltenVK/icd/MoltenVK_icd.json)
-    set(MVK_ICD_DST ${MVK_DST}/MoltenVK_icd.json)
+    if (NOT ENABLE_SYSTEM_VULKAN)
+        # Bundle Vulkan loader and KosmicKrisp driver with the emulator.
+        set_property(TARGET shadps4 APPEND PROPERTY BUILD_RPATH "@executable_path")
 
-    add_custom_command(
-        OUTPUT ${MVK_ICD_DST}
-        DEPENDS ${MVK_ICD_SRC} ${MVK_DST}
-        COMMAND ${CMAKE_COMMAND} -E copy ${MVK_ICD_SRC} ${MVK_ICD_DST})
-    add_custom_command(
-        OUTPUT ${MVK_DYLIB_DST}
-        DEPENDS ${MVK_DYLIB_SRC} ${MVK_DST}
-        COMMAND ${CMAKE_COMMAND} -E copy ${MVK_DYLIB_SRC} ${MVK_DYLIB_DST})
-    add_custom_target(CopyMoltenVK DEPENDS ${MVK_ICD_DST} ${MVK_DYLIB_DST})
-    add_dependencies(CopyMoltenVK MoltenVK)
-    add_dependencies(shadps4 CopyMoltenVK)
+        set(LOADER_DEST "${CMAKE_CURRENT_BINARY_DIR}/libvulkan.dylib")
+        set(DRIVER_DEST "${CMAKE_CURRENT_BINARY_DIR}/libvulkan_kosmickrisp.dylib")
+        set(ICD_DEST "${CMAKE_CURRENT_BINARY_DIR}/kosmickrisp_mesa_icd.json")
+
+        add_custom_command(
+            OUTPUT ${LOADER_DEST}
+            DEPENDS ${VULKAN_LOADER_PATH} vulkan
+            COMMAND ${CMAKE_COMMAND} -E copy ${VULKAN_LOADER_PATH} ${LOADER_DEST})
+        add_custom_command(
+            OUTPUT ${DRIVER_DEST}
+            DEPENDS ${VULKAN_DRIVER_PATH} kosmickrisp
+            COMMAND ${CMAKE_COMMAND} -E copy ${VULKAN_DRIVER_PATH} ${DRIVER_DEST})
+        add_custom_command(
+            OUTPUT ${ICD_DEST}
+            DEPENDS ${VULKAN_ICD_PATH} kosmickrisp
+            COMMAND ${CMAKE_COMMAND} -E copy ${VULKAN_ICD_PATH} ${ICD_DEST})
+
+        add_custom_target(CopyVulkanDriver DEPENDS ${LOADER_DEST} ${DRIVER_DEST} ${ICD_DEST})
+        add_dependencies(shadps4 CopyVulkanDriver)
+    endif()
 
     if (ARCHITECTURE STREQUAL "x86_64")
         # Reserve system-managed memory space.
@@ -1245,6 +1253,11 @@ if (APPLE)
 
     # Replacement for std::chrono::time_zone
     target_link_libraries(shadps4 PRIVATE date::date-tz epoll-shim)
+
+    # Create and embed Info.plist
+    set(INFO_PLIST_PATH ${CMAKE_CURRENT_BINARY_DIR}/dist/Info.plist)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/dist/MacOSBundleInfo.plist.in ${INFO_PLIST_PATH})
+    target_link_options(shadps4 PRIVATE LINKER:-sectcreate,__TEXT,__info_plist,${INFO_PLIST_PATH})
 elseif (${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD")
     target_link_libraries(shadps4 PRIVATE date::date-tz epoll-shim)
 endif()
