@@ -431,9 +431,6 @@ s32 PS4_SYSV_ABI sceCameraGetFrameData(s32 handle, OrbisCameraFrameData* frame_d
     if (!temp_frame) {
         return ORBIS_CAMERA_ERROR_BUSY;
     }
-    if (frame) { // release previous frame, if it exists
-        SDL_ReleaseCameraFrame(sdl_camera, frame);
-    }
     frame = temp_frame;
     buffer_index ^= 1;
     LOG_INFO(Lib_Camera, "sdl frame: {}", (void*)frame->pixels);
@@ -474,6 +471,10 @@ s32 PS4_SYSV_ABI sceCameraGetFrameData(s32 handle, OrbisCameraFrameData* frame_d
     default:
         UNREACHABLE();
     }
+
+    SDL_ReleaseCameraFrame(sdl_camera, frame);
+    frame = nullptr;
+
     frame_data->meta.format[0][0] = output_config0.format.formatLevel0;
     frame_data->meta.format[1][0] = output_config1.format.formatLevel0;
     LOG_INFO(Lib_Camera, "p0: {}", frame_data->pFramePointerList[0][0]);
