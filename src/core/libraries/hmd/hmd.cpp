@@ -3,6 +3,7 @@
 
 #include "common/elf_info.h"
 #include "common/logging/log.h"
+#include "core/emulator_settings.h"
 #include "core/libraries/error_codes.h"
 #include "core/libraries/hmd/hmd.h"
 #include "core/libraries/hmd/hmd_error.h"
@@ -164,14 +165,19 @@ s32 PS4_SYSV_ABI sceHmdGetFieldOfView(s32 handle, OrbisHmdFieldOfView* field_of_
     }
 
     // These values are a hardcoded return when a headset is connected.
-    // Leaving this here for future developers.
-    // field_of_view->tan_out = 1.20743;
-    // field_of_view->tan_in = 1.181346;
-    // field_of_view->tan_top = 1.262872;
-    // field_of_view->tan_bottom = 1.262872;
+    // Leaving this here for future developers. thank you stephen from the past <3
 
-    // Fails internally due to some internal library checks that break without a connected headset.
-    return ORBIS_HMD_ERROR_HANDLE_INVALID;
+    if (!EmulatorSettings.IsEmulatePSVR()) {
+        // Fails internally due to some internal library checks that break without a connected
+        // headset.
+        return ORBIS_HMD_ERROR_HANDLE_INVALID;
+    }
+
+    field_of_view->tan_out = 1.20743;
+    field_of_view->tan_in = 1.181346;
+    field_of_view->tan_top = 1.262872;
+    field_of_view->tan_bottom = 1.262872;
+    return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI sceHmdGetInertialSensorData(s32 handle, void* data, s32 unk) {
@@ -1023,7 +1029,7 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("-y4OUwFf4jE", "libSceHmd", 1, "libSceHmd", Func_FF2E0E53015FE231);
 
     RegisterDistortion(sym);
-    RegisterReprojection(sym);
+    // RegisterReprojection(sym);
 };
 
 } // namespace Libraries::Hmd
