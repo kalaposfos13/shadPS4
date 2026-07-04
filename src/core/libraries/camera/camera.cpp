@@ -428,6 +428,7 @@ s32 PS4_SYSV_ABI sceCameraGetFrameData(s32 handle, OrbisCameraFrameData* frame_d
     if (!frame) {
         return ORBIS_CAMERA_ERROR_BUSY;
     }
+    LOG_INFO(Lib_Camera, "sdl frame: {}", (void*)frame->pixels);
 
     switch (output_config0.format.formatLevel0) {
     case ORBIS_CAMERA_FORMAT_YUV422:
@@ -461,6 +462,8 @@ s32 PS4_SYSV_ABI sceCameraGetFrameData(s32 handle, OrbisCameraFrameData* frame_d
     }
     frame_data->meta.format[0][0] = output_config0.format.formatLevel0;
     frame_data->meta.format[1][0] = output_config1.format.formatLevel0;
+    LOG_INFO(Lib_Camera, "p0: {}", frame_data->pFramePointerList[0][0]);
+    LOG_INFO(Lib_Camera, "p1: {}", frame_data->pFramePointerList[1][0]);
     // not fully correct, but good enough
     frame_data->pFramePointerListGarlic[0][0] = frame_data->pFramePointerList[0][0];
     frame_data->pFramePointerListGarlic[1][0] = frame_data->pFramePointerList[1][0];
