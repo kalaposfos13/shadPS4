@@ -418,16 +418,17 @@ s32 PS4_SYSV_ABI sceCameraGetFrameData(s32 handle, OrbisCameraFrameData* frame_d
     }
     Uint64 timestampNS = 0;
     static SDL_Surface* frame = nullptr;
+    auto* temp_frame = SDL_AcquireCameraFrame(sdl_camera, &timestampNS);
+    frame_data->status[0] = frame != nullptr ? 0 : -1;
+    frame_data->status[1] = frame != nullptr ? 0 : -1;
+
+    if (!temp_frame) {
+        return ORBIS_CAMERA_ERROR_BUSY;
+    }
     if (frame) { // release previous frame, if it exists
         SDL_ReleaseCameraFrame(sdl_camera, frame);
     }
-    frame = SDL_AcquireCameraFrame(sdl_camera, &timestampNS);
-
-    frame_data->status[0] = frame != nullptr ? 0 : -1;
-    frame_data->status[1] = frame != nullptr ? 0 : -1;
-    if (!frame) {
-        return ORBIS_CAMERA_ERROR_BUSY;
-    }
+    frame = temp_frame;
     LOG_INFO(Lib_Camera, "sdl frame: {}", (void*)frame->pixels);
 
     switch (output_config0.format.formatLevel0) {
