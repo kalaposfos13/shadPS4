@@ -336,8 +336,13 @@ s32 PS4_SYSV_ABI sceCameraGetExposureGain(s32 handle, OrbisCameraChannel channel
     return ORBIS_OK;
 }
 
-static std::vector<u16> raw16_buffer1, raw16_buffer2;
-static std::vector<u8> raw8_buffer1, raw8_buffer2;
+static std::vector<u16> raw16_buffers[2][2];
+static std::vector<u8> raw8_buffers[2][2];
+static std::vector<u32> yuv422_buffers[2][2];
+
+static void CopyYUV422(const u32* src, u32* dst, s32 w, s32 h) {
+    std::memcpy(dst, src, w * h * sizeof(u32));
+}
 
 static void ConvertRGBA8888ToRAW16(const u8* src, u16* dst, int width, int height) {
     for (int y = 0; y < height; ++y) {
@@ -419,57 +424,69 @@ s32 PS4_SYSV_ABI sceCameraGetFrameData(s32 handle, OrbisCameraFrameData* frame_d
     }
     Uint64 timestampNS = 0;
     static SDL_Surface* frame = nullptr;
+    static u64 buffer_index = 0;
 
     if (g_is_dummy_camera) {
-        frame_data->pFramePointerList[0][0] = raw16_buffer1.data();
-        frame_data->pFramePointerList[1][0] = raw16_buffer2.data();
+        frame_data->pFramePointerList[0][0] = yuv422_buffers[0][buffer_index].data();
+        frame_data->pFramePointerList[1][0] = yuv422_buffers[0][buffer_index].data();
         frame_data->status[0] = 0;
         frame_data->status[1] = 0;
     } else {
-        if (frame) { // release previous frame, if it exists
-            SDL_ReleaseCameraFrame(sdl_camera, frame);
-        }
         frame = SDL_AcquireCameraFrame(sdl_camera, &timestampNS);
-
         frame_data->status[0] = frame != nullptr ? 0 : -1;
         frame_data->status[1] = frame != nullptr ? 0 : -1;
+
         if (!frame) {
             return ORBIS_CAMERA_ERROR_BUSY;
         }
+        buffer_index ^= 1;
 
         switch (output_config0.format.formatLevel0) {
         case ORBIS_CAMERA_FORMAT_YUV422:
-            frame_data->pFramePointerList[0][0] = frame->pixels;
+            CopyYUV422((u32*)frame->pixels, yuv422_buffers[0][buffer_index].data(), c_width,
+                       c_height);
+            frame_data->pFramePointerList[0][0] = yuv422_buffers[0][buffer_index].data();
             break;
         case ORBIS_CAMERA_FORMAT_RAW16:
-            ConvertRGBA8888ToRAW16((u8*)frame->pixels, raw16_buffer1.data(), c_width, c_height);
-            frame_data->pFramePointerList[0][0] = raw16_buffer1.data();
+            ConvertRGBA8888ToRAW16((u8*)frame->pixels, raw16_buffers[0][buffer_index].data(),
+                                   c_width, c_height);
+            frame_data->pFramePointerList[0][0] = raw16_buffers[0][buffer_index].data();
             break;
         case ORBIS_CAMERA_FORMAT_RAW8:
-            ConvertRGBA8888ToRAW8((u8*)frame->pixels, raw8_buffer1.data(), c_width, c_height);
-            frame_data->pFramePointerList[0][0] = raw8_buffer1.data();
+            ConvertRGBA8888ToRAW8((u8*)frame->pixels, raw8_buffers[0][buffer_index].data(), c_width,
+                                  c_height);
+            frame_data->pFramePointerList[0][0] = raw8_buffers[0][buffer_index].data();
             break;
         default:
             UNREACHABLE();
         }
         switch (output_config1.format.formatLevel0) {
         case ORBIS_CAMERA_FORMAT_YUV422:
-            frame_data->pFramePointerList[1][0] = frame->pixels;
+            CopyYUV422((u32*)frame->pixels, yuv422_buffers[1][buffer_index].data(), c_width,
+                       c_height);
+            frame_data->pFramePointerList[1][0] = yuv422_buffers[1][buffer_index].data();
             break;
         case ORBIS_CAMERA_FORMAT_RAW16:
-            ConvertRGBA8888ToRAW16((u8*)frame->pixels, raw16_buffer2.data(), c_width, c_height);
-            frame_data->pFramePointerList[1][0] = raw16_buffer2.data();
+            ConvertRGBA8888ToRAW16((u8*)frame->pixels, raw16_buffers[1][buffer_index].data(),
+                                   c_width, c_height);
+            frame_data->pFramePointerList[1][0] = raw16_buffers[1][buffer_index].data();
             break;
         case ORBIS_CAMERA_FORMAT_RAW8:
-            ConvertRGBA8888ToRAW8((u8*)frame->pixels, raw8_buffer2.data(), c_width, c_height);
-            frame_data->pFramePointerList[1][0] = raw8_buffer2.data();
+            ConvertRGBA8888ToRAW8((u8*)frame->pixels, raw8_buffers[1][buffer_index].data(), c_width,
+                                  c_height);
+            frame_data->pFramePointerList[1][0] = raw8_buffers[1][buffer_index].data();
             break;
         default:
             UNREACHABLE();
         }
+
+        SDL_ReleaseCameraFrame(sdl_camera, frame);
+        frame = nullptr;
     }
+
     frame_data->meta.format[0][0] = output_config0.format.formatLevel0;
     frame_data->meta.format[1][0] = output_config1.format.formatLevel0;
+
     // not fully correct, but good enough
     frame_data->pFramePointerListGarlic[0][0] = frame_data->pFramePointerList[0][0];
     frame_data->pFramePointerListGarlic[1][0] = frame_data->pFramePointerList[1][0];
@@ -1060,10 +1077,11 @@ s32 PS4_SYSV_ABI sceCameraStart(s32 handle, OrbisCameraStartParameter* param) {
         LOG_INFO(Lib_Camera, "No camera devices connected");
         return ORBIS_CAMERA_ERROR_NOT_CONNECTED;
     }
-    raw8_buffer1.resize(c_width * c_height);
-    raw16_buffer1.resize(c_width * c_height);
-    raw8_buffer2.resize(c_width * c_height);
-    raw16_buffer2.resize(c_width * c_height);
+    for (int i = 0; i < 4; i++) {
+        raw8_buffers[i / 2][i % 2].resize(c_width * c_height);
+        raw16_buffers[i / 2][i % 2].resize(c_width * c_height);
+        yuv422_buffers[i / 2][i % 2].resize(c_width * c_height);
+    }
     SDL_CameraSpec cam_spec{};
     switch (output_config0.format.formatLevel0) {
     case ORBIS_CAMERA_FORMAT_YUV422:
