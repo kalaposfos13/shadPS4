@@ -21,6 +21,7 @@ static bool g_library_opened = false;
 static s32 g_firmware_version = 0;
 static s32 g_handles = 0;
 static constexpr s32 c_width = 1280, c_height = 800;
+static bool g_is_dummy_camera = false;
 
 SDL_Camera* sdl_camera = nullptr;
 OrbisCameraConfigExtention output_config0, output_config1;
@@ -410,7 +411,7 @@ s32 PS4_SYSV_ABI sceCameraGetFrameData(s32 handle, OrbisCameraFrameData* frame_d
     if (handle < 1 || frame_data->sizeThis > 584) {
         return ORBIS_CAMERA_ERROR_PARAM;
     }
-    if (!g_library_opened || !sdl_camera) {
+    if (!g_library_opened || (!sdl_camera && !g_is_dummy_camera)) {
         return ORBIS_CAMERA_ERROR_NOT_OPEN;
     }
     if (EmulatorSettings.GetCameraId() == -1) {
@@ -418,46 +419,54 @@ s32 PS4_SYSV_ABI sceCameraGetFrameData(s32 handle, OrbisCameraFrameData* frame_d
     }
     Uint64 timestampNS = 0;
     static SDL_Surface* frame = nullptr;
-    if (frame) { // release previous frame, if it exists
-        SDL_ReleaseCameraFrame(sdl_camera, frame);
-    }
-    frame = SDL_AcquireCameraFrame(sdl_camera, &timestampNS);
 
-    frame_data->status[0] = frame != nullptr ? 0 : -1;
-    frame_data->status[1] = frame != nullptr ? 0 : -1;
-    if (!frame) {
-        return ORBIS_CAMERA_ERROR_BUSY;
-    }
-
-    switch (output_config0.format.formatLevel0) {
-    case ORBIS_CAMERA_FORMAT_YUV422:
-        frame_data->pFramePointerList[0][0] = frame->pixels;
-        break;
-    case ORBIS_CAMERA_FORMAT_RAW16:
-        ConvertRGBA8888ToRAW16((u8*)frame->pixels, raw16_buffer1.data(), c_width, c_height);
+    if (g_is_dummy_camera) {
         frame_data->pFramePointerList[0][0] = raw16_buffer1.data();
-        break;
-    case ORBIS_CAMERA_FORMAT_RAW8:
-        ConvertRGBA8888ToRAW8((u8*)frame->pixels, raw8_buffer1.data(), c_width, c_height);
-        frame_data->pFramePointerList[0][0] = raw8_buffer1.data();
-        break;
-    default:
-        UNREACHABLE();
-    }
-    switch (output_config1.format.formatLevel0) {
-    case ORBIS_CAMERA_FORMAT_YUV422:
-        frame_data->pFramePointerList[1][0] = frame->pixels;
-        break;
-    case ORBIS_CAMERA_FORMAT_RAW16:
-        ConvertRGBA8888ToRAW16((u8*)frame->pixels, raw16_buffer2.data(), c_width, c_height);
         frame_data->pFramePointerList[1][0] = raw16_buffer2.data();
-        break;
-    case ORBIS_CAMERA_FORMAT_RAW8:
-        ConvertRGBA8888ToRAW8((u8*)frame->pixels, raw8_buffer2.data(), c_width, c_height);
-        frame_data->pFramePointerList[1][0] = raw8_buffer2.data();
-        break;
-    default:
-        UNREACHABLE();
+        frame_data->status[0] = 0;
+        frame_data->status[1] = 0;
+    } else {
+        if (frame) { // release previous frame, if it exists
+            SDL_ReleaseCameraFrame(sdl_camera, frame);
+        }
+        frame = SDL_AcquireCameraFrame(sdl_camera, &timestampNS);
+
+        frame_data->status[0] = frame != nullptr ? 0 : -1;
+        frame_data->status[1] = frame != nullptr ? 0 : -1;
+        if (!frame) {
+            return ORBIS_CAMERA_ERROR_BUSY;
+        }
+
+        switch (output_config0.format.formatLevel0) {
+        case ORBIS_CAMERA_FORMAT_YUV422:
+            frame_data->pFramePointerList[0][0] = frame->pixels;
+            break;
+        case ORBIS_CAMERA_FORMAT_RAW16:
+            ConvertRGBA8888ToRAW16((u8*)frame->pixels, raw16_buffer1.data(), c_width, c_height);
+            frame_data->pFramePointerList[0][0] = raw16_buffer1.data();
+            break;
+        case ORBIS_CAMERA_FORMAT_RAW8:
+            ConvertRGBA8888ToRAW8((u8*)frame->pixels, raw8_buffer1.data(), c_width, c_height);
+            frame_data->pFramePointerList[0][0] = raw8_buffer1.data();
+            break;
+        default:
+            UNREACHABLE();
+        }
+        switch (output_config1.format.formatLevel0) {
+        case ORBIS_CAMERA_FORMAT_YUV422:
+            frame_data->pFramePointerList[1][0] = frame->pixels;
+            break;
+        case ORBIS_CAMERA_FORMAT_RAW16:
+            ConvertRGBA8888ToRAW16((u8*)frame->pixels, raw16_buffer2.data(), c_width, c_height);
+            frame_data->pFramePointerList[1][0] = raw16_buffer2.data();
+            break;
+        case ORBIS_CAMERA_FORMAT_RAW8:
+            ConvertRGBA8888ToRAW8((u8*)frame->pixels, raw8_buffer2.data(), c_width, c_height);
+            frame_data->pFramePointerList[1][0] = raw8_buffer2.data();
+            break;
+        default:
+            UNREACHABLE();
+        }
     }
     frame_data->meta.format[0][0] = output_config0.format.formatLevel0;
     frame_data->meta.format[1][0] = output_config1.format.formatLevel0;
@@ -1071,6 +1080,13 @@ s32 PS4_SYSV_ABI sceCameraStart(s32 handle, OrbisCameraStartParameter* param) {
         LOG_ERROR(Lib_Camera, "Invalid format {}",
                   std::to_underlying(output_config0.format.formatLevel0));
         break;
+    }
+    g_is_dummy_camera = false; // for the off chance of the user reloading their config, then the
+                               // game reopening the handle
+    if (EmulatorSettings.GetCameraId() == -2) {
+        g_is_dummy_camera = true;
+        LOG_INFO(Lib_Camera, "Using dummy camera");
+        return ORBIS_OK;
     }
     cam_spec.height = c_height;
     cam_spec.width = c_width;
