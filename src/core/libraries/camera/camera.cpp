@@ -456,7 +456,7 @@ s32 PS4_SYSV_ABI sceCameraGetFrameData(s32 handle, OrbisCameraFrameData* frame_d
     switch (output_config1.format.formatLevel0) {
     case ORBIS_CAMERA_FORMAT_YUV422:
         CopyYUV422((u32*)frame->pixels, yuv422_buffers[1][buffer_index].data(), c_width, c_height);
-        frame_data->pFramePointerList[0][0] = yuv422_buffers[1][buffer_index].data();
+        frame_data->pFramePointerList[1][0] = yuv422_buffers[1][buffer_index].data();
         break;
     case ORBIS_CAMERA_FORMAT_RAW16:
         ConvertRGBA8888ToRAW16((u8*)frame->pixels, raw16_buffers[1][buffer_index].data(), c_width,
