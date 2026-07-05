@@ -349,6 +349,8 @@ s32 unloadModule(s32 id, s32 argc, const void* argv, s32* res_out, bool is_inter
             continue;
         }
 
+        LOG_INFO(Loader, "Unloading module {}", mod.name);
+
         // If the module is loaded once, and is part of the second preload list,
         // then return OK and do nothing.
         for (s32 index : g_preload_list_2) {
