@@ -9,6 +9,7 @@
 #include "core/libraries/hmd/hmd_error.h"
 #include "core/libraries/kernel/process.h"
 #include "core/libraries/libs.h"
+#include "core/user_settings.h"
 
 namespace Libraries::Hmd {
 
@@ -29,6 +30,7 @@ s32 PS4_SYSV_ABI sceHmdInitialize(const OrbisHmdInitializeParam* param) {
         sceHmdDistortionInitialize(param->reserved0);
     }
     g_library_initialized = true;
+    g_user_id = UserManagement.GetDefaultUser().user_id;
     return ORBIS_OK;
 }
 
@@ -39,8 +41,9 @@ s32 PS4_SYSV_ABI sceHmdInitialize315(const OrbisHmdInitializeParam* param) {
     if (param == nullptr) {
         return ORBIS_HMD_ERROR_PARAMETER_NULL;
     }
-    LOG_WARNING(Lib_Hmd, "PSVR headsets are not supported yet");
+    LOG_WARNING(Lib_Hmd, "dummy");
     g_library_initialized = true;
+    g_user_id = UserManagement.GetDefaultUser().user_id;
     return ORBIS_OK;
 }
 
@@ -77,7 +80,7 @@ s32 PS4_SYSV_ABI sceHmdGet2DEyeOffset(s32 handle, OrbisHmdEyeOffset* left_offset
     if (handle != g_internal_handle) {
         return ORBIS_HMD_ERROR_HANDLE_INVALID;
     }
-    if (g_firmware_version >= Common::ElfInfo::FW_450) {
+    if (g_firmware_version >= Common::ElfInfo::FW_450 && !EmulatorSettings.IsEmulatePSVR()) {
         // Due to some faulty in-library checks, a missing headset results in this error
         // instead of the expected ORBIS_HMD_ERROR_DEVICE_DISCONNECTED error.
         return ORBIS_HMD_ERROR_HANDLE_INVALID;
@@ -119,13 +122,17 @@ s32 PS4_SYSV_ABI sceHmdGetDeviceInformation(OrbisHmdDeviceInformation* info) {
     }
 
     memset(info, 0, sizeof(OrbisHmdDeviceInformation));
-    info->status = OrbisHmdDeviceStatus::ORBIS_HMD_DEVICE_STATUS_NOT_DETECTED;
+
+    info->status = EmulatorSettings.IsEmulatePSVR()
+                       ? OrbisHmdDeviceStatus::ORBIS_HMD_DEVICE_STATUS_READY
+                       : OrbisHmdDeviceStatus::ORBIS_HMD_DEVICE_STATUS_NOT_DETECTED;
     info->user_id = g_user_id;
+    info->hmu_mount = 1;
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI sceHmdGetDeviceInformationByHandle(s32 handle, OrbisHmdDeviceInformation* info) {
-    LOG_DEBUG(Lib_Hmd, "called");
+    LOG_DEBUG(Lib_Hmd, "called, handle : {:#x}", (u32)handle);
     if (handle != g_internal_handle) {
         return ORBIS_HMD_ERROR_HANDLE_INVALID;
     }
@@ -142,22 +149,23 @@ s32 PS4_SYSV_ABI sceHmdGetDeviceInformationByHandle(s32 handle, OrbisHmdDeviceIn
     }
 
     memset(info, 0, sizeof(OrbisHmdDeviceInformation));
-    info->status = OrbisHmdDeviceStatus::ORBIS_HMD_DEVICE_STATUS_NOT_DETECTED;
+    if (EmulatorSettings.IsEmulatePSVR()) {
+        info->status = OrbisHmdDeviceStatus::ORBIS_HMD_DEVICE_STATUS_READY;
+        info->hmu_mount = 1;
+    } else {
+        info->status = OrbisHmdDeviceStatus::ORBIS_HMD_DEVICE_STATUS_NOT_DETECTED;
+        info->hmu_mount = 0;
+    }
     info->user_id = g_user_id;
     return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI sceHmdGetFieldOfView(s32 handle, OrbisHmdFieldOfView* field_of_view) {
-    LOG_DEBUG(Lib_Hmd, "called");
+    LOG_DEBUG(Lib_Hmd, "called, handle: {:#x}", (u32)handle);
     if (field_of_view == nullptr) {
         return ORBIS_HMD_ERROR_PARAMETER_NULL;
     }
     if (handle != g_internal_handle) {
-        return ORBIS_HMD_ERROR_HANDLE_INVALID;
-    }
-    if (g_firmware_version >= Common::ElfInfo::FW_450) {
-        // Due to some faulty in-library checks, a missing headset results in this error
-        // instead of the expected ORBIS_HMD_ERROR_DEVICE_DISCONNECTED error.
         return ORBIS_HMD_ERROR_HANDLE_INVALID;
     }
     if (!g_library_initialized) {
@@ -1029,7 +1037,7 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("-y4OUwFf4jE", "libSceHmd", 1, "libSceHmd", Func_FF2E0E53015FE231);
 
     RegisterDistortion(sym);
-    // RegisterReprojection(sym);
+    RegisterReprojection(sym);
 };
 
 } // namespace Libraries::Hmd
