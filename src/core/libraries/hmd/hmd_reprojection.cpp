@@ -6,8 +6,39 @@
 #include "core/libraries/hmd/hmd.h"
 #include "core/libraries/hmd/hmd_error.h"
 #include "core/libraries/libs.h"
+#include "core/libraries/videoout/driver.h"
+#include "core/libraries/videoout/video_out.h"
+
+namespace Libraries::VideoOut {
+extern std::unique_ptr<VideoOutDriver> driver;
+}
 
 namespace Libraries::Hmd {
+
+struct OrbisHmdDistortionTextureTranslation {
+    float scale_x;
+    float scale_y;
+    float offset_x;
+    float offset_y;
+};
+
+struct OrbisHmdReprojectionParameter {
+    const u32* srcL;
+    const u32* srcR;
+    const u8* sampler;
+    OrbisHmdDistortionTextureTranslation leftTranslation;
+    OrbisHmdDistortionTextureTranslation rightTranslation;
+    uint64_t* label;
+    u32 timing;
+    uint64_t predictionTime;
+    u32 predictionType;
+    uint64_t flags;
+    uint64_t reserved[4];
+};
+
+static s32 g_vo_handle = -1;
+static s32 g_vo_i0 = -1;
+static s32 g_vo_i1 = -1;
 
 s32 PS4_SYSV_ABI sceHmdReprojectionStartMultilayer() {
     LOG_ERROR(Lib_Hmd, "(STUBBED) called");
@@ -80,8 +111,12 @@ s32 PS4_SYSV_ABI sceHmdReprojectionSetCallback() {
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI sceHmdReprojectionSetDisplayBuffers() {
+s32 PS4_SYSV_ABI sceHmdReprojectionSetDisplayBuffers(s32 videoOutHandle, s32 index0, s32 index1,
+                                                     void* option) {
     LOG_ERROR(Lib_Hmd, "(STUBBED) called");
+    g_vo_handle = videoOutHandle;
+    g_vo_i0 = index0;
+    g_vo_i1 = index1;
     return ORBIS_OK;
 }
 
@@ -100,8 +135,23 @@ s32 PS4_SYSV_ABI sceHmdReprojectionSetUserEventStart() {
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI sceHmdReprojectionStart() {
+static u64 DecodeTextureAddress(u32 addr) {
+    const u8 s = 3;
+
+    addr &= ~(~(~0u << 2) << s);
+
+    return static_cast<u64>(addr) << 8;
+}
+
+s32 PS4_SYSV_ABI sceHmdReprojectionStart(OrbisHmdReprojectionParameter* param, void* tracker_state,
+                                         s64 flip_arg, void* opt) {
     LOG_ERROR(Lib_Hmd, "(STUBBED) called");
+    void** addr;
+    auto vo_port = Libraries::VideoOut::driver->GetPort(1);
+    std::memcpy((void*)vo_port->buffer_slots[flip_arg % 2 ? g_vo_i0 : g_vo_i1].address_left,
+                (void*)DecodeTextureAddress(param->srcR[0]), 1920 * 1080 * 4);
+    Libraries::VideoOut::sceVideoOutSubmitFlip(g_vo_handle, flip_arg % 2 ? g_vo_i0 : g_vo_i1, 1,
+                                               flip_arg);
     return ORBIS_OK;
 }
 
