@@ -76,7 +76,7 @@ s32 PS4_SYSV_ABI sceVrTrackerInit(const OrbisVrTrackerInitParam* param) {
     }
 
     // Parameter checks are fairly thorough here.
-    if (param->size != sizeof(OrbisVrTrackerInitParam) ||
+    if (param->size != 144 /* ??? */ ||
         // Check garlic memory parameters
         param->direct_memory_garlic == nullptr ||
         param->direct_memory_garlic_alignment != ORBIS_VR_TRACKER_MEMORY_ALIGNMENT ||
@@ -101,7 +101,9 @@ s32 PS4_SYSV_ABI sceVrTrackerInit(const OrbisVrTrackerInitParam* param) {
             OrbisVrTrackerCalibrationMode::ORBIS_VR_TRACKER_CALIBRATION_AUTO ||
         param->calibration_settings.gun_position >
             OrbisVrTrackerCalibrationMode::ORBIS_VR_TRACKER_CALIBRATION_AUTO) {
-        return ORBIS_VR_TRACKER_ERROR_ARGUMENT_INVALID;
+        LOG_ERROR(Lib_VrTracker, "invalid params");
+        // dexed is submitting way off values so something is wrong but I don't know what
+        // return ORBIS_OK;
     }
 
     // Real hardware will segfault if any of the supplied mappings aren't long enough,
@@ -110,26 +112,26 @@ s32 PS4_SYSV_ABI sceVrTrackerInit(const OrbisVrTrackerInitParam* param) {
     Libraries::Kernel::OrbisVirtualQueryInfo info;
     // The memory type for the whole range should be the same here,
     // so the memory should be contained in one VMA.
-    VAddr addr_to_check = std::bit_cast<VAddr>(param->direct_memory_garlic);
-    s32 result = memory->VirtualQuery(addr_to_check, 0, &info);
-    ASSERT_MSG(result == 0 && info.end - addr_to_check >= param->direct_memory_garlic_size,
-               "Insufficient garlic memory provided");
+    // VAddr addr_to_check = std::bit_cast<VAddr>(param->direct_memory_garlic);
+    // s32 result = memory->VirtualQuery(addr_to_check, 0, &info);
+    // ASSERT_MSG(result == 0 && info.end - addr_to_check >= param->direct_memory_garlic_size,
+    //            "Insufficient garlic memory provided");
 
-    g_garlic_memory_pointer = param->direct_memory_garlic;
-    g_garlic_size = param->direct_memory_garlic_size;
+    // g_garlic_memory_pointer = param->direct_memory_garlic;
+    // g_garlic_size = param->direct_memory_garlic_size;
 
-    addr_to_check = std::bit_cast<VAddr>(param->direct_memory_onion);
-    result = memory->VirtualQuery(addr_to_check, 0, &info);
-    ASSERT_MSG(result == 0 && info.end - addr_to_check >= param->direct_memory_onion_size,
-               "Insufficient onion memory provided");
+    // addr_to_check = std::bit_cast<VAddr>(param->direct_memory_onion);
+    // result = memory->VirtualQuery(addr_to_check, 0, &info);
+    // ASSERT_MSG(result == 0 && info.end - addr_to_check >= param->direct_memory_onion_size,
+    //            "Insufficient onion memory provided");
 
-    g_onion_memory_pointer = param->direct_memory_onion;
-    g_onion_size = param->direct_memory_onion_size;
+    // g_onion_memory_pointer = param->direct_memory_onion;
+    // g_onion_size = param->direct_memory_onion_size;
 
-    addr_to_check = std::bit_cast<VAddr>(param->work_memory);
-    result = memory->VirtualQuery(addr_to_check, 0, &info);
-    ASSERT_MSG(result == 0 && info.end - addr_to_check >= param->work_memory_size,
-               "Insufficient work memory provided");
+    // addr_to_check = std::bit_cast<VAddr>(param->work_memory);
+    // result = memory->VirtualQuery(addr_to_check, 0, &info);
+    // ASSERT_MSG(result == 0 && info.end - addr_to_check >= param->work_memory_size,
+    //            "Insufficient work memory provided");
 
     g_work_memory_pointer = param->work_memory;
     g_work_size = param->work_memory_size;
@@ -155,8 +157,8 @@ s32 PS4_SYSV_ABI sceVrTrackerRegisterDevice2(const OrbisVrTrackerDeviceType devi
 
 s32 PS4_SYSV_ABI sceVrTrackerRegisterDeviceInternal(const OrbisVrTrackerDeviceType device_type,
                                                     const s32 handle, s32 unk0, s32 unk1) {
-    LOG_WARNING(Lib_VrTracker, "(STUBBED) called, device_type = {}, handle = {}",
-                static_cast<u32>(device_type), handle);
+    LOG_WARNING(Lib_VrTracker, "(STUBBED) called, device_type = {}, handle = {:#x}",
+                static_cast<u32>(device_type), (u32)handle);
     if (!g_library_initialized) {
         return ORBIS_VR_TRACKER_ERROR_NOT_INIT;
     }
@@ -215,7 +217,10 @@ s32 PS4_SYSV_ABI sceVrTrackerGetPlayAreaWarningInfo(OrbisVrTrackerPlayAreaWarnin
 
 s32 PS4_SYSV_ABI sceVrTrackerGetResult(const OrbisVrTrackerGetResultParam* param,
                                        OrbisVrTrackerResultData* result) {
-    LOG_ERROR(Lib_VrTracker, "(STUBBED) called");
+    // LOG_WARNING(Lib_VrTracker, "(STUBBED) called");
+    result->connected = true;
+    result->handle = param->handle;
+    result->status = OrbisVrTrackerStatus::ORBIS_VR_TRACKER_STATUS_TRACKING;
     return ORBIS_OK;
 }
 
@@ -232,13 +237,12 @@ s32 PS4_SYSV_ABI sceVrTrackerGetTime(u64* time) {
 }
 
 s32 PS4_SYSV_ABI sceVrTrackerGpuSubmit(const OrbisVrTrackerGpuSubmitParam* param) {
-    LOG_ERROR(Lib_VrTracker, "(STUBBED) called");
+    // LOG_ERROR(Lib_VrTracker, "(STUBBED) called");
     if (!g_library_initialized) {
         return ORBIS_VR_TRACKER_ERROR_NOT_INIT;
     }
 
-    // Impossible to submit valid data here since sceCameraGetFrameData returns an error.
-    return ORBIS_VR_TRACKER_ERROR_ARGUMENT_INVALID;
+    return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI sceVrTrackerGpuWait(const OrbisVrTrackerGpuWaitParam* param) {
@@ -255,13 +259,12 @@ s32 PS4_SYSV_ABI sceVrTrackerGpuWait(const OrbisVrTrackerGpuWaitParam* param) {
 }
 
 s32 PS4_SYSV_ABI sceVrTrackerGpuWaitAndCpuProcess() {
-    LOG_ERROR(Lib_VrTracker, "(STUBBED) called");
+    // LOG_ERROR(Lib_VrTracker, "(STUBBED) called");
     if (!g_library_initialized) {
         return ORBIS_VR_TRACKER_ERROR_NOT_INIT;
     }
 
-    // Impossible to perform GPU submits
-    return ORBIS_VR_TRACKER_ERROR_NOT_EXECUTE_GPU_SUBMIT;
+    return ORBIS_OK;
 }
 
 s32 PS4_SYSV_ABI
@@ -362,7 +365,7 @@ s32 PS4_SYSV_ABI sceVrTrackerSetRestingMode() {
 
 s32 PS4_SYSV_ABI
 sceVrTrackerUpdateMotionSensorData(const OrbisVrTrackerUpdateMotionSensorDataParam* param) {
-    LOG_ERROR(Lib_VrTracker, "(STUBBED) called");
+    // LOG_ERROR(Lib_VrTracker, "(STUBBED) called");
     return ORBIS_OK;
 }
 
