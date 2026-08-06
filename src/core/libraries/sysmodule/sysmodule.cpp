@@ -98,8 +98,18 @@ s32 PS4_SYSV_ABI sceSysmoduleLoadModule(OrbisSysModule id) {
     return result;
 }
 
-s32 PS4_SYSV_ABI sceSysmoduleLoadModuleByNameInternal() {
-    LOG_ERROR(Lib_SysModule, "(STUBBED) called");
+s32 PS4_SYSV_ABI sceSysmoduleLoadModuleByNameInternal(char const* name) {
+    LOG_ERROR(Lib_SysModule, "(DUMMY) called, name: {}", name);
+
+    auto* game_info = Common::Singleton<Common::ElfInfo>::Instance();
+    const auto& sys_module_path = EmulatorSettings.GetSysModulesDir();
+    const auto& game_specific_modules_path =
+        sys_module_path /
+        (game_info->GameSerial().empty() ? std::string_view("no_serial") : game_info->GameSerial());
+    std::filesystem::path host_path = game_specific_modules_path / (std::string(name) + ".sprx");
+    if (std::filesystem::exists(host_path)) {
+        Common::Singleton<Core::Linker>::Instance()->LoadAndStartModule(host_path, 0, nullptr, nullptr);
+    }
     return ORBIS_OK;
 }
 
