@@ -454,6 +454,11 @@ u64 PS4_SYSV_ABI posix_sysconf(s32 name) {
     }
 }
 
+s32 PS4_SYSV_ABI sceMbusEventReceive() {
+    while (true)
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+}
+
 void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     service_thread = std::jthread{KernelServiceThread};
     g_environ.emplace_back(nullptr);
@@ -473,6 +478,7 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LIB_OBJ("f7uOxY9mM1U", "libkernel", 1, "libkernel", &g_stack_chk_guard);
     LIB_OBJ("+2thxYZ4syk", "libkernel", 1, "libkernel", &g_environ);
     LIB_OBJ("djxxOmW6-aw", "libkernel", 1, "libkernel", &g_progname);
+    LIB_FUNCTION("puHrnP8V-dY", "libSceMbus", 1, "libSceMbus", sceMbusEventReceive);
     LIB_FUNCTION("D4yla3vx4tY", "libkernel", 1, "libkernel", sceKernelError);
     LIB_FUNCTION("YeU23Szo3BM", "libkernel", 1, "libkernel", sceKernelGetAllowedSdkVersionOnSystem);
     LIB_FUNCTION("Mv1zUObHvXI", "libkernel", 1, "libkernel", sceKernelGetSystemSwVersion);
