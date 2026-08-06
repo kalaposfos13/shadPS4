@@ -162,6 +162,8 @@ public:
     void Execute(const std::vector<std::string>& args = {});
     void DebugDump();
 
+    void* Dlsym(std::string const library_name, std::string const func_name);
+
 private:
     MemoryManager* memory;
     Libraries::Kernel::Thread main_thread;

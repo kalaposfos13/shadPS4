@@ -27,8 +27,12 @@
 #include "core/tls.h"
 #include "ipc/ipc.h"
 
+#include <array>
+#include "emulator.h"
+
 #ifndef _WIN32
 #include <signal.h>
+#include "linker.h"
 #endif
 
 namespace Core {
@@ -98,6 +102,7 @@ void Linker::Execute(const std::vector<std::string>& args) {
     static PS4_SYSV_ABI s32 (*malloc_init)() = nullptr;
 
     if (has_libcinternal) {
+        malloc_init = (decltype(malloc_init))Dlsym("libSceLibcInternal.sprx", "_malloc_init");
         for (const auto& m : m_modules) {
             const auto& mod = m.get();
             if (mod->name.contains("libSceLibcInternal.sprx")) {
@@ -109,6 +114,22 @@ void Linker::Execute(const std::vector<std::string>& args) {
                         malloc_init = reinterpret_cast<PS4_SYSV_ABI s32 (*)()>(sym.virtual_address);
                     }
                 }
+            }
+        }
+    }
+
+    if (Common::Singleton<Common::ElfInfo>::Instance()->GameSerial() == "NPXS20001") {
+        constexpr auto ModulesToLoad = std::to_array<SysModules>({
+            {"libScePsm.sprx", nullptr},
+        });
+        auto* game_info = Common::Singleton<Common::ElfInfo>::Instance();
+        const auto& sys_module_path = EmulatorSettings.GetSysModulesDir();
+        const auto& game_specific_modules_path =
+            sys_module_path / (game_info->GameSerial().empty() ? std::string_view("no_serial")
+                                                               : game_info->GameSerial());
+        for (auto const& mod : ModulesToLoad) {
+            if (std::filesystem::exists(game_specific_modules_path / mod.module_name)) {
+                LoadModule(game_specific_modules_path / mod.module_name);
             }
         }
     }
@@ -549,4 +570,17 @@ void Linker::DebugDump() {
     }
 }
 
+void* Linker::Dlsym(std::string const library_name, std::string const func_name) {
+    for (const auto& m : m_modules) {
+        const auto& mod = m.get();
+        if (mod->name.contains(library_name)) {
+            for (const auto& sym : mod->export_sym.GetSymbols()) {
+                if (sym.nid_name.compare(func_name) == 0) {
+                    return (void*)sym.virtual_address;
+                }
+            }
+        }
+    }
+    return nullptr;
+}
 } // namespace Core
