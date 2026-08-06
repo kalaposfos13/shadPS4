@@ -56,7 +56,7 @@ int VideoOutDriver::Open(const ServiceThreadParams* params) {
     }
     main_port.is_open = true;
     liverpool->SetVoPort(&main_port);
-    return 1;
+    return 2;
 }
 
 void VideoOutDriver::Close(s32 handle) {
@@ -99,7 +99,7 @@ void VideoOutDriver::Close(s32 handle) {
 }
 
 VideoOutPort* VideoOutDriver::GetPort(int handle) {
-    if (handle != 1) [[unlikely]] {
+    if (handle != 2) [[unlikely]] {
         return nullptr;
     }
     return &main_port;
