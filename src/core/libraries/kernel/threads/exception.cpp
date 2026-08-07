@@ -100,8 +100,10 @@ s32 NativeToOrbisSignal(s32 s) {
     case 0:
         return 128;
     default:
-        if (s > 0 && s < 128) {
+        if (s > 0 && s < SIGRTMAX) {
             return s;
+        } else if (s >= SIGRTMIN && s <= SIGRTMAX) {
+            return (s % SIGRTMIN) + SIGRTMIN;
         }
         UNREACHABLE_MSG("Unknown signal {}", s);
     }
