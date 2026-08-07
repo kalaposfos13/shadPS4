@@ -6,6 +6,7 @@
 #include "common/elf_info.h"
 #include "common/logging/log.h"
 #include "core/libraries/error_codes.h"
+#include "core/libraries/kernel/file_system.h"
 #include "core/libraries/kernel/orbis_error.h"
 #include "core/libraries/kernel/process.h"
 #include "core/libraries/libs.h"
@@ -98,19 +99,20 @@ s32 PS4_SYSV_ABI sceSysmoduleLoadModule(OrbisSysModule id) {
     return result;
 }
 
-s32 PS4_SYSV_ABI sceSysmoduleLoadModuleByNameInternal(char const* name) {
+s32 PS4_SYSV_ABI sceSysmoduleLoadModuleByNameInternal(char const* name, u64 args, void const* argp,
+                                                      void const* popt, s32* res) {
     LOG_ERROR(Lib_SysModule, "(DUMMY) called, name: {}", name);
-
-    auto* game_info = Common::Singleton<Common::ElfInfo>::Instance();
-    const auto& sys_module_path = EmulatorSettings.GetSysModulesDir();
-    const auto& game_specific_modules_path =
-        sys_module_path /
-        (game_info->GameSerial().empty() ? std::string_view("no_serial") : game_info->GameSerial());
-    std::filesystem::path host_path = game_specific_modules_path / (std::string(name) + ".sprx");
-    if (std::filesystem::exists(host_path)) {
-        Common::Singleton<Core::Linker>::Instance()->LoadAndStartModule(host_path, 0, nullptr, nullptr);
-    }
-    return ORBIS_OK;
+    std::string filename = std::string(name) + ".sprx";
+    s32 exists;
+    exists = Libraries::Kernel::posix_access(("/sys/common/lib/" + filename).c_str(), 0);
+    if (exists == 0)
+        return Libraries::Kernel::sceKernelLoadStartModule(("/sys/common/lib/" + filename).c_str(),
+                                                           args, argp, 0, popt, res);
+    exists = Libraries::Kernel::posix_access(("/sys/priv/lib/" + filename).c_str(), 0);
+    if (exists == 0)
+        return Libraries::Kernel::sceKernelLoadStartModule(("/sys/priv/lib/" + filename).c_str(),
+                                                           args, argp, 0, popt, res);
+    return ORBIS_KERNEL_ERROR_EINVAL;
 }
 
 s32 PS4_SYSV_ABI sceSysmoduleLoadModuleInternal(OrbisSysModuleInternal id) {
