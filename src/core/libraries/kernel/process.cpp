@@ -82,10 +82,6 @@ s32 PS4_SYSV_ABI sceKernelLoadStartModule(const char* moduleFileName, u64 args, 
 
     std::string guest_path(moduleFileName);
 
-    if ((flags & 0x20000) != 0) {
-        guest_path += ".sprx"; // validation for this was pulled right out of my ass
-    }
-
     s32 handle = -1;
 
     if (guest_path[0] == '/') {
