@@ -459,6 +459,139 @@ s32 PS4_SYSV_ABI sceMbusEventReceive() {
         std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
+s32 PS4_SYSV_ABI ipmimgr_call(s64 op, s64 unk2, u32* result, u8* args, u64 args_size, u64 unk3) {
+    LOG_ERROR(Lib_Kernel, "(STUBBED) called, op: {:#x}", op);
+    switch (op) {
+    case 2: {
+        std::string name = *(char**)(args + 8);
+        LOG_ERROR(Lib_Kernel, "Create client {}", name);
+        if (name == "SceNorpheusUpdService" || name == "SceCompAppProxyUtil" ||
+            name == "SceCompAppProxy" || name == "SceShellAppProxy" ||
+            name == "SceStickerCoreServer" || name == "SceNpPartyIpc" ||
+            name == "ScePartyIpcService") {
+            *result = 0;
+        } else {
+            *result = POSIX_ENOENT;
+        }
+
+        if (name == "ScePartyIpcService") {
+            while (true) {
+            }
+        }
+    }
+    case 0x201: {
+        while (true) {
+        }
+    }
+    case 0x251: {
+        *result = POSIX_EAGAIN;
+    }
+    default: {
+        *result = 0;
+    }
+    }
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceKernelGetPsmIntdevModeForRcmgr() {
+    LOG_ERROR(Lib_Kernel, "(STUBBED)");
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceMbusInit() {
+    LOG_ERROR(Lib_Kernel, "(STUBBED)");
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceMbusEventCreate_() {
+    LOG_ERROR(Lib_Kernel, "(STUBBED)");
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceMbusGetDeviceInfoByCondition_() {
+    // LOG_ERROR(Lib_Kernel, "(STUBBED)");
+    return ORBIS_OK;
+}
+
+char* PS4_SYSV_ABI dlerror() {
+    LOG_ERROR(Lib_Kernel, "(STUBBED)");
+    return nullptr;
+}
+
+s32 PS4_SYSV_ABI chdir(const char* path) {
+    LOG_ERROR(Lib_Kernel, "(STUBBED) path = {}", path);
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceApplicationInitialize() {
+    LOG_ERROR(Lib_Kernel, "(STUBBED)");
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI getrlimit(s32 rid, u64* limits) {
+    LOG_ERROR(Lib_Kernel, "(STUBBED)");
+    if (limits) {
+        limits[0] = 0;
+        limits[1] = 0;
+    }
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI pthread_spin_init() {
+    LOG_ERROR(Lib_Kernel, "(STUBBED)");
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI pthread_spin_lock() {
+    LOG_ERROR(Lib_Kernel, "(STUBBED)");
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI pthread_spin_trylock() {
+    LOG_ERROR(Lib_Kernel, "(STUBBED)");
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI pthread_spin_unlock() {
+    LOG_ERROR(Lib_Kernel, "(STUBBED)");
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI pthread_spin_destroy() {
+    LOG_ERROR(Lib_Kernel, "(STUBBED)");
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sysctl() {
+    LOG_ERROR(Lib_Kernel, "(STUBBED)");
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI shm_open(const char* path) {
+    LOG_ERROR(Lib_Kernel, "(STUBBED), path = {}", path);
+    return 0x10000;
+}
+
+s32 PS4_SYSV_ABI shm_unlink(const char* path) {
+    LOG_ERROR(Lib_Kernel, "(STUBBED), path = {}", path);
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI pthread_mutex_setname_np(void* mutex, const char* name) {
+    LOG_ERROR(Lib_Kernel, "(STUBBED), name = {}", name);
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI pthread_cond_setname_np(void* mutex, const char* name) {
+    // LOG_ERROR(Lib_Kernel, "(STUBBED), name = {}", name);
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceVideoOutSysAddSetModeEvent() {
+    LOG_ERROR(Lib_Kernel, "(STUBBED)");
+    return ORBIS_OK;
+}
+
 void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     service_thread = std::jthread{KernelServiceThread};
     g_environ.emplace_back(nullptr);
@@ -478,7 +611,30 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LIB_OBJ("f7uOxY9mM1U", "libkernel", 1, "libkernel", &g_stack_chk_guard);
     LIB_OBJ("+2thxYZ4syk", "libkernel", 1, "libkernel", g_environ.data());
     LIB_OBJ("djxxOmW6-aw", "libkernel", 1, "libkernel", &g_progname);
+
+    LIB_FUNCTION("Hk7iHmGxB18", "libkernel", 1, "libkernel", ipmimgr_call);
+    LIB_FUNCTION("C2ltEJILIGE", "libkernel", 1, "libkernel", sceKernelGetPsmIntdevModeForRcmgr);
+    LIB_FUNCTION("wRPXMGtkOq0", "libSceMbus", 1, "libSceMbus", sceMbusInit);
+    LIB_FUNCTION("c08SEHicDNU", "libSceMbus", 1, "libSceMbus", sceMbusEventCreate_);
+    LIB_FUNCTION("KRL-S9qBqXw", "libSceMbus", 1, "libSceMbus", sceMbusGetDeviceInfoByCondition_);
     LIB_FUNCTION("puHrnP8V-dY", "libSceMbus", 1, "libSceMbus", sceMbusEventReceive);
+    LIB_FUNCTION("ucFJiTO1EUw", "libkernel", 1, "libkernel", dlerror);
+    LIB_FUNCTION("6mMQ1MSPW-Q", "libkernel", 1, "libkernel", chdir);
+    LIB_FUNCTION("XFYItOxS6r0", "libSceSysCore", 1, "libSceSysCore", sceApplicationInitialize);
+    LIB_FUNCTION("Wh7HbV7JFqc", "libkernel", 1, "libkernel", getrlimit);
+    LIB_FUNCTION("ZMn3clnAGBA", "libkernel", 1, "libkernel", pthread_spin_init);
+    LIB_FUNCTION("pw+70ClLYlY", "libkernel", 1, "libkernel", pthread_spin_lock);
+    LIB_FUNCTION("rCTGkBIHfPY", "libkernel", 1, "libkernel", pthread_spin_trylock);
+    LIB_FUNCTION("LEfMMCT+SlM", "libkernel", 1, "libkernel", pthread_spin_unlock);
+    LIB_FUNCTION("IJIggoPZExk", "libkernel", 1, "libkernel", pthread_spin_destroy);
+    LIB_FUNCTION("DFmMT80xcNI", "libkernel", 1, "libkernel", sysctl);
+    LIB_FUNCTION("QuJYZ2KVGGQ", "libkernel", 1, "libkernel", shm_open);
+    LIB_FUNCTION("tPWsbOUGO8k", "libkernel", 1, "libkernel", shm_unlink);
+    LIB_FUNCTION("nTxZBp8YNGc", "libkernel", 1, "libkernel", pthread_mutex_setname_np);
+    LIB_FUNCTION("EZ8h70dtFLg", "libkernel", 1, "libkernel", pthread_cond_setname_np);
+    LIB_FUNCTION("X8FN-5Nk-yE", "libSceVideoOut", 1, "libSceVideoOut",
+                 sceVideoOutSysAddSetModeEvent);
+
     LIB_FUNCTION("D4yla3vx4tY", "libkernel", 1, "libkernel", sceKernelError);
     LIB_FUNCTION("YeU23Szo3BM", "libkernel", 1, "libkernel", sceKernelGetAllowedSdkVersionOnSystem);
     LIB_FUNCTION("Mv1zUObHvXI", "libkernel", 1, "libkernel", sceKernelGetSystemSwVersion);
