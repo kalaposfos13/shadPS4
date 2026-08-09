@@ -224,13 +224,13 @@ public:
         }
     }
 
+    std::string m_name;
+
 private:
     std::mutex m_mutex;
 
     std::list<Waiter*> m_waiters;
     std::condition_variable m_destroy_cv;
-
-    std::string m_name;
 
     ThreadMode m_thread_mode;
     QueueMode m_queue_mode;
@@ -303,8 +303,10 @@ int PS4_SYSV_ABI sceKernelDeleteEventFlag(OrbisKernelEventFlag ef) {
     return ORBIS_OK;
 }
 
-int PS4_SYSV_ABI sceKernelOpenEventFlag() {
-    LOG_ERROR(Kernel_Event, "(STUBBED) called");
+int PS4_SYSV_ABI sceKernelOpenEventFlag(OrbisKernelEventFlag* ef, const char* name) {
+    LOG_ERROR(Kernel_Event, "(STUBBED) called, name = {}", name);
+    *ef = new EventFlagInternal(std::string(name), EventFlagInternal::ThreadMode::Single,
+                                EventFlagInternal::QueueMode::Fifo, 0);
     return ORBIS_OK;
 }
 
@@ -393,6 +395,10 @@ int PS4_SYSV_ABI sceKernelWaitEventFlag(OrbisKernelEventFlag ef, u64 bitPattern,
     LOG_DEBUG(Kernel_Event, "called bitPattern = {:#x} waitMode = {:#x}", bitPattern, waitMode);
     if (ef == nullptr) {
         return ORBIS_KERNEL_ERROR_ESRCH;
+    }
+
+    if (ef->m_name == "SceBootStatusFlags") {
+        return ORBIS_OK;
     }
 
     if (bitPattern == 0) {
