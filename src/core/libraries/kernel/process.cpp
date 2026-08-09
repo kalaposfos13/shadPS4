@@ -107,6 +107,7 @@ s32 PS4_SYSV_ABI sceKernelLoadStartModule(const char* moduleFileName, u64 args, 
 }
 
 s32 PS4_SYSV_ABI sceKernelDlsym(s32 handle, const char* symbol, void** addrp) {
+    LOG_INFO(Lib_Kernel, "called, func: {}", symbol);
     auto* linker = Common::Singleton<Core::Linker>::Instance();
     auto* module = linker->GetModule(handle);
     if (module == nullptr) {
