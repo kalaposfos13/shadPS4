@@ -176,7 +176,9 @@ s32 OrbisToNativeSignal(s32 s) {
     case 128:
         return 0;
     default:
-        if (s > 0 && s < 128) {
+        if (s >= SIGRTMIN && s < 128) {
+            return s - SIGRTMIN;
+        } else if (s < SIGRTMIN) {
             return s;
         }
         UNREACHABLE_MSG("Unknown signal {}", s);
@@ -466,8 +468,8 @@ s32 PS4_SYSV_ABI posix_sigaction(s32 sig, Sigaction* act, Sigaction* oact) {
 #if !defined(__APPLE__) && !defined(__FreeBSD__)
     if (native_sig >= __SIGRTMIN && native_sig < SIGRTMIN) {
         LOG_ERROR(Lib_Kernel, "Guest is attempting to use the HLE libc-reserved signal {}!", sig);
-        *__Error() = POSIX_EINVAL;
-        return ORBIS_FAIL;
+        // *__Error() = POSIX_EINVAL;
+        // return ORBIS_FAIL;
     }
 #else
     if (native_sig > SIGUSR2) {
