@@ -634,8 +634,10 @@ void Emulator::Run(std::filesystem::path file, std::vector<std::string> args,
     }
     mnt->Mount(host_font_dir, guest_font_dir);
 
-    if (!EmulatorSettings.GetFwRootDir().empty())
-        mnt->Mount(EmulatorSettings.GetFwRootDir() / "system", "/sys/");
+    if (std::filesystem::exists(EmulatorSettings.GetSysModulesDir() / id)) {
+        mnt->Mount(EmulatorSettings.GetSysModulesDir() / id, "/sys/common/lib/");
+        mnt->Mount(EmulatorSettings.GetSysModulesDir() / id, "/sys/priv/lib/");
+    }
 
     // There is a second font directory, mount that too.
     guest_font_dir.append("2");

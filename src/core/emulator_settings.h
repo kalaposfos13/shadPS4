@@ -195,7 +195,6 @@ struct GeneralSettings {
     Setting<std::filesystem::path> home_dir;
     Setting<std::filesystem::path> sys_modules_dir;
     Setting<std::filesystem::path> font_dir;
-    Setting<std::filesystem::path> fw_root_dir;
 
     Setting<int> volume_slider{100};
     Setting<bool> neo_mode{false};
@@ -249,7 +248,7 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(GeneralSettings, install_dirs, addon_install_
                                    trophy_notification_side, connected_to_network,
                                    discord_rpc_enabled, show_fps_counter, console_language,
                                    big_picture_scale, shadnet_server, shadnet_webapi_server,
-                                   signaling_info, enable_upnp, fw_root_dir)
+                                   signaling_info, enable_upnp)
 
 // -------------------------------
 // Log settings
@@ -685,7 +684,6 @@ public:
     SETTING_FORWARD(m_general, ShadNetWebApiServer, shadnet_webapi_server)
     SETTING_FORWARD(m_general, SignalingInfo, signaling_info)
     SETTING_FORWARD_BOOL(m_general, UPnPEnabled, enable_upnp)
-    SETTING_FORWARD(m_general, FwRootDir, fw_root_dir)
 
     // Log settings
     SETTING_FORWARD_BOOL(m_log, LogAppend, append)
