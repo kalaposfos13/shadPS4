@@ -93,7 +93,7 @@ int PS4_SYSV_ABI sceUserServiceGetFileBrowserSortTitle();
 int PS4_SYSV_ABI sceUserServiceGetFileSelectorFilter();
 int PS4_SYSV_ABI sceUserServiceGetFileSelectorSortContent();
 int PS4_SYSV_ABI sceUserServiceGetFileSelectorSortTitle();
-int PS4_SYSV_ABI sceUserServiceGetForegroundUser();
+int PS4_SYSV_ABI sceUserServiceGetForegroundUser(int* uid);
 int PS4_SYSV_ABI sceUserServiceGetFriendCustomListLastFocus();
 int PS4_SYSV_ABI sceUserServiceGetFriendFlag();
 int PS4_SYSV_ABI sceUserServiceGetGlsAccessTokenNiconicoLive();
