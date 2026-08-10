@@ -43,7 +43,9 @@
 namespace Libraries::Kernel {
 
 static u64 g_stack_chk_guard = 0xDEADBEEF54321ABC; // dummy return
-static std::vector<char*> g_environ{};
+static std::vector<char const*> g_environ{};
+static char* environment[64];
+static char** kernel_environ;
 static const char* g_progname = "eboot.bin";
 
 boost::asio::io_context io_context;
@@ -543,11 +545,55 @@ s32 PS4_SYSV_ABI sceApplicationInitialize() {
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI getrlimit(s32 rid, u64* limits) {
+struct OrbisRlimit {
+    u64 rlim_cur;
+    u64 rlim_max;
+};
+
+static constexpr s32 ORBIS_RLIMIT_CPU = 0;      /* maximum cpu time in seconds */
+static constexpr s32 ORBIS_RLIMIT_FSIZE = 1;    /* maximum file size */
+static constexpr s32 ORBIS_RLIMIT_DATA = 2;     /* data size */
+static constexpr s32 ORBIS_RLIMIT_STACK = 3;    /* stack size */
+static constexpr s32 ORBIS_RLIMIT_CORE = 4;     /* core file size */
+static constexpr s32 ORBIS_RLIMIT_RSS = 5;      /* resident set size */
+static constexpr s32 ORBIS_RLIMIT_MEMLOCK = 6;  /* locked-in-memory address space */
+static constexpr s32 ORBIS_RLIMIT_NPROC = 7;    /* number of processes */
+static constexpr s32 ORBIS_RLIMIT_NOFILE = 8;   /* number of open files */
+static constexpr s32 ORBIS_RLIMIT_SBSIZE = 9;   /* maximum size of all socket buffers */
+static constexpr s32 ORBIS_RLIMIT_VMEM = 10;    /* virtual process size (incl. mmap) */
+static constexpr s32 ORBIS_RLIMIT_NPTS = 11;    /* pseudo-terminals */
+static constexpr s32 ORBIS_RLIMIT_SWAP = 12;    /* swap used */
+static constexpr s32 ORBIS_RLIMIT_KQUEUES = 13; /* kqueues allocated */
+static constexpr s32 ORBIS_RLIMIT_UMTXP = 14;   /* process-shared umtx */
+static constexpr s32 ORBIS_RLIMIT_PIPEBUF = 15; /* pipes/fifos buffers */
+static constexpr s32 ORBIS_RLIMIT_VMM = 16;     /* virtual machines */
+
+s32 PS4_SYSV_ABI getrlimit(s32 resource, OrbisRlimit* rlim) {
     LOG_ERROR(Lib_Kernel, "(STUBBED)");
-    if (limits) {
-        limits[0] = 256;
-        limits[1] = 256;
+
+    switch (resource) {
+    case ORBIS_RLIMIT_DATA: {
+        // ?
+        rlim->rlim_cur = 0xffffffffffffffff;
+        rlim->rlim_max = 0xffffffffffffffff;
+        break;
+    }
+
+    case ORBIS_RLIMIT_STACK: {
+        // ?
+        rlim->rlim_cur = 0xffffffffffffffff;
+        rlim->rlim_max = 0xffffffffffffffff;
+        break;
+    }
+
+    case ORBIS_RLIMIT_NOFILE: {
+        rlim->rlim_cur = 256;
+        rlim->rlim_max = 256;
+        break;
+    }
+
+    default:
+        UNREACHABLE_MSG("unhandled resource {}\n", resource);
     }
     return ORBIS_OK;
 }
@@ -608,9 +654,55 @@ s32 PS4_SYSV_ABI sceVideoOutSysAddSetModeEvent() {
     return ORBIS_OK;
 }
 
+s32 PS4_SYSV_ABI pthread_get_user_context_np() {
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI pthread_resume_user_context_np() {
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI pthread_suspend_user_context_np() {
+    return ORBIS_OK;
+}
+
+static constexpr s32 SCE_REGMGR_ENT_KEY_SYSTEM_initialize = 0x2040000;
+static constexpr s32 SCE_REGMGR_ENT_KEY_SYSTEM_language = 0x2020000;
+static constexpr s32 SCE_REGMGR_ENT_KEY_SYSTEM_button_assign = 0x20B0000;
+static constexpr s32 SCE_REGMGR_ENT_KEY_VIDEOOUT_reset_reso_flag = 0xA130000;
+s32 PS4_SYSV_ABI sceRegMgrGetInt(s32 key, s32* data) {
+    LOG_ERROR(Lib_Kernel, "key={:#x}, data={}", key, (void*)data);
+
+    switch (key) {
+    case SCE_REGMGR_ENT_KEY_SYSTEM_initialize:
+        *data = 1;
+        break;
+    case SCE_REGMGR_ENT_KEY_SYSTEM_language:
+        *data = 1;
+        break;
+    case SCE_REGMGR_ENT_KEY_SYSTEM_button_assign:
+        *data = 1;
+        break;
+    case SCE_REGMGR_ENT_KEY_VIDEOOUT_reset_reso_flag:
+        *data = 1;
+        break;
+    default:
+        *data = 0;
+        break;
+    }
+
+    return ORBIS_OK;
+}
+
 void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     service_thread = std::jthread{KernelServiceThread};
+    // g_environ.emplace_back("MONO_GC_PARAMS=nursery-size=1024m,max-heap-size=4096m");
+    // g_environ.emplace_back("MONO_LOG_LEVEL=debug");
     g_environ.emplace_back(nullptr);
+
+    std::memset(environment, 0, sizeof(environment));
+    // environment[0] = "MONO_GC_PARAMS=nursery-size=1024m,max-heap-size=4096m";
+    kernel_environ = environment;
 
     Libraries::Kernel::RegisterFileSystem(sym);
     Libraries::Kernel::RegisterTime(sym);
@@ -625,8 +717,12 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     Libraries::Kernel::RegisterCoredump(sym);
 
     LIB_OBJ("f7uOxY9mM1U", "libkernel", 1, "libkernel", &g_stack_chk_guard);
-    LIB_OBJ("+2thxYZ4syk", "libkernel", 1, "libkernel", g_environ.data());
+    LIB_OBJ("+2thxYZ4syk", "libkernel", 1, "libkernel", &kernel_environ);
     LIB_OBJ("djxxOmW6-aw", "libkernel", 1, "libkernel", &g_progname);
+
+    LIB_FUNCTION("YkGOXpJEtO8", "libkernel", 1, "libkernel", pthread_get_user_context_np);
+    LIB_FUNCTION("cfjAjVTFG6A", "libkernel", 1, "libkernel", pthread_suspend_user_context_np);
+    LIB_FUNCTION("QRdE7dBfNks", "libkernel", 1, "libkernel", pthread_resume_user_context_np);
 
     LIB_FUNCTION("Hk7iHmGxB18", "libkernel", 1, "libkernel", ipmimgr_call);
     LIB_FUNCTION("C2ltEJILIGE", "libkernel", 1, "libkernel", sceKernelGetPsmIntdevModeForRcmgr);
