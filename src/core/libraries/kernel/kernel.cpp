@@ -698,6 +698,10 @@ s32 PS4_SYSV_ABI sceRegMgrGetInt(s32 key, s32* data) {
     return ORBIS_OK;
 }
 
+s32 PS4_SYSV_ABI sceBgftServiceIntGetNotificationEvent() {
+    return -1;
+}
+
 void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     service_thread = std::jthread{KernelServiceThread};
     // g_environ.emplace_back("MONO_GC_PARAMS=nursery-size=1024m,max-heap-size=4096m");
@@ -705,7 +709,7 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     g_environ.emplace_back(nullptr);
 
     std::memset(environment, 0, sizeof(environment));
-    // environment[0] = "MONO_GC_PARAMS=nursery-size=1024m,max-heap-size=4096m";
+    environment[0] = "MONO_GC_PARAMS=nursery-size=64m,max-heap-size=256m";
     kernel_environ = environment;
 
     Libraries::Kernel::RegisterFileSystem(sym);
@@ -729,6 +733,7 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("QRdE7dBfNks", "libkernel", 1, "libkernel", pthread_resume_user_context_np);
     LIB_FUNCTION("mPYKD12UDQI", "libSceRegMgr", 1, "libSceRegMgr", sceRegMgrGetInt);
     LIB_FUNCTION("8aCOCGoRkUI", "libkernel", 1, "libkernel", sceKernelIsCEX);
+    LIB_FUNCTION("vJhYrkgTYWY", "libSceBgft", 1, "libSceBgft", sceBgftServiceIntGetNotificationEvent);
 
     LIB_FUNCTION("Hk7iHmGxB18", "libkernel", 1, "libkernel", ipmimgr_call);
     LIB_FUNCTION("C2ltEJILIGE", "libkernel", 1, "libkernel", sceKernelGetPsmIntdevModeForRcmgr);
