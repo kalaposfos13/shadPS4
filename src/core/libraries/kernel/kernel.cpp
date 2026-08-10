@@ -469,31 +469,40 @@ s32 PS4_SYSV_ABI ipmimgr_call(s64 op, s64 unk2, u32* result, u8* args, u64 args_
     LOG_ERROR(Lib_Kernel, "(STUBBED) called, op: {:#x}", op);
     switch (op) {
     case 2: {
+        *result = -1;
         std::string name = *(char**)(args + 8);
         LOG_ERROR(Lib_Kernel, "Create client {}", name);
-        if (name == "SceNorpheusUpdService" || name == "SceCompAppProxyUtil" ||
+        if (name == "SceMorpheusUpdService" || name == "SceCompAppProxyUtil" ||
             name == "SceCompAppProxy" || name == "SceShellAppProxy" ||
             name == "SceStickerCoreServer" || name == "SceNpPartyIpc" ||
             name == "ScePartyIpcService") {
             *result = 0;
-        } else {
-            *result = POSIX_ENOENT;
         }
 
         if (name == "ScePartyIpcService") {
             while (true) {
+                std::this_thread::sleep_for(std::chrono::seconds(1));
             }
         }
+
+        if (g_curthread->name == "SceVnaIpcServer") {
+            while (true)
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+        break;
     }
     case 0x201: {
         while (true) {
         }
+        break;
     }
     case 0x251: {
         *result = POSIX_EAGAIN;
+        break;
     }
     default: {
         *result = 0;
+        break;
     }
     }
     return ORBIS_OK;
@@ -573,9 +582,10 @@ s32 PS4_SYSV_ABI sysctl() {
     return ORBIS_OK;
 }
 
+static s32 shm_index = 0x10000;
 s32 PS4_SYSV_ABI shm_open(const char* path) {
     LOG_ERROR(Lib_Kernel, "(STUBBED), path = {}", path);
-    return 0x10000;
+    return shm_index++;
 }
 
 s32 PS4_SYSV_ABI shm_unlink(const char* path) {

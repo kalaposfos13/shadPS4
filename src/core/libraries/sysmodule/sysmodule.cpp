@@ -106,6 +106,9 @@ s32 PS4_SYSV_ABI sceSysmoduleLoadModuleByNameInternal(char const* name, u64 args
     std::unordered_set<std::string> const skipped_modules{
         "libSceDipsw",
         "libSceComposite",
+        "libSceUpdateService",
+        "libScePatchCheckerClient",
+        "libSceMusicCoreServerClient",
     };
     if (skipped_modules.contains(name)) {
         LOG_WARNING(Lib_SysModule, "skipping {}", name);
