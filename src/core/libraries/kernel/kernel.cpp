@@ -468,7 +468,7 @@ s32 PS4_SYSV_ABI sceMbusEventReceive() {
 }
 
 s32 PS4_SYSV_ABI ipmimgr_call(s64 op, s64 unk2, u32* result, u8* args, u64 args_size, u64 unk3) {
-    LOG_ERROR(Lib_Kernel, "(STUBBED) called, op: {:#x}", op);
+    // LOG_ERROR(Lib_Kernel, "(STUBBED) called, op: {:#x}", op);
     switch (op) {
     case 2: {
         *result = -1;
