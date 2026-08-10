@@ -723,6 +723,7 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("YkGOXpJEtO8", "libkernel", 1, "libkernel", pthread_get_user_context_np);
     LIB_FUNCTION("cfjAjVTFG6A", "libkernel", 1, "libkernel", pthread_suspend_user_context_np);
     LIB_FUNCTION("QRdE7dBfNks", "libkernel", 1, "libkernel", pthread_resume_user_context_np);
+    LIB_FUNCTION("mPYKD12UDQI", "libSceRegMgr", 1, "libSceRegMgr", sceRegMgrGetInt);
 
     LIB_FUNCTION("Hk7iHmGxB18", "libkernel", 1, "libkernel", ipmimgr_call);
     LIB_FUNCTION("C2ltEJILIGE", "libkernel", 1, "libkernel", sceKernelGetPsmIntdevModeForRcmgr);
