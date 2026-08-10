@@ -100,22 +100,11 @@ void Linker::Execute(const std::vector<std::string>& args) {
     // we need to find the _malloc_init function and run it manually.
     // This is something libkernel runs during initialization.
     static PS4_SYSV_ABI s32 (*malloc_init)() = nullptr;
+    static PS4_SYSV_ABI s32 (*sceLibcInternalMemoryMutexEnable_fn)() = nullptr;
 
     if (has_libcinternal) {
         malloc_init = (decltype(malloc_init))Dlsym("libSceLibcInternal.sprx", "_malloc_init");
-        for (const auto& m : m_modules) {
-            const auto& mod = m.get();
-            if (mod->name.contains("libSceLibcInternal.sprx")) {
-                // Found libSceLibcInternal, now search through function exports.
-                // Looking for _malloc_init to init libSceLibcInternal properly
-                // and for all the memory allocating functions, so we can initialize our heap API
-                for (const auto& sym : mod->export_sym.GetSymbols()) {
-                    if (sym.nid_name.compare("_malloc_init") == 0) {
-                        malloc_init = reinterpret_cast<PS4_SYSV_ABI s32 (*)()>(sym.virtual_address);
-                    }
-                }
-            }
-        }
+        sceLibcInternalMemoryMutexEnable_fn = (decltype(malloc_init))Dlsym("libSceLibcInternal.sprx", "sceLibcInternalMemoryMutexEnable");
     }
 
     // Configure the direct and flexible memory regions.
@@ -174,6 +163,11 @@ void Linker::Execute(const std::vector<std::string>& args) {
                 // Call _malloc_init
                 s32 ret = malloc_init();
                 ASSERT_MSG(ret == 0, "malloc_init failed");
+            }
+            if (sceLibcInternalMemoryMutexEnable_fn != nullptr) {
+                s32 ret = sceLibcInternalMemoryMutexEnable_fn();
+                LOG_INFO(Loader, "sceLibcInternalMemoryMutexEnable ret: {}", ret);
+                ASSERT_MSG(ret == 0, "sceLibcInternalMemoryMutexEnable_fn failed");
             }
         }
 
@@ -559,7 +553,7 @@ void Linker::DebugDump() {
 void* Linker::Dlsym(std::string const library_name, std::string const func_name) {
     for (const auto& m : m_modules) {
         const auto& mod = m.get();
-        if (mod->name.contains(library_name)) {
+        if (mod->name.contains(library_name) || library_name.empty()) {
             for (const auto& sym : mod->export_sym.GetSymbols()) {
                 if (sym.nid_name.compare(func_name) == 0) {
                     return (void*)sym.virtual_address;
@@ -569,4 +563,5 @@ void* Linker::Dlsym(std::string const library_name, std::string const func_name)
     }
     return nullptr;
 }
+
 } // namespace Core
