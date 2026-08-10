@@ -223,13 +223,13 @@ public:
             waiter->cv.notify_one();
         }
     }
+    std::mutex m_mutex;
 
     std::string m_name;
 
     u64 m_bits = 0;
 
 private:
-    std::mutex m_mutex;
 
     std::list<Waiter*> m_waiters;
     std::condition_variable m_destroy_cv;
