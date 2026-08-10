@@ -102,6 +102,10 @@ s32 PS4_SYSV_ABI sceSysmoduleLoadModule(OrbisSysModule id) {
 s32 PS4_SYSV_ABI sceSysmoduleLoadModuleByNameInternal(char const* name, u64 args, void const* argp,
                                                       void const* popt, s32* res) {
     LOG_ERROR(Lib_SysModule, "(DUMMY) called, name: {}", name);
+    if (std::string(name) == "libSceDipsw") {
+        LOG_WARNING(Lib_SysModule, "skipping libSceDipsw");
+        return 999;
+    }
     std::string filename = std::string(name) + ".sprx";
     s32 exists;
     exists = Libraries::Kernel::posix_access(("/sys/common/lib/" + filename).c_str(), 0);
