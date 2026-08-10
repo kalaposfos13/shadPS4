@@ -212,7 +212,7 @@ int PS4_SYSV_ABI sceUserServiceGetFileSelectorSortTitle() {
 
 int PS4_SYSV_ABI sceUserServiceGetForegroundUser(int* uid) {
     LOG_ERROR(Lib_UserService, "called");
-    return sceUserServiceGetInitialUser(uid);
+    return ORBIS_OK;
 }
 
 int PS4_SYSV_ABI sceUserServiceGetFriendCustomListLastFocus() {

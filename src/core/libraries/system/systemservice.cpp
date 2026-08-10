@@ -59,8 +59,8 @@ int PS4_SYSV_ABI sceAppMessagingTryGetEventFlag() {
 }
 
 int PS4_SYSV_ABI sceAppMessagingTryReceiveMsg() {
-    LOG_ERROR(Lib_SystemService, "(STUBBED) called");
-    return ORBIS_OK;
+    // LOG_ERROR(Lib_SystemService, "(STUBBED) called");
+    return -1;
 }
 
 int PS4_SYSV_ABI Func_C8E899ABEF7F64C4() {
