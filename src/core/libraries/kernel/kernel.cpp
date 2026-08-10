@@ -44,8 +44,8 @@ namespace Libraries::Kernel {
 
 static u64 g_stack_chk_guard = 0xDEADBEEF54321ABC; // dummy return
 static std::vector<char const*> g_environ{};
-static char* environment[64];
-static char** kernel_environ;
+static char const* environment[64];
+static char const** kernel_environ;
 static const char* g_progname = "eboot.bin";
 
 boost::asio::io_context io_context;
@@ -481,15 +481,10 @@ s32 PS4_SYSV_ABI ipmimgr_call(s64 op, s64 unk2, u32* result, u8* args, u64 args_
             *result = 0;
         }
 
-        if (name == "ScePartyIpcService") {
+        if (name == "ScePartyIpcService" || name == "SceVnaIpcServer") {
             while (true) {
                 std::this_thread::sleep_for(std::chrono::seconds(1));
             }
-        }
-
-        if (g_curthread->name == "SceVnaIpcServer") {
-            while (true)
-                std::this_thread::sleep_for(std::chrono::seconds(1));
         }
         break;
     }
@@ -709,7 +704,7 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     g_environ.emplace_back(nullptr);
 
     std::memset(environment, 0, sizeof(environment));
-    environment[0] = "MONO_GC_PARAMS=nursery-size=64m,max-heap-size=256m";
+    environment[0] = "MONO_GC_PARAMS=nursery-size=256m,max-heap-size=1024m";
     kernel_environ = environment;
 
     Libraries::Kernel::RegisterFileSystem(sym);
@@ -733,7 +728,8 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("QRdE7dBfNks", "libkernel", 1, "libkernel", pthread_resume_user_context_np);
     LIB_FUNCTION("mPYKD12UDQI", "libSceRegMgr", 1, "libSceRegMgr", sceRegMgrGetInt);
     LIB_FUNCTION("8aCOCGoRkUI", "libkernel", 1, "libkernel", sceKernelIsCEX);
-    LIB_FUNCTION("vJhYrkgTYWY", "libSceBgft", 1, "libSceBgft", sceBgftServiceIntGetNotificationEvent);
+    LIB_FUNCTION("vJhYrkgTYWY", "libSceBgft", 1, "libSceBgft",
+                 sceBgftServiceIntGetNotificationEvent);
 
     LIB_FUNCTION("Hk7iHmGxB18", "libkernel", 1, "libkernel", ipmimgr_call);
     LIB_FUNCTION("C2ltEJILIGE", "libkernel", 1, "libkernel", sceKernelGetPsmIntdevModeForRcmgr);
