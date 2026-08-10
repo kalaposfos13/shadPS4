@@ -35,6 +35,7 @@ constexpr auto Lib_AudioIn = "Lib.AudioIn";                         ///< The Lib
 constexpr auto Lib_AudioOut = "Lib.AudioOut";                       ///< The LibSceAudioOut implementation.
 constexpr auto Lib_AvPlayer = "Lib.AvPlayer";                       ///< The LibSceAvPlayer implementation.
 constexpr auto Lib_Camera = "Lib.Camera";                           ///< The LibSceCamera implementation.
+constexpr auto Lib_Composite = "Lib.Composite";                     ///< The LibSceComposite implementation.
 constexpr auto Lib_CommonDlg = "Lib.CommonDlg";                     ///< The LibSceCommonDialog implementation.
 constexpr auto Lib_CompanionHttpd = "Lib.CompanionHttpd";           ///< The LibSceCompanionHttpd implementation.
 constexpr auto Lib_CompanionUtil = "Lib.CompanionUtil";             ///< The LibSceCompanionUtil implementation.

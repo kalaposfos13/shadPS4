@@ -14,6 +14,7 @@
 #include "core/libraries/camera/camera.h"
 #include "core/libraries/companion/companion_httpd.h"
 #include "core/libraries/companion/companion_util.h"
+#include "core/libraries/composite/composite.h"
 #include "core/libraries/content_export/content_export.h"
 #include "core/libraries/disc_map/disc_map.h"
 #include "core/libraries/fiber/fiber.h"
@@ -165,6 +166,7 @@ void InitHLELibs(Core::Loader::SymbolsResolver* sym) {
             {"ulobjmgr.sprx", Libraries::Ulobjmgr::RegisterLib},
             {"libSceSigninDialog.sprx", Libraries::SigninDialog::RegisterLib},
             {"libSceCamera.sprx", Libraries::Camera::RegisterLib},
+            {"libSceComposite.sprx", Libraries::Composite::RegisterLib},
             {"libSceCompanionHttpd.sprx", Libraries::CompanionHttpd::RegisterLib},
             {"libSceCompanionUtil.sprx", Libraries::CompanionUtil::RegisterLib},
             {"libSceVoice.sprx", Libraries::Voice::RegisterLib},

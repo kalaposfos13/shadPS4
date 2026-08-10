@@ -640,6 +640,8 @@ void Emulator::Run(std::filesystem::path file, std::vector<std::string> args,
         mnt->Mount(EmulatorSettings.GetSysModulesDir() / id,
                    "/sys/common_ex/lib/"); // should be empty but whatever
     }
+    mnt->Mount(EmulatorSettings.GetFwRootDir() / "system_ex" / "vsh_asset",
+               "/system_ex/vsh_asset/");
 
     // There is a second font directory, mount that too.
     guest_font_dir.append("2");

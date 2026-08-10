@@ -14,6 +14,7 @@
 #include "core/libraries/sysmodule/sysmodule_error.h"
 #include "core/libraries/sysmodule/sysmodule_internal.h"
 #include "core/linker.h"
+#include <unordered_set>
 
 namespace Libraries::SysModule {
 
@@ -102,8 +103,12 @@ s32 PS4_SYSV_ABI sceSysmoduleLoadModule(OrbisSysModule id) {
 s32 PS4_SYSV_ABI sceSysmoduleLoadModuleByNameInternal(char const* name, u64 args, void const* argp,
                                                       void const* popt, s32* res) {
     LOG_ERROR(Lib_SysModule, "(DUMMY) called, name: {}", name);
-    if (std::string(name) == "libSceDipsw") {
-        LOG_WARNING(Lib_SysModule, "skipping libSceDipsw");
+    std::unordered_set<std::string> const skipped_modules{
+        "libSceDipsw",
+        "libSceComposite",
+    };
+    if (skipped_modules.contains(name)) {
+        LOG_WARNING(Lib_SysModule, "skipping {}", name);
         return 999;
     }
     std::string filename = std::string(name) + ".sprx";

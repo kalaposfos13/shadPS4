@@ -717,6 +717,8 @@ set(MISC_LIBS  src/core/libraries/screenshot/screenshot.cpp
                src/core/libraries/ulobjmgr/ulobjmgr.h
                src/core/libraries/signin_dialog/signindialog.cpp
                src/core/libraries/signin_dialog/signindialog.h
+               src/core/libraries/composite/composite.cpp
+               src/core/libraries/composite/composite.h
 )
 
 set(CAMERA_LIBS  src/core/libraries/camera/camera.cpp

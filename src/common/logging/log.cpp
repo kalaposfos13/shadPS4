@@ -59,6 +59,7 @@ std::unordered_map<std::string_view, std::shared_ptr<spdlog::logger>> ALL_LOGGER
     {Class::Lib_AudioOut, nullptr},
     {Class::Lib_AvPlayer, nullptr},
     {Class::Lib_Camera, nullptr},
+    {Class::Lib_Composite, nullptr},
     {Class::Lib_CommonDlg, nullptr},
     {Class::Lib_CompanionHttpd, nullptr},
     {Class::Lib_CompanionUtil, nullptr},
