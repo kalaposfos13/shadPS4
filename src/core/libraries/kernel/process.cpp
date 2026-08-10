@@ -3,6 +3,7 @@
 
 #include "common/elf_info.h"
 #include "common/logging/log.h"
+#include "common/sha1.h"
 #include "core/emulator_settings.h"
 #include "core/file_sys/fs.h"
 #include "core/libraries/kernel/orbis_error.h"
@@ -109,7 +110,7 @@ s32 PS4_SYSV_ABI sceKernelLoadStartModule(const char* moduleFileName, u64 args, 
 }
 
 s32 PS4_SYSV_ABI sceKernelDlsym(s32 handle, const char* symbol, void** addrp) {
-    LOG_INFO(Lib_Kernel, "called, func: {}", symbol);
+    LOG_INFO(Lib_Kernel, "called, module: {}, func: {}", handle, symbol);
     auto* linker = Common::Singleton<Core::Linker>::Instance();
     auto* module = linker->GetModule(handle);
     if (module == nullptr) {
