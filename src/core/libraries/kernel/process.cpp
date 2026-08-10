@@ -166,7 +166,7 @@ s32 PS4_SYSV_ABI sceKernelGetModuleInfoFromAddr(VAddr addr, s32 flags,
         return ORBIS_KERNEL_ERROR_EFAULT;
     }
 
-    LOG_INFO(Lib_Kernel, "called addr = {:#x}, flags = {:#x}", addr, flags);
+    LOG_DEBUG(Lib_Kernel, "called addr = {:#x}, flags = {:#x}", addr, flags);
     auto* linker = Common::Singleton<Core::Linker>::Instance();
     auto* module = linker->FindByAddress(addr);
     if (!module) {
