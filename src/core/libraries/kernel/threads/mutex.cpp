@@ -259,6 +259,10 @@ s32 PS4_SYSV_ABI posix_pthread_mutex_trylock(PthreadMutexT* mutex) {
 }
 
 s32 PS4_SYSV_ABI posix_pthread_mutex_lock(PthreadMutexT* mutex) {
+    if (!mutex) {
+        LOG_WARNING(Kernel_Pthread, "null mutex");
+        return ORBIS_OK;
+    }
     CHECK_AND_INIT_MUTEX
     return (*mutex)->Lock(nullptr);
 }
@@ -300,6 +304,10 @@ s32 PthreadMutex::Unlock() {
 }
 
 s32 PS4_SYSV_ABI posix_pthread_mutex_unlock(PthreadMutexT* mutex) {
+    if (!mutex) {
+        LOG_WARNING(Kernel_Pthread, "null mutex");
+        return ORBIS_OK;
+    }
     PthreadMutex* mp = *mutex;
     if (mp <= THR_MUTEX_DESTROYED) [[unlikely]] {
         if (mp == THR_MUTEX_DESTROYED) {
