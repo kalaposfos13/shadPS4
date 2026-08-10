@@ -143,11 +143,6 @@ s32 PS4_SYSV_ABI sceCompositorHandleProcessEvents() {
 }
 
 s32 PS4_SYSV_ABI sceCompositorInit() {
-    LOG_ERROR(Lib_Composite, "(STUBBED) called");
-    return ORBIS_OK;
-}
-
-s32 PS4_SYSV_ABI sceCompositorInitWithProcessOrder() {
     LOG_ERROR(Lib_Composite, "called");
     sce_compositor_system_address = nullptr;
     sce_compositor_video_address = nullptr;
@@ -159,6 +154,12 @@ s32 PS4_SYSV_ABI sceCompositorInitWithProcessOrder() {
         &sce_compositor_video_address, 1_GB, 0, std::to_underlying(Core::MemoryMapFlags::System),
         "sceComposite HLE buffer 2");
     sce_compositor_video_size = 1_GB;
+    return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceCompositorInitWithProcessOrder() {
+    LOG_ERROR(Lib_Composite, "called");
+    sceCompositorInit();
     return ORBIS_OK;
 }
 
