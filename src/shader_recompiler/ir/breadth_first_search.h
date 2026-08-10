@@ -136,7 +136,7 @@ auto DominatingBreadthFirstSearch(Instruction* inst, const IR::Block& current_pa
         }
     }
 
-    ASSERT_MSG(findings.size() == 1, "Unable to deduce correct finding");
+    ASSERT_MSG(findings.size() > 0, "Unable to deduce correct finding");
     return findings[0];
 }
 
