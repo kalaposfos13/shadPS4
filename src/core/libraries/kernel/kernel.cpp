@@ -477,7 +477,7 @@ s32 PS4_SYSV_ABI ipmimgr_call(s64 op, s64 unk2, u32* result, u8* args, u64 args_
         if (name == "SceMorpheusUpdService" || name == "SceCompAppProxyUtil" ||
             name == "SceCompAppProxy" || name == "SceShellAppProxy" ||
             name == "SceStickerCoreServer" || name == "SceNpPartyIpc" ||
-            name == "ScePartyIpcService") {
+            name == "ScePartyIpcService" || name == "SceAppDbIpc") {
             *result = 0;
         }
 
@@ -508,6 +508,10 @@ s32 PS4_SYSV_ABI ipmimgr_call(s64 op, s64 unk2, u32* result, u8* args, u64 args_
     }
     }
     return ORBIS_OK;
+}
+
+s32 PS4_SYSV_ABI sceKernelIsCEX() {
+    return 1;
 }
 
 s32 PS4_SYSV_ABI sceKernelGetPsmIntdevModeForRcmgr() {
@@ -724,6 +728,7 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("cfjAjVTFG6A", "libkernel", 1, "libkernel", pthread_suspend_user_context_np);
     LIB_FUNCTION("QRdE7dBfNks", "libkernel", 1, "libkernel", pthread_resume_user_context_np);
     LIB_FUNCTION("mPYKD12UDQI", "libSceRegMgr", 1, "libSceRegMgr", sceRegMgrGetInt);
+    LIB_FUNCTION("8aCOCGoRkUI", "libkernel", 1, "libkernel", sceKernelIsCEX);
 
     LIB_FUNCTION("Hk7iHmGxB18", "libkernel", 1, "libkernel", ipmimgr_call);
     LIB_FUNCTION("C2ltEJILIGE", "libkernel", 1, "libkernel", sceKernelGetPsmIntdevModeForRcmgr);
