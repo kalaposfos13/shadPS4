@@ -230,7 +230,6 @@ public:
     u64 m_bits = 0;
 
 private:
-
     std::list<Waiter*> m_waiters;
     std::condition_variable m_destroy_cv;
 
@@ -255,7 +254,7 @@ int PS4_SYSV_ABI sceKernelCreateEventFlag(OrbisKernelEventFlag* ef, const char* 
         return ORBIS_KERNEL_ERROR_EINVAL;
     }
     if (pOptParam || attr > (ORBIS_KERNEL_EVF_ATTR_MULTI | ORBIS_KERNEL_EVF_ATTR_TH_PRIO)) {
-        LOG_ERROR(Debug, "unknown attr-s: {:#x}", attr); 
+        LOG_ERROR(Debug, "unknown attr-s: {:#x}", attr);
         // return ORBIS_KERNEL_ERROR_EINVAL;
     }
 
@@ -426,10 +425,14 @@ int PS4_SYSV_ABI sceKernelWaitEventFlag(OrbisKernelEventFlag ef, u64 bitPattern,
     if (ef == nullptr) {
         return ORBIS_KERNEL_ERROR_ESRCH;
     }
-
-    if (ef->m_name == "SceBootStatusFlags") {
+    if (ef->m_name == "SceBootStatusFlags")
         return ORBIS_OK;
-    }
+    if (ef->m_name == "SceCompositorEventflag")
+        return ORBIS_OK;
+    if (ef->m_name == "SceCompositorResetStatusEVF")
+        return ORBIS_OK;
+    if (ef->m_name == "SceCompositorSysSusEq")
+        return ORBIS_OK;
 
     if (bitPattern == 0) {
         return ORBIS_KERNEL_ERROR_EINVAL;

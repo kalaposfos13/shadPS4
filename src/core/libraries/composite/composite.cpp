@@ -154,6 +154,39 @@ s32 PS4_SYSV_ABI sceCompositorInit() {
         &sce_compositor_video_address, 1_GB, 0, std::to_underlying(Core::MemoryMapFlags::System),
         "sceComposite HLE buffer 2");
     sce_compositor_video_size = 1_GB;
+
+    constexpr u32 sce_composite_color_width = 1280;
+    constexpr u32 sce_composite_color_height = 720;
+    constexpr u32 color_target_size = sce_composite_color_width * sce_composite_color_height * 4;
+
+    using namespace VideoOut;
+    using namespace Kernel;
+    // SceVideoOut::bufs[0].base will be patched by libSceComposite, but we need to allocate a
+    // buffer for the first frame flip
+    sce_composite_color_target_addr = nullptr;
+    void* dmem_addr;
+    // TODO: User proper flags when I emulate them
+    sceKernelAllocateMainDirectMemory(color_target_size, 16_KB, 0, (s64*)&dmem_addr);
+    sceKernelMapDirectMemory(&sce_composite_color_target_addr, color_target_size, 0, 0,
+                             (s64)dmem_addr, 0x1000);
+
+    ASSERT(sce_composite_color_target_addr != nullptr);
+
+    BufferAttribute attrib = {};
+    attrib.pixel_format = PixelFormat::A8R8G8B8Srgb;
+    attrib.tiling_mode =
+        TilingMode::Linear; // the og comment says linear, but has 0 as the value, which is tiled?
+                            // either way, we're not getting to the point where it matters yet
+    attrib.aspect_ratio = 0;
+    attrib.width = sce_composite_color_width;
+    attrib.height = sce_composite_color_height;
+    attrib.pitch_in_pixel = sce_composite_color_width;
+    attrib.option = 0;
+    attrib.reserved0 = 0;
+    attrib.reserved1 = 0;
+
+    void* addrs[1] = {sce_composite_color_target_addr};
+    sceVideoOutRegisterBuffers(2, 0, addrs, 1, &attrib);
     return ORBIS_OK;
 }
 

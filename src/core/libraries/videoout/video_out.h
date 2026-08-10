@@ -116,6 +116,8 @@ struct OrbisVideoOutEventData {
     u64 flip_arg : 48;
 };
 
+inline void* sce_composite_color_target_addr = nullptr;
+
 void PS4_SYSV_ABI sceVideoOutSetBufferAttribute(BufferAttribute* attribute, PixelFormat pixelFormat,
                                                 u32 tilingMode, u32 aspectRatio, u32 width,
                                                 u32 height, u32 pitchInPixel);
