@@ -104,7 +104,8 @@ void Linker::Execute(const std::vector<std::string>& args) {
 
     if (has_libcinternal) {
         malloc_init = (decltype(malloc_init))Dlsym("libSceLibcInternal.sprx", "_malloc_init");
-        sceLibcInternalMemoryMutexEnable_fn = (decltype(malloc_init))Dlsym("libSceLibcInternal.sprx", "sceLibcInternalMemoryMutexEnable");
+        sceLibcInternalMemoryMutexEnable_fn = (decltype(malloc_init))Dlsym(
+            "libSceLibcInternal.sprx", "sceLibcInternalMemoryMutexEnable");
     }
 
     // Configure the direct and flexible memory regions.

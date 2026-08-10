@@ -3,6 +3,7 @@
 
 #include <mutex>
 
+#include <unordered_set>
 #include "common/elf_info.h"
 #include "common/logging/log.h"
 #include "core/libraries/error_codes.h"
@@ -14,7 +15,6 @@
 #include "core/libraries/sysmodule/sysmodule_error.h"
 #include "core/libraries/sysmodule/sysmodule_internal.h"
 #include "core/linker.h"
-#include <unordered_set>
 
 namespace Libraries::SysModule {
 
