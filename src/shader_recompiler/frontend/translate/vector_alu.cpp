@@ -1270,6 +1270,10 @@ void Translator::V_CMP_U32(ConditionOp op, bool is_signed, bool set_exec, const 
 void Translator::V_CMP_U64(ConditionOp op, bool is_signed, bool set_exec, const GcnInst& inst) {
     const bool is_zero = inst.src[1].field == OperandField::ConstZero;
     const bool is_neg_one = inst.src[1].field == OperandField::SignedConstIntNeg;
+    if (!is_zero && !is_neg_one) {
+        LOG_WARNING(Render_Recompiler, "with unsupported sources skipped");
+        return;
+    }
     ASSERT(is_zero || is_neg_one);
     if (is_neg_one) {
         ASSERT_MSG(-s32(inst.src[1].code) + SignedConstIntNegMin - 1 == -1,

@@ -25,7 +25,7 @@ Sampler::Sampler(const Vulkan::Instance& instance, const AmdGpu::Sampler& sample
     }
 
     const auto custom_color = [&]() -> std::optional<vk::SamplerCustomBorderColorCreateInfoEXT> {
-        if (border_color == vk::BorderColor::eFloatCustomEXT) {
+        if (border_color == vk::BorderColor::eFloatCustomEXT && border_color_base.Address<std::array<float, 4>*>()) {
             const auto border_color_index = sampler.border_color_ptr.Value();
             const auto border_color_buffer = border_color_base.Address<std::array<float, 4>*>();
             const auto custom_border_color_array = border_color_buffer[border_color_index];
