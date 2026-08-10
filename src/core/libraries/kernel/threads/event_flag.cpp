@@ -255,7 +255,8 @@ int PS4_SYSV_ABI sceKernelCreateEventFlag(OrbisKernelEventFlag* ef, const char* 
         return ORBIS_KERNEL_ERROR_EINVAL;
     }
     if (pOptParam || attr > (ORBIS_KERNEL_EVF_ATTR_MULTI | ORBIS_KERNEL_EVF_ATTR_TH_PRIO)) {
-        return ORBIS_KERNEL_ERROR_EINVAL;
+        LOG_ERROR(Debug, "unknown attr-s: {:#x}", attr); 
+        // return ORBIS_KERNEL_ERROR_EINVAL;
     }
 
     if (strlen(pName) >= 32) {
