@@ -196,7 +196,10 @@ static inline u16 GetFlatbufOffset(const IR::Inst* inst) {
         auto inst_info = inst->Flags<IR::BufferInstInfo>();
         return inst_info.flatbuf_off_dw;
     }
-    return inst->Flags<u16>();
+    if (inst->GetOpcode() == IR::Opcode::ReadConst) {
+        return inst->Flags<u16>();
+    }
+    UNREACHABLE_MSG("Instruction not supported");
 }
 
 static inline void SetFlatbufOffset(IR::Inst* inst, u16 offset) {
@@ -204,9 +207,13 @@ static inline void SetFlatbufOffset(IR::Inst* inst, u16 offset) {
         auto inst_info = inst->Flags<IR::BufferInstInfo>();
         inst_info.flatbuf_off_dw.Assign(offset);
         inst->SetFlags(inst_info);
-    } else {
-        inst->SetFlags(offset);
+        return;
     }
+    if (inst->GetOpcode() == IR::Opcode::ReadConst) {
+        inst->SetFlags(offset);
+        return;
+    }
+    UNREACHABLE_MSG("Instruction not supported");
 }
 
 static bool ComputeOffset(Xbyak::CodeGenerator& c, Xbyak::Reg32 reg, PassInfo& pass_info,
@@ -225,9 +232,8 @@ static bool ComputeOffset(Xbyak::CodeGenerator& c, Xbyak::Reg32 reg, PassInfo& p
 
 static bool EmitComputeOffsetIAdd32(Xbyak::CodeGenerator& c, Xbyak::Reg32 reg, PassInfo& pass_info,
                                     IR::Inst* inst) {
-    if (inst->AreAllArgsImmediates()) {
-        c.mov(reg, inst->Arg(0).U32() + inst->Arg(1).U32());
-    } else if (inst->Arg(0).IsImmediate()) {
+    ASSERT(!inst->AreAllArgsImmediates());
+    if (inst->Arg(0).IsImmediate()) {
         ABORT_ON_FAILURE(ComputeOffset(c, reg, pass_info, inst->Arg(1)));
         c.add(reg, inst->Arg(0).U32());
     } else if (inst->Arg(1).IsImmediate()) {
@@ -245,9 +251,8 @@ static bool EmitComputeOffsetIAdd32(Xbyak::CodeGenerator& c, Xbyak::Reg32 reg, P
 
 static bool EmitComputeOffsetISub32(Xbyak::CodeGenerator& c, Xbyak::Reg32 reg, PassInfo& pass_info,
                                     IR::Inst* inst) {
-    if (inst->AreAllArgsImmediates()) {
-        c.mov(reg, inst->Arg(0).U32() - inst->Arg(1).U32());
-    } else if (inst->Arg(0).IsImmediate()) {
+    ASSERT(!inst->AreAllArgsImmediates());
+    if (inst->Arg(0).IsImmediate()) {
         ABORT_ON_FAILURE(ComputeOffset(c, reg, pass_info, inst->Arg(1)));
         c.neg(reg);
         c.add(reg, inst->Arg(0).U32());
@@ -267,9 +272,8 @@ static bool EmitComputeOffsetISub32(Xbyak::CodeGenerator& c, Xbyak::Reg32 reg, P
 
 static bool EmitComputeOffsetIMul32(Xbyak::CodeGenerator& c, Xbyak::Reg32 reg, PassInfo& pass_info,
                                     IR::Inst* inst) {
-    if (inst->AreAllArgsImmediates()) {
-        c.mov(reg, inst->Arg(0).U32() * inst->Arg(1).U32());
-    } else if (inst->Arg(0).IsImmediate()) {
+    ASSERT(!inst->AreAllArgsImmediates());
+    if (inst->Arg(0).IsImmediate()) {
         ABORT_ON_FAILURE(ComputeOffset(c, reg, pass_info, inst->Arg(1)));
         c.imul(reg, reg, inst->Arg(0).U32());
     } else if (inst->Arg(1).IsImmediate()) {
@@ -287,9 +291,8 @@ static bool EmitComputeOffsetIMul32(Xbyak::CodeGenerator& c, Xbyak::Reg32 reg, P
 
 static bool EmitComputeOffsetShiftLeftLogical32(Xbyak::CodeGenerator& c, Xbyak::Reg32 reg,
                                                 PassInfo& pass_info, IR::Inst* inst) {
-    if (inst->AreAllArgsImmediates()) {
-        c.mov(reg, inst->Arg(0).U32() << inst->Arg(1).U32());
-    } else if (inst->Arg(0).IsImmediate()) {
+    ASSERT(!inst->AreAllArgsImmediates());
+    if (inst->Arg(0).IsImmediate()) {
         ABORT_ON_FAILURE(ComputeOffset(c, reg, pass_info, inst->Arg(1)));
         c.shl(reg, inst->Arg(0).U32());
         c.mov(ecx, reg);
@@ -310,9 +313,8 @@ static bool EmitComputeOffsetShiftLeftLogical32(Xbyak::CodeGenerator& c, Xbyak::
 
 static bool EmitComputeOffsetShiftRightLogical32(Xbyak::CodeGenerator& c, Xbyak::Reg32 reg,
                                                  PassInfo& pass_info, IR::Inst* inst) {
-    if (inst->AreAllArgsImmediates()) {
-        c.mov(reg, inst->Arg(0).U32() >> inst->Arg(1).U32());
-    } else if (inst->Arg(0).IsImmediate()) {
+    ASSERT(!inst->AreAllArgsImmediates());
+    if (inst->Arg(0).IsImmediate()) {
         ABORT_ON_FAILURE(ComputeOffset(c, reg, pass_info, inst->Arg(1)));
         c.mov(ecx, reg);
         c.mov(reg, inst->Arg(0).U32());
@@ -332,9 +334,8 @@ static bool EmitComputeOffsetShiftRightLogical32(Xbyak::CodeGenerator& c, Xbyak:
 
 static bool EmitComputeOffsetBitwiseAnd32(Xbyak::CodeGenerator& c, Xbyak::Reg32 reg,
                                           PassInfo& pass_info, IR::Inst* inst) {
-    if (inst->AreAllArgsImmediates()) {
-        c.mov(reg, inst->Arg(0).U32() & inst->Arg(1).U32());
-    } else if (inst->Arg(0).IsImmediate()) {
+    ASSERT(!inst->AreAllArgsImmediates());
+    if (inst->Arg(0).IsImmediate()) {
         ABORT_ON_FAILURE(ComputeOffset(c, reg, pass_info, inst->Arg(1)));
         c.and_(reg, inst->Arg(0).U32());
     } else if (inst->Arg(1).IsImmediate()) {
@@ -352,9 +353,8 @@ static bool EmitComputeOffsetBitwiseAnd32(Xbyak::CodeGenerator& c, Xbyak::Reg32 
 
 static bool EmitComputeOffsetBitwiseOr32(Xbyak::CodeGenerator& c, Xbyak::Reg32 reg,
                                          PassInfo& pass_info, IR::Inst* inst) {
-    if (inst->AreAllArgsImmediates()) {
-        c.mov(reg, inst->Arg(0).U32() | inst->Arg(1).U32());
-    } else if (inst->Arg(0).IsImmediate()) {
+    ASSERT(!inst->AreAllArgsImmediates());
+    if (inst->Arg(0).IsImmediate()) {
         ABORT_ON_FAILURE(ComputeOffset(c, reg, pass_info, inst->Arg(1)));
         c.or_(reg, inst->Arg(0).U32());
     } else if (inst->Arg(1).IsImmediate()) {
@@ -372,9 +372,8 @@ static bool EmitComputeOffsetBitwiseOr32(Xbyak::CodeGenerator& c, Xbyak::Reg32 r
 
 static bool EmitComputeOffsetBitwiseXor32(Xbyak::CodeGenerator& c, Xbyak::Reg32 reg,
                                           PassInfo& pass_info, IR::Inst* inst) {
-    if (inst->AreAllArgsImmediates()) {
-        c.mov(reg, inst->Arg(0).U32() ^ inst->Arg(1).U32());
-    } else if (inst->Arg(0).IsImmediate()) {
+    ASSERT(!inst->AreAllArgsImmediates());
+    if (inst->Arg(0).IsImmediate()) {
         ABORT_ON_FAILURE(ComputeOffset(c, reg, pass_info, inst->Arg(1)));
         c.xor_(reg, inst->Arg(0).U32());
     } else if (inst->Arg(1).IsImmediate()) {
@@ -392,12 +391,9 @@ static bool EmitComputeOffsetBitwiseXor32(Xbyak::CodeGenerator& c, Xbyak::Reg32 
 
 static bool EmitComputeOffsetBitwiseNot32(Xbyak::CodeGenerator& c, Xbyak::Reg32 reg,
                                           PassInfo& pass_info, IR::Inst* inst) {
-    if (inst->AreAllArgsImmediates()) {
-        c.mov(reg, ~inst->Arg(0).U32());
-    } else {
-        ABORT_ON_FAILURE(ComputeOffset(c, reg, pass_info, inst->Arg(0)));
-        c.not_(reg);
-    }
+    ASSERT(!inst->AreAllArgsImmediates());
+    ABORT_ON_FAILURE(ComputeOffset(c, reg, pass_info, inst->Arg(0)));
+    c.not_(reg);
     return true;
 }
 
@@ -454,10 +450,7 @@ static bool EmitComputeOffsetUMax32(Xbyak::CodeGenerator& c, Xbyak::Reg32 reg, P
 static bool EmitComputeOffsetBitFieldUExtract(Xbyak::CodeGenerator& c, Xbyak::Reg32 reg,
                                               PassInfo& pass_info, IR::Inst* inst) {
     // We asume that the count is always less than 32, Is this correct?
-    if (inst->AreAllArgsImmediates()) {
-        c.mov(reg, (inst->Arg(0).U32() >> inst->Arg(1).U32()) & ((1U << inst->Arg(2).U32()) - 1));
-        return true;
-    }
+    ASSERT(!inst->AreAllArgsImmediates());
     if (inst->Arg(0).IsImmediate()) {
         c.mov(reg, inst->Arg(0).U32());
     } else {
@@ -662,58 +655,60 @@ void FlattenExtendedUserdataPass(IR::Program& program) {
          r_it++) {
         IR::Block* block = *r_it;
         for (IR::Inst& inst : *block) {
-            if (inst.GetOpcode() == IR::Opcode::ReadConst ||
-                inst.GetOpcode() == IR::Opcode::ReadConstBuffer) {
-                if (inst.GetOpcode() == IR::Opcode::ReadConstBuffer) {
-                    // Only flatten ReadConstBuffer if it was marked as a sharp source in the
-                    // resource discovery pass
-                    auto inst_info = inst.Flags<IR::BufferInstInfo>();
-                    if (!inst_info.sharp_source) {
-                        continue;
-                    }
-                }
+            if (inst.GetOpcode() != IR::Opcode::ReadConst ||
+                inst.GetOpcode() != IR::Opcode::ReadConstBuffer) {
+                continue;
+            }
 
-                all_readconsts.push_back(&inst);
-
-                auto offset = inst.Arg(1);
-                if (offset.IsImmediate()) {
+            if (inst.GetOpcode() == IR::Opcode::ReadConstBuffer) {
+                // Only flatten ReadConstBuffer if it was marked as a sharp source in the
+                // resource discovery pass
+                auto inst_info = inst.Flags<IR::BufferInstInfo>();
+                if (!inst_info.sharp_source) {
                     continue;
                 }
+            }
 
-                queue.push(offset.InstRecursive());
-                while (!queue.empty()) {
-                    IR::Inst* inst{queue.front()};
-                    queue.pop();
+            all_readconsts.push_back(&inst);
 
-                    if (inst->GetOpcode() == IR::Opcode::ReadConstBuffer) {
-                        auto buffer_inst_info = inst->Flags<IR::BufferInstInfo>();
-                        if (!buffer_inst_info.sharp_source.Value()) {
-                            all_readconsts.push_back(inst);
-                            auto offset = inst->Arg(1);
-                            if (!offset.IsImmediate()) {
-                                auto arg_inst = offset.InstRecursive();
-                                if (std::ranges::find(visited, arg_inst) == visited.end()) {
-                                    visited.push_back(arg_inst);
-                                    queue.push(arg_inst);
-                                }
+            auto offset = inst.Arg(1);
+            if (offset.IsImmediate()) {
+                continue;
+            }
+
+            queue.push(offset.InstRecursive());
+            while (!queue.empty()) {
+                IR::Inst* inst{queue.front()};
+                queue.pop();
+
+                if (inst->GetOpcode() == IR::Opcode::ReadConstBuffer) {
+                    auto buffer_inst_info = inst->Flags<IR::BufferInstInfo>();
+                    if (!buffer_inst_info.sharp_source.Value()) {
+                        all_readconsts.push_back(inst);
+                        auto offset = inst->Arg(1);
+                        if (!offset.IsImmediate()) {
+                            auto arg_inst = offset.InstRecursive();
+                            if (std::ranges::find(visited, arg_inst) == visited.end()) {
+                                visited.push_back(arg_inst);
+                                queue.push(arg_inst);
                             }
                         }
+                    }
+                    continue;
+                }
+                if (inst->GetOpcode() == IR::Opcode::GetUserData ||
+                    inst->GetOpcode() == IR::Opcode::ReadConst) {
+                    continue;
+                }
+                for (size_t arg = inst->NumArgs(); arg--;) {
+                    const IR::Value arg_value = inst->Arg(arg);
+                    if (arg_value.IsImmediate()) {
                         continue;
                     }
-                    if (inst->GetOpcode() == IR::Opcode::GetUserData ||
-                        inst->GetOpcode() == IR::Opcode::ReadConst) {
-                        continue;
-                    }
-                    for (size_t arg = inst->NumArgs(); arg--;) {
-                        const IR::Value arg_value = inst->Arg(arg);
-                        if (arg_value.IsImmediate()) {
-                            continue;
-                        }
-                        IR::Inst* arg_inst = arg_value.InstRecursive();
-                        if (std::ranges::find(visited, arg_inst) == visited.end()) {
-                            visited.push_back(arg_inst);
-                            queue.push(arg_inst);
-                        }
+                    IR::Inst* arg_inst = arg_value.InstRecursive();
+                    if (std::ranges::find(visited, arg_inst) == visited.end()) {
+                        visited.push_back(arg_inst);
+                        queue.push(arg_inst);
                     }
                 }
             }

@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 shadPS4 Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "common/assert.h"
 #include "shader_recompiler/ir/breadth_first_search.h"
 #include "shader_recompiler/ir/passes/ir_passes.h"
 #include "shader_recompiler/ir/passes/resource_pass.h"
@@ -67,7 +68,7 @@ std::pair<IR::Inst*, bool> CheckDisableAnisoLod0Pattern(IR::Inst* inst) {
     return {prod2, true};
 }
 
-const IR::Inst* FindSharpSource(IR::Inst* handle, const IR::Block& current_parent) {
+IR::Inst* FindSharpSource(IR::Inst* handle, const IR::Block& current_parent) {
     auto finding = IR::DominatingBreadthFirstSearch(
         handle, current_parent, false, [](IR::Inst* inst) -> std::optional<IR::Inst*> {
             if (inst->GetOpcode() == IR::Opcode::GetUserData ||
@@ -85,15 +86,32 @@ const IR::Inst* FindSharpSource(IR::Inst* handle, const IR::Block& current_paren
     }
 
     auto sharp_source = finding.value();
-    if (sharp_source->GetOpcode() == IR::Opcode::ReadConstBuffer) {
-        // Set flag so that the flattening pass knows to flatten this instruction.
-        // TODO: Do we need to set this flag for all components of a composite?
-        auto flags = sharp_source->Flags<IR::BufferInstInfo>();
-        flags.sharp_source.Assign(1u);
-        sharp_source->SetFlags(flags);
-    }
-
     return sharp_source;
+}
+
+void MarkReadConstBufferSharpSources(IR::Inst& first, IR::Block& block, u32 count) {
+    auto first_handle = FindSharpSource(&first, block)->Arg(0);
+    auto it = block.Instructions().iterator_to(first);
+    auto end = block.Instructions().end();
+    u32 marked_count = 0;
+    for (; it != end && marked_count < count; ++it) {
+        IR::Inst& inst = *it;
+        if (inst.GetOpcode() == IR::Opcode::SetScalarRegister ||
+            inst.GetOpcode() == IR::Opcode::IAdd32) {
+            continue;
+        }
+        auto source = FindSharpSource(&inst, block);
+        if (source && source->GetOpcode() == IR::Opcode::ReadConstBuffer) {
+            ASSERT(source->Arg(0) == first_handle);
+            marked_count++;
+            auto flags = source->Flags<IR::BufferInstInfo>();
+            flags.sharp_source.Assign(1u);
+            source->SetFlags(flags);
+            continue;
+        }
+        break;
+    }
+    ASSERT(marked_count == count);
 }
 
 void DiscoverBufferSharp(IR::Block& block, IR::Inst& inst, ResourceDiscoveryList& sharp_usages) {
@@ -103,15 +121,18 @@ void DiscoverBufferSharp(IR::Block& block, IR::Inst& inst, ResourceDiscoveryList
         sharp_usages.emplace_back(ResourceDiscovery{&inst, &block, nullptr});
     } else {
         IR::Inst* buffer_handle = handle->Arg(0).InstRecursive();
-        const IR::Inst* sharp_source = FindSharpSource(buffer_handle, block);
+        IR::Inst* sharp_source = FindSharpSource(buffer_handle, block);
+        if (sharp_source && sharp_source->GetOpcode() == IR::Opcode::ReadConstBuffer) {
+            MarkReadConstBufferSharpSources(*sharp_source, *sharp_source->GetParent(), 4);
+        }
         sharp_usages.emplace_back(ResourceDiscovery{&inst, &block, sharp_source});
     }
 }
 
 void DiscoverImageSharp(IR::Block& block, IR::Inst& inst, ResourceDiscoveryList& sharp_usages) {
     IR::Inst* image_handle = inst.Arg(0).InstRecursive();
-    const IR::Inst* sharp_source = FindSharpSource(image_handle, block);
-    const IR::Inst* sampler_sharp_source = nullptr;
+    IR::Inst* sharp_source = FindSharpSource(image_handle, block);
+    IR::Inst* sampler_sharp_source = nullptr;
     bool disable_aniso = false;
 
     if (inst.GetOpcode() == IR::Opcode::ImageSampleRaw) {
@@ -122,6 +143,16 @@ void DiscoverImageSharp(IR::Block& block, IR::Inst& inst, ResourceDiscoveryList&
             sampler_sharp_source = FindSharpSource(sampler_handle, block);
             disable_aniso = found;
         }
+    }
+
+    if (sharp_source && sharp_source->GetOpcode() == IR::Opcode::ReadConstBuffer) {
+        const auto texture_flags = inst.Flags<IR::TextureInstInfo>();
+        const auto is_r128 = texture_flags.is_r128.Value();
+        MarkReadConstBufferSharpSources(*sharp_source, *sharp_source->GetParent(), is_r128 ? 4 : 8);
+    }
+    if (sampler_sharp_source && sampler_sharp_source->GetOpcode() == IR::Opcode::ReadConstBuffer) {
+        MarkReadConstBufferSharpSources(*sampler_sharp_source, *sampler_sharp_source->GetParent(),
+                                        4);
     }
 
     sharp_usages.emplace_back(ResourceDiscovery{
@@ -147,7 +178,6 @@ ResourceDiscoveryList ResourceDiscoverPass(IR::Program& program, const Profile& 
             }
         }
     }
-
     return sharp_usages;
 }
 
