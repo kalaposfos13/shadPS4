@@ -32,6 +32,7 @@
 #ifdef _WIN64
 #include <Rpc.h>
 #else
+#include <setjmp.h>
 #include <uuid/uuid.h>
 #endif
 #include <common/singleton.h>
@@ -523,6 +524,11 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("ca7v6Cxulzs", "libkernel", 1, "libkernel", sceKernelSetGPO);
     LIB_FUNCTION("iKJMWrAumPE", "libkernel", 1, "libkernel", getargc);
     LIB_FUNCTION("FJmglmTMdr4", "libkernel", 1, "libkernel", getargv);
+
+#ifndef _WIN32
+    LIB_FUNCTION("aRo9AhFUXcM", "libkernel", 1, "libkernel", __sigsetjmp);
+    LIB_FUNCTION("pebqbE5ws8s", "libkernel", 1, "libkernel", siglongjmp);
+#endif
 }
 
 } // namespace Libraries::Kernel
