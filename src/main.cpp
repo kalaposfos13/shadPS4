@@ -62,12 +62,14 @@ int main(int argc, char* argv[]) {
     bool configClean = false;
     bool configGlobal = false;
     bool bigPicture = false;
+    bool sameProcess = false;
 
     std::optional<std::filesystem::path> addGameFolder;
     std::optional<std::filesystem::path> setAddonFolder;
     std::optional<std::string> patchFile;
 
-    std::vector<std::pair<std::filesystem::path, std::filesystem::path>> mounts;
+    std::vector<std::pair<std::filesystem::path, std::string>> mounts;
+    static std::vector<std::string> env_vars;
 
     // ---- Options ----
     app.add_option("guest_arg", gamePath, "Game path or ID"); // positional
@@ -77,6 +79,8 @@ int main(int argc, char* argv[]) {
                  "Disable automatic loading of game patches");
 
     app.add_flag("-b,--big-picture", bigPicture, "Start in Big Picture Mode");
+    app.add_flag("--same-process", sameProcess,
+                 "Launch the game in the same process when using Big Picture Mode");
 
     app.add_option("-f,--fullscreen", fullscreenStr, "Fullscreen mode (true|false)");
 
@@ -93,6 +97,7 @@ int main(int argc, char* argv[]) {
     app.add_option("--add-game-folder", addGameFolder)->check(CLI::ExistingDirectory);
     app.add_option("--set-addon-folder", setAddonFolder)->check(CLI::ExistingDirectory);
     app.add_option("--mount", mounts, "Mount source to destination");
+    app.add_option("-e,--env", env_vars, "Environment variables to pass to the guest");
 
     // ---- Capture args after `--` verbatim ----
     app.allow_extras();
@@ -120,9 +125,13 @@ int main(int argc, char* argv[]) {
                 double_dash_index = i;
             }
         }
-        // I kept finding edge cases CLI11 seems to not handle correctly, so manually cutting off
-        // everything after '--' seems to be the easiest way to make everything work
-        app.parse(double_dash_index, argv);
+
+        // If the -- arg is present, only parse args before it
+        if (double_dash_found) {
+            app.parse(double_dash_index, argv);
+        } else {
+            app.parse(argc, argv);
+        }
     } catch (const CLI::ParseError& e) {
         return app.exit(e);
     }
@@ -154,7 +163,7 @@ int main(int argc, char* argv[]) {
     Common::Log::g_should_append |= EmulatorSettings.IsLogAppend();
 
     if (bigPicture) {
-        BigPictureMode::Launch(argv[0]);
+        BigPictureMode::Launch(argv[0], sameProcess);
         return 0;
     }
 
@@ -241,7 +250,7 @@ int main(int argc, char* argv[]) {
     auto* emulator = Common::Singleton<Core::Emulator>::Instance();
     emulator->executableName = argv[0];
     emulator->waitForDebuggerBeforeRun = waitForDebugger;
-    emulator->Run(ebootPath, gameArgs, overrideRoot, mounts);
+    emulator->Run(ebootPath, gameArgs, overrideRoot, mounts, env_vars);
 
     return 0;
 }

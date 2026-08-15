@@ -43,9 +43,7 @@
 namespace Libraries::Kernel {
 
 static u64 g_stack_chk_guard = 0xDEADBEEF54321ABC; // dummy return
-static std::vector<char const*> g_environ{};
-static char const* environment[64];
-static char const** kernel_environ;
+char const* g_environment[64];
 static const char* g_progname = "eboot.bin";
 
 boost::asio::io_context io_context;
@@ -150,23 +148,6 @@ void SetPosixErrno(s32 e) {
         LOG_WARNING(Kernel, "Unhandled errno {}", e);
         g_posix_errno = e;
     }
-}
-
-static u64 g_mspace_atomic_id_mask = 0;
-static u64 g_mstate_table[64] = {0};
-
-struct HeapInfoInfo {
-    u64 size = sizeof(HeapInfoInfo);
-    u32 flag;
-    u32 getSegmentInfo;
-    u64* mspace_atomic_id_mask;
-    u64* mstate_table;
-};
-
-void PS4_SYSV_ABI sceLibcHeapGetTraceInfo(HeapInfoInfo* info) {
-    info->mspace_atomic_id_mask = &g_mspace_atomic_id_mask;
-    info->mstate_table = g_mstate_table;
-    info->getSegmentInfo = 0;
 }
 
 struct OrbisKernelUuid {
@@ -505,10 +486,6 @@ s32 PS4_SYSV_ABI ipmimgr_call(s64 op, s64 unk2, u32* result, u8* args, u64 args_
     return ORBIS_OK;
 }
 
-s32 PS4_SYSV_ABI sceKernelIsCEX() {
-    return 1;
-}
-
 s32 PS4_SYSV_ABI sceKernelGetPsmIntdevModeForRcmgr() {
     LOG_ERROR(Lib_Kernel, "(STUBBED)");
     return ORBIS_OK;
@@ -699,13 +676,8 @@ s32 PS4_SYSV_ABI sceBgftServiceIntGetNotificationEvent() {
 
 void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     service_thread = std::jthread{KernelServiceThread};
-    // g_environ.emplace_back("MONO_GC_PARAMS=nursery-size=1024m,max-heap-size=4096m");
-    // g_environ.emplace_back("MONO_LOG_LEVEL=debug");
-    g_environ.emplace_back(nullptr);
 
-    std::memset(environment, 0, sizeof(environment));
-    environment[0] = "MONO_GC_PARAMS=nursery-size=256m,max-heap-size=1024m";
-    kernel_environ = environment;
+    static char const** kernel_environ = g_environment;
 
     Libraries::Kernel::RegisterFileSystem(sym);
     Libraries::Kernel::RegisterTime(sym);
@@ -727,7 +699,6 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("cfjAjVTFG6A", "libkernel", 1, "libkernel", pthread_suspend_user_context_np);
     LIB_FUNCTION("QRdE7dBfNks", "libkernel", 1, "libkernel", pthread_resume_user_context_np);
     LIB_FUNCTION("mPYKD12UDQI", "libSceRegMgr", 1, "libSceRegMgr", sceRegMgrGetInt);
-    LIB_FUNCTION("8aCOCGoRkUI", "libkernel", 1, "libkernel", sceKernelIsCEX);
     LIB_FUNCTION("vJhYrkgTYWY", "libSceBgft", 1, "libSceBgft",
                  sceBgftServiceIntGetNotificationEvent);
 
@@ -776,9 +747,6 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
 
     LIB_FUNCTION("mkawd0NA9ts", "libkernel", 1, "libkernel", posix_sysconf);
     LIB_FUNCTION("mkawd0NA9ts", "libScePosix", 1, "libkernel", posix_sysconf);
-
-    LIB_FUNCTION("NWtTN10cJzE", "libSceLibcInternalExt", 1, "libSceLibcInternal",
-                 sceLibcHeapGetTraceInfo);
 
     // network
     LIB_FUNCTION("XVL8So3QJUk", "libkernel", 1, "libkernel", Libraries::Net::sys_connect);

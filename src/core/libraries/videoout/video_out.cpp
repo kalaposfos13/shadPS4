@@ -480,8 +480,6 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("w3BY+tAEiQY", "libSceVideoOut", 1, "libSceVideoOut", sceVideoOutRegisterBuffers);
     LIB_FUNCTION("HXzjK9yI30k", "libSceVideoOut", 1, "libSceVideoOut", sceVideoOutAddFlipEvent);
     LIB_FUNCTION("Xru92wHJRmg", "libSceVideoOut", 1, "libSceVideoOut", sceVideoOutAddVblankEvent);
-    LIB_FUNCTION("Ek+VR4lcJQI", "libSceVideoOut", 1, "libSceVideoOut",
-                 sceVideoOutAddVblankEvent); // sceVideoOutSysAddVblankEvent
     LIB_FUNCTION("CBiu4mCE1DA", "libSceVideoOut", 1, "libSceVideoOut", sceVideoOutSetFlipRate);
     LIB_FUNCTION("i6-sR91Wt-4", "libSceVideoOut", 1, "libSceVideoOut",
                  sceVideoOutSetBufferAttribute);
@@ -489,6 +487,8 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
                  sceVideoOutGetResolutionStatus);
     LIB_FUNCTION("8XGijEoThE0", "libSceVideoOut", 1, "libSceVideoOut",
                  sceVideoOutGetResolutionStatus); // sceVideoOutSysGetResolutionStatus
+    LIB_FUNCTION("Ek+VR4lcJQI", "libSceVideoOut", 1, "libSceVideoOut",
+                 sceVideoOutAddVblankEvent); // sceVideoOutSysAddVblankEvent
     LIB_FUNCTION("Up36PTk687E", "libSceVideoOut", 1, "libSceVideoOut", sceVideoOutOpen);
     LIB_FUNCTION("zgXifHT9ErY", "libSceVideoOut", 1, "libSceVideoOut", sceVideoOutIsFlipPending);
     LIB_FUNCTION("N5KDtkIjjJ4", "libSceVideoOut", 1, "libSceVideoOut",
