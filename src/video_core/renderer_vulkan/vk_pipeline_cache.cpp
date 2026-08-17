@@ -26,6 +26,8 @@ using Shader::LogicalStage;
 using Shader::Output;
 using Shader::Stage;
 
+extern bool is_compile_frame;
+
 constexpr static auto SpirvVersion1_6 = 0x00010600U;
 
 constexpr static std::array DescriptorHeapSizes = {
@@ -613,6 +615,8 @@ vk::ShaderModule PipelineCache::CompileModule(Shader::Info& info, Shader::Runtim
     LOG_INFO(Render_Vulkan, "Compiling {} shader {:#x} {}", info.stage, info.pgm_hash,
              perm_idx != 0 ? "(permutation)" : "");
     DumpShader(code, info.pgm_hash, info.stage, perm_idx, "bin");
+
+    is_compile_frame = true;
 
     const auto ir_program = Shader::TranslateProgram(code, pools, info, runtime_info, profile);
     auto spv = Shader::Backend::SPIRV::EmitSPIRV(profile, runtime_info, ir_program, binding);

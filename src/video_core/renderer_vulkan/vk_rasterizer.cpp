@@ -401,6 +401,9 @@ void Rasterizer::OnSubmit() {
     buffer_cache.RunGarbageCollector();
 }
 
+bool run_dma = false;
+bool is_compile_frame = false;
+
 bool Rasterizer::BindResources(const Pipeline* pipeline) {
     if (IsComputeImageCopy(pipeline) || IsComputeMetaClear(pipeline) ||
         IsComputeImageClear(pipeline)) {
@@ -430,13 +433,14 @@ bool Rasterizer::BindResources(const Pipeline* pipeline) {
         uses_dma |= stage->uses_dma;
     }
 
-    if (uses_dma) {
+    if (uses_dma && (run_dma || is_compile_frame)) {
         // We only use fault buffer for DMA right now.
         Common::RecursiveSharedLock lock{mapped_ranges_mutex};
         for (auto& range : mapped_ranges) {
             buffer_cache.SynchronizeBuffersInRange(range.lower(), range.upper() - range.lower());
         }
         fault_process_pending = true;
+        run_dma = false;
     }
 
     return true;

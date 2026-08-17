@@ -18,6 +18,10 @@
 #include "video_core/renderdoc.h"
 #include "video_core/renderer_vulkan/vk_rasterizer.h"
 
+namespace Vulkan {
+extern bool run_dma;
+}
+
 namespace AmdGpu {
 
 static const char* dcb_task_name{"DCB_TASK"};
@@ -217,7 +221,7 @@ Liverpool::Task Liverpool::ProcessCeUpdate(std::span<const u32> ccb) {
 
 Liverpool::Task Liverpool::ProcessGraphics(std::span<const u32> dcb, std::span<const u32> ccb) {
     FIBER_ENTER(dcb_task_name);
-
+    Vulkan::run_dma = true;
     cblock.Reset();
 
     // TODO: potentially, ASCs also can depend on CE and in this case the
@@ -904,6 +908,7 @@ Liverpool::Task Liverpool::ProcessGraphics(std::span<const u32> dcb, std::span<c
 template <bool is_indirect>
 Liverpool::Task Liverpool::ProcessCompute(std::span<const u32> acb, u32 vqid) {
     FIBER_ENTER(acb_task_name[vqid]);
+    Vulkan::run_dma = true;
     auto& queue = asc_queues[{vqid}];
     const bool host_markers_enabled = rasterizer && EmulatorSettings.IsVkHostMarkersEnabled();
 
