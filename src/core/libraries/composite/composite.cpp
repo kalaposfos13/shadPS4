@@ -82,7 +82,7 @@ s32 PS4_SYSV_ABI sceCompositorGetAnotherProcessVideoSize() {
 
 s32 PS4_SYSV_ABI sceCompositorGetCanvasHandle() {
     LOG_ERROR(Lib_Composite, "(STUBBED) called");
-    return ORBIS_OK;
+    return 1;
 }
 
 s32 PS4_SYSV_ABI sceCompositorGetClientList() {
@@ -186,6 +186,7 @@ s32 PS4_SYSV_ABI sceCompositorInit() {
     attrib.reserved1 = 0;
 
     void* addrs[1] = {sce_composite_color_target_addr};
+    sceVideoOutOpen(0, 0, 0, nullptr);
     sceVideoOutRegisterBuffers(2, 0, addrs, 1, &attrib);
     return ORBIS_OK;
 }
@@ -436,7 +437,15 @@ s32 PS4_SYSV_ABI Func_A5E7CB11092CC77E() {
     return ORBIS_OK;
 }
 
+s32 sceApplicationSetCanvasHandle(s16 param_1, s32 param_2) {
+    LOG_ERROR(/*Sys*/ Core, "(STUBBED) called");
+    return ORBIS_OK;
+}
+
 void RegisterLib(Core::Loader::SymbolsResolver* sym) {
+
+    LIB_FUNCTION("qTHiabfEukw", "libSceSysCore", 1, "libSceSysCore",
+                 sceApplicationSetCanvasHandle);
 
     LIB_FUNCTION("G4Q8KNkb5XE", "libSceComposite", 1, "libSceComposite",
                  sceCompositorAllocateIndex);

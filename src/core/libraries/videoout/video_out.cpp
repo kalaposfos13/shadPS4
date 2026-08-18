@@ -467,13 +467,6 @@ s32 PS4_SYSV_ABI sceVideoOutSetWindowModeMargins(s32 handle, s32 top, s32 bottom
 void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     driver = std::make_unique<VideoOutDriver>(EmulatorSettings.GetInternalScreenWidth(),
                                               EmulatorSettings.GetInternalScreenHeight());
-    if (Common::Singleton<Common::ElfInfo>::Instance()->GameSerial() == "NPXS20001") {
-        std::thread open_thread{[]() {
-            std::this_thread::sleep_for(std::chrono::milliseconds(4000));
-            auto handle = sceVideoOutOpen(0, 0, 0, nullptr);
-        }};
-        open_thread.detach();
-    }
 
     LIB_FUNCTION("SbU3dwp80lQ", "libSceVideoOut", 1, "libSceVideoOut", sceVideoOutGetFlipStatus);
     LIB_FUNCTION("U46NwOiJpys", "libSceVideoOut", 1, "libSceVideoOut", sceVideoOutSubmitFlip);
