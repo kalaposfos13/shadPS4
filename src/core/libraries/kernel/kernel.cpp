@@ -622,7 +622,7 @@ s32 PS4_SYSV_ABI shm_unlink(const char* path) {
 }
 
 s32 PS4_SYSV_ABI pthread_mutex_setname_np(void* mutex, const char* name) {
-    LOG_ERROR(Lib_Kernel, "(STUBBED), name = {}", name);
+    LOG_DEBUG(Lib_Kernel, "(STUBBED), name = {}", name);
     return ORBIS_OK;
 }
 
