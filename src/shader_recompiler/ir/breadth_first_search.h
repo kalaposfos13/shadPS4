@@ -6,8 +6,6 @@
 #include <type_traits>
 #include <boost/container/small_vector.hpp>
 #include <queue>
-#include "shader_recompiler/frontend/dominance.h"
-#include "shader_recompiler/ir/basic_block.h"
 #include "shader_recompiler/ir/value.h"
 
 namespace Shader::IR {
