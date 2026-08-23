@@ -23,6 +23,7 @@
 #include "common/logging/log.h"
 #include "common/path_util.h"
 #include "core/emulator_settings.h"
+#include "core/linker.h"
 #include "core/libraries/error_codes.h"
 #include "core/libraries/kernel/orbis_error.h"
 #include "core/libraries/kernel/process.h"
@@ -36,6 +37,24 @@
 #endif
 
 namespace Libraries::Http {
+
+static bool g_is_lle = true;
+
+#define HTTP2_LLE_FORWARD(func, ...)                                                               \
+    do {                                                                                           \
+        if (g_is_lle) {                                                                            \
+            using func_type = decltype(&func);                                                     \
+            auto linker = Common::Singleton<Core::Linker>::Instance();                             \
+            auto index = linker->FindByLibName("libSceHttp.sprx");                                 \
+            ASSERT(index != -1);                                                                   \
+            auto mod = linker->GetModule(index);                                                   \
+            ASSERT(mod);                                                                           \
+            func_type lle_func = reinterpret_cast<func_type>(mod->FindByName(__func__));           \
+            ASSERT(lle_func);                                                                      \
+            LOG_INFO(Lib_Http, "called, forwarding to LLE");                                       \
+            return lle_func(__VA_ARGS__);                                                          \
+        }                                                                                          \
+    } while (false)
 
 enum class HttpRequestState {
     Created,
@@ -1201,6 +1220,7 @@ int PS4_SYSV_ABI sceHttpCreateConnection(int tmplId, const char* serverName, con
 }
 
 int PS4_SYSV_ABI sceHttpCreateConnectionWithURL(int tmplId, const char* url, bool enableKeepalive) {
+    HTTP2_LLE_FORWARD(sceHttpCreateConnectionWithURL, tmplId, url, enableKeepalive);
     LOG_INFO(Lib_Http, "called tmplId={}, url={}, enableKeepalive={}", tmplId, url ? url : "(null)",
              enableKeepalive);
     {
@@ -1316,6 +1336,7 @@ int PS4_SYSV_ABI sceHttpCreateRequest(int connId, int method, const char* path, 
 
 int PS4_SYSV_ABI sceHttpCreateRequestWithURL(int connId, s32 method, const char* url,
                                              u64 contentLength) {
+    HTTP2_LLE_FORWARD(sceHttpCreateRequestWithURL, connId, method, url, contentLength);
     LOG_INFO(Lib_Http, "called connId={}, method={}, url={}, contentLength={}", connId, method,
              url ? url : "(null)", contentLength);
     std::lock_guard<std::mutex> lock(g_state.m_mutex);
@@ -1353,6 +1374,7 @@ int PS4_SYSV_ABI sceHttpCreateRequestWithURL(int connId, s32 method, const char*
 
 int PS4_SYSV_ABI sceHttpCreateTemplate(int libhttpCtxId, const char* userAgent, int httpVer,
                                        int isAutoProxyConf) {
+    HTTP2_LLE_FORWARD(sceHttpCreateTemplate, libhttpCtxId, userAgent, httpVer, isAutoProxyConf);
     LOG_INFO(Lib_Http, "called libhttpCtxId={}, userAgent={}, httpVer={}, isAutoProxyConf={}",
              libhttpCtxId, userAgent ? userAgent : "(null)", httpVer, isAutoProxyConf);
     std::lock_guard<std::mutex> lock(g_state.m_mutex);
@@ -1492,6 +1514,7 @@ int PS4_SYSV_ABI sceHttpRequestGetAllHeaders() {
 }
 
 int PS4_SYSV_ABI sceHttpSendRequest(int reqId, const void* postData, u64 size) {
+    HTTP2_LLE_FORWARD(sceHttpSendRequest, reqId, postData, size);
     LOG_INFO(Lib_Http, "called reqId={}, postData={}, size={}", reqId, fmt::ptr(postData), size);
     std::shared_ptr<HttpRequest> req_ptr;
     SendRequestPlan plan;
@@ -2281,6 +2304,7 @@ int PS4_SYSV_ABI sceHttpTrySetNonblock(int id, int isEnable) {
 // Http Communication functions
 //***********************************
 int PS4_SYSV_ABI sceHttpReadData(s32 reqId, void* data, u64 size) {
+    HTTP2_LLE_FORWARD(sceHttpReadData, reqId, data, size);
     LOG_INFO(Lib_Http, "called reqId={}, data={}, size={}", reqId, fmt::ptr(data), size);
     std::unique_lock<std::mutex> lock(g_state.m_mutex);
     if (!g_state.inited) {
@@ -2318,6 +2342,7 @@ int PS4_SYSV_ABI sceHttpReadData(s32 reqId, void* data, u64 size) {
 }
 
 int PS4_SYSV_ABI sceHttpAbortRequest(int reqId) {
+    HTTP2_LLE_FORWARD(sceHttpAbortRequest, reqId);
     LOG_INFO(Lib_Http, "called reqId={}", reqId);
     std::lock_guard<std::mutex> lock(g_state.m_mutex);
     if (!g_state.inited) {
@@ -2491,6 +2516,7 @@ int PS4_SYSV_ABI sceHttpSetResponseHeaderMaxSize(int id, u64 headerSize) {
 }
 
 int PS4_SYSV_ABI sceHttpGetAllResponseHeaders(int reqId, char** header, u64* headerSize) {
+    HTTP2_LLE_FORWARD(sceHttpGetAllResponseHeaders, reqId, header, headerSize);
     LOG_INFO(Lib_Http, "called reqId={}, header={}, headerSize={}", reqId, fmt::ptr(header),
              fmt::ptr(headerSize));
     std::unique_lock<std::mutex> lock(g_state.m_mutex);
@@ -2564,6 +2590,7 @@ int PS4_SYSV_ABI sceHttpGetResponseContentLength(int reqId, int* result, u64* co
 }
 
 int PS4_SYSV_ABI sceHttpGetStatusCode(int reqId, int* statusCode) {
+    HTTP2_LLE_FORWARD(sceHttpGetStatusCode, reqId, statusCode);
     LOG_DEBUG(Lib_Http, "called reqId={}", reqId);
     std::unique_lock<std::mutex> lock(g_state.m_mutex);
     if (!g_state.inited) {
@@ -2626,6 +2653,7 @@ int PS4_SYSV_ABI sceHttpSetInflateGZIPEnabled(int id, int isEnable) {
 // Http Header setting functions
 //***********************************
 int PS4_SYSV_ABI sceHttpAddRequestHeader(int id, const char* name, const char* value, s32 mode) {
+    HTTP2_LLE_FORWARD(sceHttpAddRequestHeader, id, name, value, mode);
     LOG_INFO(Lib_Http, "called id={}, name={}, value={}, mode={}", id, name ? name : "(null)",
              value ? value : "(null)", mode);
     std::lock_guard<std::mutex> lock(g_state.m_mutex);
@@ -2692,6 +2720,7 @@ int PS4_SYSV_ABI sceHttpRemoveRequestHeader(int id, const char* name) {
 }
 
 int PS4_SYSV_ABI sceHttpSetRequestContentLength(int id, u64 contentLength) {
+    HTTP2_LLE_FORWARD(sceHttpSetRequestContentLength, id, contentLength);
     LOG_INFO(Lib_Http, "called id={}, contentLength={}", id, contentLength);
     std::lock_guard<std::mutex> lock(g_state.m_mutex);
     if (!g_state.inited) {
@@ -2850,6 +2879,7 @@ int PS4_SYSV_ABI sceHttpDeleteConnection(int connId) {
 // Template functions
 //***********************************
 int PS4_SYSV_ABI sceHttpDeleteTemplate(int tmplId) {
+    HTTP2_LLE_FORWARD(sceHttpDeleteTemplate, tmplId);
     LOG_INFO(Lib_Http, "called tmplId={}", tmplId);
     std::lock_guard<std::mutex> lock(g_state.m_mutex);
     if (!g_state.inited) {
@@ -2867,6 +2897,7 @@ int PS4_SYSV_ABI sceHttpDeleteTemplate(int tmplId) {
 // Request functions
 //***********************************
 int PS4_SYSV_ABI sceHttpDeleteRequest(int reqId) {
+    HTTP2_LLE_FORWARD(sceHttpDeleteRequest, reqId);
     LOG_INFO(Lib_Http, "called reqId={}", reqId);
     std::lock_guard<std::mutex> lock(g_state.m_mutex);
     if (!g_state.inited) {
@@ -2969,6 +3000,7 @@ int PS4_SYSV_ABI sceHttpCreateRequest2(int connId, const char* method, const cha
 
 int PS4_SYSV_ABI sceHttpCreateRequestWithURL2(int connId, const char* method, const char* url,
                                               u64 contentLength) {
+    HTTP2_LLE_FORWARD(sceHttpCreateRequestWithURL2, connId, method, url, contentLength);
     LOG_INFO(Lib_Http, "called connId={}, method={}, url={}, contentLength={}", connId,
              method ? method : "(null)", url ? url : "(null)", contentLength);
     int int_method;
@@ -4092,6 +4124,8 @@ int PS4_SYSV_ABI sceHttpUriUnescape(char* out, u64* require, u64 prepare, const 
 }
 
 void RegisterLib(Core::Loader::SymbolsResolver* sym) {
+    g_is_lle = false;
+
     LIB_FUNCTION("hvG6GfBMXg8", "libSceHttp", 1, "libSceHttp", sceHttpAbortRequest);
     LIB_FUNCTION("JKl06ZIAl6A", "libSceHttp", 1, "libSceHttp", sceHttpAbortRequestForce);
     LIB_FUNCTION("sWQiqKvYTVA", "libSceHttp", 1, "libSceHttp", sceHttpAbortWaitRequest);

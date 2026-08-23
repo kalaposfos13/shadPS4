@@ -97,6 +97,15 @@ public:
         return -1;
     }
 
+    u32 FindByLibName(const std::filesystem::path& name) const {
+        for (u32 i = 0; i < m_modules.size(); i++) {
+            if (name == m_modules[i]->name) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     u32 MaxTlsIndex() const {
         return max_tls_index;
     }

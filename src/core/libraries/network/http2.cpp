@@ -2,18 +2,39 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "common/logging/log.h"
+#include "common/singleton.h"
 #include "core/libraries/error_codes.h"
 #include "core/libraries/libs.h"
 #include "core/libraries/network/http.h"
 #include "core/libraries/network/http2.h"
+#include "core/linker.h"
 
 #include <map>
 
 namespace Libraries::Http2 {
 
+static bool g_is_lle = true;
+
+#define HTTP2_LLE_FORWARD(func, ...)                                                               \
+    do {                                                                                           \
+        if (g_is_lle) {                                                                            \
+            using func_type = decltype(&func);                                                     \
+            auto linker = Common::Singleton<Core::Linker>::Instance();                             \
+            auto index = linker->FindByLibName("libSceHttp2.sprx");                                \
+            ASSERT(index != -1);                                                                   \
+            auto mod = linker->GetModule(index);                                                   \
+            ASSERT(mod);                                                                           \
+            func_type lle_func = reinterpret_cast<func_type>(mod->FindByName(__func__));           \
+            ASSERT(lle_func);                                                                      \
+            LOG_INFO(Lib_Http2, "called, forwarding to LLE");                                      \
+            return lle_func(__VA_ARGS__);                                                          \
+        }                                                                                          \
+    } while (false)
+
 std::map<s32, s32> requests_to_connections{};
 
 s32 PS4_SYSV_ABI sceHttp2AbortRequest(s32 req_id) {
+    HTTP2_LLE_FORWARD(sceHttp2AbortRequest, req_id);
     LOG_ERROR(Lib_Http2, "(STUBBED) called");
     s32 result = Libraries::Http::sceHttpAbortRequest(req_id);
     if (result < 0) {
@@ -29,6 +50,7 @@ s32 PS4_SYSV_ABI sceHttp2AddCookie() {
 
 s32 PS4_SYSV_ABI sceHttp2AddRequestHeader(s32 template_or_req_id, const char* name,
                                           const char* value, u32 mode) {
+    HTTP2_LLE_FORWARD(sceHttp2AddRequestHeader, template_or_req_id, name, value, mode);
     LOG_ERROR(Lib_Http2, "(STUBBED) called");
     s32 result = Libraries::Http::sceHttpAddRequestHeader(template_or_req_id, name, value, mode);
     if (result < 0) {
@@ -64,6 +86,7 @@ s32 PS4_SYSV_ABI sceHttp2CreateCookieBox() {
 
 s32 PS4_SYSV_ABI sceHttp2CreateRequestWithURL(s32 tmpl_id, const char* method, const char* url,
                                               u64 content_length) {
+    HTTP2_LLE_FORWARD(sceHttp2CreateRequestWithURL, tmpl_id, method, url, content_length);
     LOG_ERROR(Lib_Http2, "(STUBBED) called");
     // Http1 has a connection thing to go through first
     s32 conn_id = Libraries::Http::sceHttpCreateConnectionWithURL(tmpl_id, url, true);
@@ -83,6 +106,7 @@ s32 PS4_SYSV_ABI sceHttp2CreateRequestWithURL(s32 tmpl_id, const char* method, c
 
 s32 PS4_SYSV_ABI sceHttp2CreateTemplate(s32 ctx_id, const char* user_agent, s32 http_ver,
                                         s32 auto_proxy_conf) {
+    HTTP2_LLE_FORWARD(sceHttp2CreateTemplate, ctx_id, user_agent, http_ver, auto_proxy_conf);
     LOG_ERROR(Lib_Http2, "(STUBBED) called");
     s32 tmpl_id =
         Libraries::Http::sceHttpCreateTemplate(ctx_id, user_agent, http_ver, auto_proxy_conf);
@@ -98,6 +122,7 @@ s32 PS4_SYSV_ABI sceHttp2DeleteCookieBox() {
 }
 
 s32 PS4_SYSV_ABI sceHttp2DeleteRequest(s32 req_id) {
+    HTTP2_LLE_FORWARD(sceHttp2DeleteRequest, req_id);
     LOG_ERROR(Lib_Http2, "(STUBBED) called");
     s32 result = Libraries::Http::sceHttpDeleteRequest(req_id);
     if (result < 0) {
@@ -113,6 +138,7 @@ s32 PS4_SYSV_ABI sceHttp2DeleteRequest(s32 req_id) {
 }
 
 s32 PS4_SYSV_ABI sceHttp2DeleteTemplate(s32 tmpl_id) {
+    HTTP2_LLE_FORWARD(sceHttp2DeleteTemplate, tmpl_id);
     LOG_ERROR(Lib_Http2, "(STUBBED) called");
     s32 result = Libraries::Http::sceHttpDeleteTemplate(tmpl_id);
     if (result < 0) {
@@ -122,6 +148,7 @@ s32 PS4_SYSV_ABI sceHttp2DeleteTemplate(s32 tmpl_id) {
 }
 
 s32 PS4_SYSV_ABI sceHttp2GetAllResponseHeaders(s32 req_id, char** header, u64* header_size) {
+    HTTP2_LLE_FORWARD(sceHttp2GetAllResponseHeaders, req_id, header, header_size);
     LOG_ERROR(Lib_Http2, "(STUBBED) called");
     s32 result = Libraries::Http::sceHttpGetAllResponseHeaders(req_id, header, header_size);
     if (result < 0) {
@@ -166,6 +193,7 @@ s32 PS4_SYSV_ABI sceHttp2GetResponseContentLength() {
 }
 
 s32 PS4_SYSV_ABI sceHttp2GetStatusCode(s32 req_id, s32* status_code) {
+    HTTP2_LLE_FORWARD(sceHttp2GetStatusCode, req_id, status_code);
     LOG_ERROR(Lib_Http2, "(STUBBED) called");
     s32 result = Libraries::Http::sceHttpGetStatusCode(req_id, status_code);
     if (result < 0) {
@@ -184,6 +212,7 @@ s32 PS4_SYSV_ABI sceHttp2Init(s32 net_id, s32 ssl_id, u64 pool_size, s32 max_req
 }
 
 s32 PS4_SYSV_ABI sceHttp2ReadData(s32 req_id, void* data, u64 size) {
+    HTTP2_LLE_FORWARD(sceHttp2ReadData, req_id, data, size);
     LOG_ERROR(Lib_Http2, "(STUBBED) called");
     s32 result = Libraries::Http::sceHttpReadData(req_id, data, size);
     if (result < 0) {
@@ -208,6 +237,7 @@ s32 PS4_SYSV_ABI sceHttp2RemoveRequestHeader() {
 }
 
 s32 PS4_SYSV_ABI sceHttp2SendRequest(s32 req_id, const void* data, u64 size) {
+    HTTP2_LLE_FORWARD(sceHttp2SendRequest, req_id, data, size);
     LOG_ERROR(Lib_Http2, "(STUBBED) called");
     s32 result = Libraries::Http::sceHttpSendRequest(req_id, data, size);
     if (result < 0) {
@@ -288,6 +318,7 @@ s32 PS4_SYSV_ABI sceHttp2SetMinSslVersion() {
 
 s32 PS4_SYSV_ABI sceHttp2SetPreSendCallback(s32 template_id, OrbisHttp2PreSendCallback cb_func,
                                             void* user_arg) {
+    HTTP2_LLE_FORWARD(sceHttp2SetPreSendCallback, template_id, cb_func, user_arg);
     LOG_ERROR(Lib_Http2, "(STUBBED) called");
     return ORBIS_OK;
 }
@@ -303,6 +334,7 @@ s32 PS4_SYSV_ABI sceHttp2SetRedirectCallback() {
 }
 
 s32 PS4_SYSV_ABI sceHttp2SetRequestContentLength(s32 req_id, u64 content_length) {
+    HTTP2_LLE_FORWARD(sceHttp2SetRequestContentLength, req_id, content_length);
     LOG_ERROR(Lib_Http2, "(STUBBED) called");
     s32 result = Libraries::Http::sceHttpSetRequestContentLength(req_id, content_length);
     if (result < 0) {
@@ -357,6 +389,8 @@ s32 PS4_SYSV_ABI sceHttp2WaitAsync() {
 }
 
 void RegisterLib(Core::Loader::SymbolsResolver* sym) {
+    g_is_lle = false;
+
     LIB_FUNCTION("IZ-qjhRqvjk", "libSceHttp2", 1, "libSceHttp2", sceHttp2AbortRequest);
     LIB_FUNCTION("flPxnowtvWY", "libSceHttp2", 1, "libSceHttp2", sceHttp2AddCookie);
     LIB_FUNCTION("nrPfOE8TQu0", "libSceHttp2", 1, "libSceHttp2", sceHttp2AddRequestHeader);
