@@ -316,7 +316,7 @@ int PS4_SYSV_ABI posix_pthread_create_name_np(PthreadT* thread, const PthreadAtt
 
     if (new_thread->attr.stackaddr_attr == nullptr) {
         /* Add additional stack space for HLE */
-        static constexpr size_t AdditionalStack = 128_KB;
+        static constexpr size_t AdditionalStack = 512_KB;
         new_thread->attr.stacksize_attr += AdditionalStack;
     }
 
