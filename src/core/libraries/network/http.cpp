@@ -23,12 +23,12 @@
 #include "common/logging/log.h"
 #include "common/path_util.h"
 #include "core/emulator_settings.h"
-#include "core/linker.h"
 #include "core/libraries/error_codes.h"
 #include "core/libraries/kernel/orbis_error.h"
 #include "core/libraries/kernel/process.h"
 #include "core/libraries/libs.h"
 #include "core/libraries/network/http.h"
+#include "core/linker.h"
 #include "http_error.h"
 
 #if __has_include(<httplib.h>)
@@ -44,13 +44,16 @@ static bool g_is_lle = true;
     do {                                                                                           \
         if (g_is_lle) {                                                                            \
             using func_type = decltype(&func);                                                     \
-            auto linker = Common::Singleton<Core::Linker>::Instance();                             \
-            auto index = linker->FindByLibName("libSceHttp.sprx");                                 \
-            ASSERT(index != -1);                                                                   \
-            auto mod = linker->GetModule(index);                                                   \
-            ASSERT(mod);                                                                           \
-            func_type lle_func = reinterpret_cast<func_type>(mod->FindByName(__func__));           \
-            ASSERT(lle_func);                                                                      \
+            static func_type lle_func = nullptr;                                                   \
+            if (!lle_func) {                                                                       \
+                auto linker = Common::Singleton<Core::Linker>::Instance();                         \
+                auto index = linker->FindByLibName("libSceHttp.sprx");                             \
+                ASSERT(index != -1);                                                               \
+                auto mod = linker->GetModule(index);                                               \
+                ASSERT(mod);                                                                       \
+                lle_func = reinterpret_cast<func_type>(mod->FindByName(__func__));                 \
+                ASSERT(lle_func);                                                                  \
+            }                                                                                      \
             LOG_INFO(Lib_Http, "called, forwarding to LLE");                                       \
             return lle_func(__VA_ARGS__);                                                          \
         }                                                                                          \
