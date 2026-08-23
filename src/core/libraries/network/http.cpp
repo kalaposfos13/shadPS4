@@ -2862,6 +2862,7 @@ int PS4_SYSV_ABI sceHttpSetRecvTimeOut(int id, u32 usec) {
 // Connection functions
 //***********************************
 int PS4_SYSV_ABI sceHttpDeleteConnection(int connId) {
+    HTTP2_LLE_FORWARD(sceHttpDeleteConnection, connId);
     LOG_INFO(Lib_Http, "called connId={}", connId);
     std::lock_guard<std::mutex> lock(g_state.m_mutex);
     if (!g_state.inited) {
