@@ -19,15 +19,6 @@
 #include "core/libraries/libs.h"
 #include "core/memory.h"
 
-#if defined(ARCH_X86_64) || defined(__arm64__) || defined(__aarch64__)
-extern "C" void* PS4_SYSV_ABI _runOnAnotherStack(void* arg, void* func,
-                                                 void* stackb) asm("_runOnAnotherStack");
-#else
-void* PS4_SYSV_ABI _runOnAnotherStack(void* arg, void* func, void* stackb) {
-    UNREACHABLE_MSG("_runOnAnotherStack not implemented on target architecture.");
-}
-#endif
-
 namespace Libraries::Kernel {
 
 extern PthreadAttr PthreadAttrDefault;
@@ -273,7 +264,7 @@ static void* RunThread(void* arg) {
     /* Run the current thread's start routine with argument: */
     auto* const stack =
         (void*)(((size_t)curthread->attr.stackaddr_attr + curthread->attr.stacksize_attr) & (~15));
-    void* ret = _runOnAnotherStack(curthread->arg, (void*)curthread->start_routine, stack);
+    void* ret = _runOnAnotherStack(curthread->arg, curthread->start_routine, stack);
 
     /* Remove thread from tracking */
     DebugState.RemoveCurrentThreadFromGuestList();
@@ -988,7 +979,7 @@ struct WrapperArgs {
     Ucontext* context;
 };
 
-static void PS4_SYSV_ABI CallbackWrapper(void* arg) {
+static void* PS4_SYSV_ABI CallbackWrapper(void* arg) {
     WrapperArgs& a = *reinterpret_cast<WrapperArgs*>(arg);
 
     if (a.action->sa_flags & POSIX_SA_SIGINFO) {
@@ -1002,6 +993,7 @@ static void PS4_SYSV_ABI CallbackWrapper(void* arg) {
             signal_handler(a.sig);
         }
     }
+    return nullptr;
 }
 
 bool Pthread::DispatchSignal(s32 sig, Siginfo* info, Ucontext* context) {
@@ -1050,7 +1042,7 @@ bool Pthread::DispatchSignal(s32 sig, Siginfo* info, Ucontext* context) {
 
         auto* stack = reinterpret_cast<void*>(
             (reinterpret_cast<uintptr_t>(sigaltstack.ss_sp) + sigaltstack.ss_size) & (~15ull));
-        _runOnAnotherStack(&arg, reinterpret_cast<void*>(CallbackWrapper), stack);
+        _runOnAnotherStack(&arg, CallbackWrapper, stack);
 
         sigaltstack.ss_flags &= ~POSIX_SS_ONSTACK;
     } else {

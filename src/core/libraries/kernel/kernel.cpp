@@ -81,7 +81,7 @@ static void KernelServiceThread(std::stop_token stoken) {
 }
 
 static PS4_SYSV_ABI void stack_chk_fail() {
-    UNREACHABLE();
+    UNREACHABLE_MSG("addr: {}", __builtin_return_address(0));
 }
 
 static thread_local s32 g_posix_errno = 0;

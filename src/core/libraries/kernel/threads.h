@@ -73,7 +73,7 @@ public:
         this->func = std::move(func);
         PthreadAttrT attr{};
         posix_pthread_attr_init(&attr);
-        posix_pthread_create(&thread, &attr, HOST_CALL(RunWrapper), this);
+        posix_pthread_create(&thread, &attr, RunWrapper, this);
         posix_pthread_attr_destroy(&attr);
     }
 

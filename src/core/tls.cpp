@@ -204,6 +204,52 @@ Tcb* GetTcbBase() {
 
 #endif
 
+void* GetHLEStack() {
+    if (!Libraries::Kernel::g_curthread->hle_stack) [[unlikely]] {
+        constexpr s32 hle_stack_size = 1_MB;
+        constexpr s32 alignment = 16;
+
+        void* raw_allocation =
+            ::operator new(hle_stack_size + alignment, std::align_val_t(alignment));
+
+        uintptr_t stack_top = reinterpret_cast<uintptr_t>(raw_allocation) + hle_stack_size - 128;
+        stack_top &= ~(alignment - 1);
+
+        Libraries::Kernel::g_curthread->hle_stack = reinterpret_cast<void*>(stack_top);
+    }
+    return Libraries::Kernel::g_curthread->hle_stack;
+}
+
+bool IsOnHLEStack() {
+    if (!Libraries::Kernel::g_curthread || !Libraries::Kernel::g_curthread->tcb) {
+        return false;
+    }
+    
+    void* hle_stack = Libraries::Kernel::g_curthread->hle_stack;
+    if (!hle_stack) {
+        return false;
+    }
+    
+    // Get current stack pointer
+    void* current_sp;
+    #ifdef _WIN32
+    current_sp = _AddressOfReturnAddress();
+    #else
+    current_sp = __builtin_frame_address(0);
+    #endif
+    
+    // Check if current SP is within the HLE stack range
+    uintptr_t sp = reinterpret_cast<uintptr_t>(current_sp);
+    uintptr_t stack_top = reinterpret_cast<uintptr_t>(hle_stack);
+    uintptr_t stack_bottom = stack_top - 1_MB; // HLE stack size
+    
+    return (sp <= stack_top && sp >= stack_bottom);
+}
+
+void SetTcbBaseForHLE(Libraries::Kernel::Pthread* thr) {
+    SetTcbBase(thr->tcb);
+}
+
 thread_local std::once_flag init_tls_flag;
 
 void InitializeTLS() {

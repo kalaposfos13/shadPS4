@@ -337,6 +337,8 @@ struct Pthread {
     Sigset sigwait_set{};
     OrbisKernelExceptionHandlerStack sigaltstack{};
 
+    void* hle_stack;
+
     bool IsSignalBlocked(s32 sig) const;
     void QueueSignal(s32 sig);
     bool ConsumeSignal(s32 sig);
