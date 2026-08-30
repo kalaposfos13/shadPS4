@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "common/alignment.h"
+#include "common/elf_info.h"
 #include "common/logging/log.h"
 #include "core/libraries/composite/composite.h"
 #include "core/libraries/error_codes.h"
@@ -174,10 +175,22 @@ s32 PS4_SYSV_ABI sceCompositorInit() {
                                   sce_composite_color_width, sce_composite_color_height,
                                   sce_composite_color_width);
 
-    void* addrs[1] = {
-        (void*)((VAddr)sce_compositor_video_address +
-                0x7fc000)}; // offset is a hack, got it by checking the difference between the
-                            // image address seen in rdoc and the base address of this allocation
+    std::unordered_map<std::string, s32> display_buf_offsets{
+        {"NPXS20001", 0x103C000},
+        {"APOL00004", 0x7fc000},
+    };
+
+    std::string serial = std::string(Common::Singleton<Common::ElfInfo>::Instance()->GameSerial());
+
+    s32 display_buf_offset = 0x103C000;
+
+    if (display_buf_offsets.contains(serial)) {
+        display_buf_offset = display_buf_offsets[serial];
+    }
+
+    // offset is a hack, got it by checking the difference between the image address seen in rdoc
+    // and the base address of this allocation
+    void* addrs[1] = {(void*)((VAddr)sce_compositor_video_address + display_buf_offset)};
     s32 video_out_handle =
         sceVideoOutOpen(Libraries::UserService::ORBIS_USER_SERVICE_USER_ID_SYSTEM, 0, 0, nullptr);
 
