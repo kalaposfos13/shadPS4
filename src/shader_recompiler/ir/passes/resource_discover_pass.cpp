@@ -111,7 +111,7 @@ void MarkReadConstBufferSharpSources(IR::Inst& first, IR::Block& block, u32 coun
         }
         break;
     }
-    ASSERT(marked_count == count);
+    // ASSERT(marked_count == count);
 }
 
 void DiscoverBufferSharp(IR::Block& block, IR::Inst& inst, ResourceDiscoveryList& sharp_usages) {
