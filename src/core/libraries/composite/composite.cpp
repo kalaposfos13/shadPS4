@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2026 shadPS4 Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
+#include "common/alignment.h"
 #include "common/logging/log.h"
 #include "core/libraries/composite/composite.h"
 #include "core/libraries/error_codes.h"
@@ -10,7 +11,6 @@
 #include "core/libraries/videoout/video_out.h"
 #include "core/memory.h"
 #include "video_core/amdgpu/liverpool.h"
-#include "common/alignment.h"
 
 extern std::unique_ptr<AmdGpu::Liverpool> liverpool;
 
@@ -163,34 +163,28 @@ s32 PS4_SYSV_ABI sceCompositorInit() {
 
     constexpr u32 sce_composite_color_width = 1920;
     constexpr u32 sce_composite_color_height = 1080;
-    constexpr u32 color_target_size = Common::AlignUp(sce_composite_color_width * sce_composite_color_height * 4, 16_KB);
+    constexpr u32 color_target_size =
+        Common::AlignUp(sce_composite_color_width * sce_composite_color_height * 4, 16_KB);
 
     using namespace VideoOut;
     using namespace Kernel;
-    // SceVideoOut::bufs[0].base will be patched by libSceComposite, but we need to allocate a
-    // buffer for the first frame flip
-    sce_composite_color_target_addr = nullptr;
-    void* dmem_addr;
-    // TODO: User proper flags when I emulate them
-    sceKernelAllocateMainDirectMemory(color_target_size, 16_KB, 0, (s64*)&dmem_addr);
-    sceKernelMapDirectMemory(&sce_composite_color_target_addr, color_target_size, 0, 0,
-                             (s64)dmem_addr, 16_KB);
-
-    ASSERT(sce_composite_color_target_addr != nullptr);
 
     BufferAttribute attrib = {};
     sceVideoOutSetBufferAttribute(&attrib, PixelFormat::A8R8G8B8Srgb, (u32)TilingMode::Linear, 0,
                                   sce_composite_color_width, sce_composite_color_height,
                                   sce_composite_color_width);
 
-    void* addrs[2] = {sce_composite_color_target_addr, sce_composite_color_target_addr};
+    void* addrs[1] = {
+        (void*)((VAddr)sce_compositor_video_address +
+                0x7fc000)}; // offset is a hack, got it by checking the difference between the
+                            // image address seen in rdoc and the base address of this allocation
     s32 video_out_handle =
         sceVideoOutOpen(Libraries::UserService::ORBIS_USER_SERVICE_USER_ID_SYSTEM, 0, 0, nullptr);
 
     int rc = sceKernelCreateEqueue(&composite_flip_queue, "composite flip queue");
     sceVideoOutAddFlipEvent(composite_flip_queue, video_out_handle, 0);
 
-    sceVideoOutRegisterBuffers(video_out_handle, 0, addrs, 2, &attrib);
+    sceVideoOutRegisterBuffers(video_out_handle, 0, addrs, 1, &attrib);
     return ORBIS_OK;
 }
 
