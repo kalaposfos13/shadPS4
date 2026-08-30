@@ -636,7 +636,7 @@ int PS4_SYSV_ABI sceUserServiceGetNotificationSettings() {
 
 int PS4_SYSV_ABI sceUserServiceGetNpAccountId() {
     LOG_ERROR(Lib_UserService, "(STUBBED) called");
-    return ORBIS_OK;
+    return 1000;
 }
 
 int PS4_SYSV_ABI sceUserServiceGetNpAccountUpgradeFlag() {

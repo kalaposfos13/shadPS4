@@ -32,6 +32,7 @@
 #ifdef _WIN64
 #include <Rpc.h>
 #else
+#include <setjmp.h>
 #include <uuid/uuid.h>
 #endif
 #include <common/singleton.h>
@@ -680,6 +681,16 @@ s32 PS4_SYSV_ABI sceBgftServiceIntGetNotificationEvent() {
     return -1;
 }
 
+s32 PS4_SYSV_ABI posix_poll() {
+    // LOG_ERROR(Lib_Kernel, "stub");
+    return -1;
+}
+
+s32 PS4_SYSV_ABI sceKernelSendNotificationRequest(s32 device, OrbisNotificationRequest* req, u64 size, s32 blocking) {
+    LOG_WARNING(Lib_Kernel, "(DUMMY) called, notification: {}", req->message);
+    return ORBIS_OK;
+}
+
 void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     service_thread = std::jthread{KernelServiceThread};
 
@@ -710,6 +721,8 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
 
     LIB_FUNCTION("Hk7iHmGxB18", "libkernel", 1, "libkernel", ipmimgr_call);
     LIB_FUNCTION("C2ltEJILIGE", "libkernel", 1, "libkernel", sceKernelGetPsmIntdevModeForRcmgr);
+    LIB_FUNCTION("zl7hupSO0C0", "libkernel", 1, "libkernel", sceKernelSendNotificationRequest);
+    LIB_FUNCTION("ku7D4q1Y9PI", "libkernel", 1, "libkernel", posix_poll);
     LIB_FUNCTION("wRPXMGtkOq0", "libSceMbus", 1, "libSceMbus", sceMbusInit);
     LIB_FUNCTION("c08SEHicDNU", "libSceMbus", 1, "libSceMbus", sceMbusEventCreate_);
     LIB_FUNCTION("KRL-S9qBqXw", "libSceMbus", 1, "libSceMbus", sceMbusGetDeviceInfoByCondition_);
@@ -797,6 +810,10 @@ void RegisterLib(Core::Loader::SymbolsResolver* sym) {
     LIB_FUNCTION("ca7v6Cxulzs", "libkernel", 1, "libkernel", sceKernelSetGPO);
     LIB_FUNCTION("iKJMWrAumPE", "libkernel", 1, "libkernel", getargc);
     LIB_FUNCTION("FJmglmTMdr4", "libkernel", 1, "libkernel", getargv);
+#ifndef _WIN32
+    LIB_FUNCTION("aRo9AhFUXcM", "libkernel", 1, "libkernel", __sigsetjmp);
+    LIB_FUNCTION("pebqbE5ws8s", "libkernel", 1, "libkernel", siglongjmp);
+#endif
 }
 
 } // namespace Libraries::Kernel

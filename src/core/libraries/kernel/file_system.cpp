@@ -72,6 +72,9 @@ static std::map<std::string, FactoryDevice> available_device = {
     {"/dev/deci_tty7",&D::DeciTtyDevice::Create },
     {"/dev/rng",      &D::RngDevice::Create },
     {"/dev/zero",  &D::ZeroDevice::Create },
+    {"/dev/pfsctldev",  &D::ZeroDevice::Create },
+    {"/dev/lvdctl",  &D::ZeroDevice::Create },
+    {"/dev/sbl_srv",  &D::ZeroDevice::Create },
     // clang-format on
 };
 

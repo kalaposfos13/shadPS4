@@ -142,6 +142,52 @@ struct OrbisKernelAppInfo {
     OrbisKernelTitleWorkaround title_workaround;
 };
 
+enum OrbisNotificationRequestType
+{
+	NotificationRequest = 0,
+	SystemNotification = 1,
+	SystemNotificationWithUserId = 2,
+	SystemNotificationWithDeviceId = 3,
+	SystemNotificationWithDeviceIdRelatedToUser = 4,
+	SystemNotificationWithText = 5,
+	SystemNotificationWithTextRelatedToUser = 6,
+	SystemNotificationWithErrorCode = 7,
+	SystemNotificationWithAppId = 8,
+	SystemNotificationWithAppName = 9,
+	SystemNotificationWithAppInfo = 9,
+	SystemNotificationWithAppNameRelatedToUser = 10,
+	SystemNotificationWithParams = 11,
+	SendSystemNotificationWithUserName = 12,
+	SystemNotificationWithUserNameInfo = 13,
+	SendAddressingSystemNotification = 14,
+	AddressingSystemNotificationWithDeviceId = 15,
+	AddressingSystemNotificationWithUserName = 16,
+	AddressingSystemNotificationWithUserId = 17,
+
+	UNK_1 = 100,
+	TrcCheckNotificationRequest = 101,
+	NpDebugNotificationRequest = 102,
+	UNK_2 = 102,
+};
+
+struct OrbisNotificationRequest {
+    enum OrbisNotificationRequestType type;
+    int32_t reqId;
+    int32_t priority;
+    int32_t msgId;
+    int32_t targetId;
+    int32_t userId;
+    int32_t unk1;
+    int32_t unk2;
+    int32_t appId;
+    int32_t errorNum;
+    int32_t unk3;
+    unsigned char useIconImageUri;
+    char message[1024];
+    char iconUri[1024];
+    char unk[1024];
+};
+
 void RegisterLib(Core::Loader::SymbolsResolver* sym);
 
 constexpr u32 POSIX_SC_ARG_MAX = 1;

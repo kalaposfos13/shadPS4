@@ -26,7 +26,7 @@ s32 PS4_SYSV_ABI sceCompositorAllocateIndex() {
 }
 
 s32 PS4_SYSV_ABI sceCompositorCheckCrash() {
-    LOG_ERROR(Lib_Composite, "(STUBBED) called");
+    // LOG_ERROR(Lib_Composite, "(STUBBED) called");
     return ORBIS_OK;
 }
 
@@ -52,6 +52,7 @@ s32 PS4_SYSV_ABI sceCompositorDeleteIndirectRenderTarget() {
 
 s32 PS4_SYSV_ABI sceCompositorFlush() {
     LOG_ERROR(Lib_Composite, "(STUBBED) called");
+    Libraries::VideoOut::sceVideoOutSubmitFlip(2, 0, 0, 0);
     return ORBIS_OK;
 }
 
@@ -203,7 +204,7 @@ s32 PS4_SYSV_ABI sceCompositorInsertThreadTraceMarker() {
 }
 
 s32 PS4_SYSV_ABI sceCompositorIsDebugCaptureEnabled() {
-    LOG_ERROR(Lib_Composite, "(STUBBED) called");
+    // LOG_ERROR(Lib_Composite, "(STUBBED) called");
     return ORBIS_OK;
 }
 
