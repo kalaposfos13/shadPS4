@@ -29,7 +29,6 @@
 #include "core/libraries/kernel/kernel.h"
 #include "core/libraries/keyboard/keyboard.h"
 #include "core/libraries/libc_internal/libc_internal.h"
-#include "core/libraries/libpng/pngdec.h"
 #include "core/libraries/libs.h"
 #include "core/libraries/mouse/mouse.h"
 #include "core/libraries/move/move.h"
@@ -141,7 +140,6 @@ void InitHLELibs(Core::Loader::SymbolsResolver* sym) {
             {"libSceNpTus.sprx", Libraries::Np::NpTus::RegisterLib},
             {"libSceScreenShot.sprx", Libraries::ScreenShot::RegisterLib},
             {"libSceAppContent.sprx", Libraries::AppContent::RegisterLib},
-            {"libScePngDec.sprx", Libraries::PngDec::RegisterLib},
             {"libScePlayGo.sprx", Libraries::PlayGo::RegisterLib},
             {"libScePlayGoDialog.sprx", Libraries::PlayGo::Dialog::RegisterLib},
             {"libSceRandom.sprx", Libraries::Random::RegisterLib},

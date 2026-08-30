@@ -14,7 +14,7 @@
 #include "core/emulator_settings.h"
 #include "core/signals.h"
 #include "shader_recompiler/info.h"
-#include "shader_recompiler/ir/breadth_first_search.h"
+#include "shader_recompiler/ir/dominance_search.h"
 #include "shader_recompiler/ir/opcodes.h"
 #include "shader_recompiler/ir/passes/srt.h"
 #include "shader_recompiler/ir/program.h"
@@ -399,9 +399,8 @@ static bool EmitComputeOffsetBitwiseNot32(Xbyak::CodeGenerator& c, Xbyak::Reg32 
 
 static bool EmitComputeOffsetUMin32(Xbyak::CodeGenerator& c, Xbyak::Reg32 reg, PassInfo& pass_info,
                                     IR::Inst* inst) {
-    if (inst->AreAllArgsImmediates()) {
-        c.mov(reg, std::min(inst->Arg(0).U32(), inst->Arg(1).U32()));
-    } else if (inst->Arg(0).IsImmediate()) {
+    ASSERT(!inst->AreAllArgsImmediates());
+    if (inst->Arg(0).IsImmediate()) {
         ABORT_ON_FAILURE(ComputeOffset(c, reg, pass_info, inst->Arg(1)));
         c.mov(ecx, inst->Arg(0).U32());
         c.cmp(reg, ecx);
@@ -424,9 +423,8 @@ static bool EmitComputeOffsetUMin32(Xbyak::CodeGenerator& c, Xbyak::Reg32 reg, P
 
 static bool EmitComputeOffsetUMax32(Xbyak::CodeGenerator& c, Xbyak::Reg32 reg, PassInfo& pass_info,
                                     IR::Inst* inst) {
-    if (inst->AreAllArgsImmediates()) {
-        c.mov(reg, std::max(inst->Arg(0).U32(), inst->Arg(1).U32()));
-    } else if (inst->Arg(0).IsImmediate()) {
+    ASSERT(!inst->AreAllArgsImmediates());
+    if (inst->Arg(0).IsImmediate()) {
         ABORT_ON_FAILURE(ComputeOffset(c, reg, pass_info, inst->Arg(1)));
         c.mov(ecx, inst->Arg(0).U32());
         c.cmp(reg, ecx);
@@ -731,10 +729,8 @@ void FlattenExtendedUserdataPass(IR::Program& program) {
             }
             return std::nullopt;
         };
-        auto base0 =
-            IR::DominatingBreadthFirstSearch(ptr_composite->Arg(0), *inst->GetParent(), true, pred);
-        auto base1 =
-            IR::DominatingBreadthFirstSearch(ptr_composite->Arg(1), *inst->GetParent(), true, pred);
+        auto base0 = IR::DominanceSearch(ptr_composite->Arg(0), *inst->GetParent(), true, pred);
+        auto base1 = IR::DominanceSearch(ptr_composite->Arg(1), *inst->GetParent(), true, pred);
         ASSERT_MSG(base0 && base1, "ReadConst not from constant memory");
 
         IR::Inst* ptr_lo = base0.value();

@@ -53,12 +53,14 @@ static LONG WINAPI SignalHandler(EXCEPTION_POINTERS* pExp) noexcept {
     switch (code) {
     case EXCEPTION_ACCESS_VIOLATION:
         guest_info._si_signo = POSIX_SIGSEGV;
+        guest_info._si_code = POSIX_SEGV_MAPERR;
         static_protection_exception = true; // Windows static guest red-zone protection
         handled = signals->DispatchAccessViolation(
             pExp, reinterpret_cast<void*>(pExp->ExceptionRecord->ExceptionInformation[1]));
         break;
     case EXCEPTION_ILLEGAL_INSTRUCTION:
         guest_info._si_signo = POSIX_SIGILL;
+        guest_info._si_code = POSIX_ILL_ILLOPC;
         static_protection_exception = true; // Windows static guest red-zone protection
         handled = signals->DispatchIllegalInstruction(pExp);
         break;
@@ -70,21 +72,48 @@ static LONG WINAPI SignalHandler(EXCEPTION_POINTERS* pExp) noexcept {
         break;
     case EXCEPTION_IN_PAGE_ERROR:
         guest_info._si_signo = POSIX_SIGBUS;
+        guest_info._si_code = POSIX_BUS_ADRALN;
         break;
     case EXCEPTION_INT_DIVIDE_BY_ZERO:
-    case EXCEPTION_INT_OVERFLOW:
-    case EXCEPTION_FLT_DIVIDE_BY_ZERO:
-    case EXCEPTION_FLT_INVALID_OPERATION:
-    case EXCEPTION_FLT_OVERFLOW:
-    case EXCEPTION_FLT_UNDERFLOW:
-    case EXCEPTION_FLT_DENORMAL_OPERAND:
-    case EXCEPTION_FLT_INEXACT_RESULT:
-    case EXCEPTION_FLT_STACK_CHECK:
         guest_info._si_signo = POSIX_SIGFPE;
+        guest_info._si_code = POSIX_FPE_INTDIV;
+        break;
+    case EXCEPTION_INT_OVERFLOW:
+        guest_info._si_signo = POSIX_SIGFPE;
+        guest_info._si_code = POSIX_FPE_INTOVF;
+        break;
+    case EXCEPTION_FLT_DIVIDE_BY_ZERO:
+        guest_info._si_signo = POSIX_SIGFPE;
+        guest_info._si_code = POSIX_FPE_FLTDIV;
+        break;
+    case EXCEPTION_FLT_INVALID_OPERATION:
+        guest_info._si_signo = POSIX_SIGFPE;
+        guest_info._si_code = POSIX_FPE_FLTINV;
+        break;
+    case EXCEPTION_FLT_OVERFLOW:
+        guest_info._si_signo = POSIX_SIGFPE;
+        guest_info._si_code = POSIX_FPE_FLTOVF;
+        break;
+    case EXCEPTION_FLT_UNDERFLOW:
+        guest_info._si_signo = POSIX_SIGFPE;
+        guest_info._si_code = POSIX_FPE_FLTUND;
+        break;
+    case EXCEPTION_FLT_DENORMAL_OPERAND:
+        guest_info._si_signo = POSIX_SIGFPE;
+        guest_info._si_code = POSIX_FPE_FLTSUB; // i am not sure about this one
+        break;
+    case EXCEPTION_FLT_INEXACT_RESULT:
+        guest_info._si_signo = POSIX_SIGFPE;
+        guest_info._si_code = POSIX_FPE_FLTRES;
+        break;
+    case EXCEPTION_FLT_STACK_CHECK:
+        guest_info._si_signo = POSIX_SIGILL;
+        guest_info._si_code = POSIX_ILL_BADSTK; // i am not sure about this one either
         break;
     case EXCEPTION_BREAKPOINT:
     case EXCEPTION_SINGLE_STEP:
         guest_info._si_signo = POSIX_SIGTRAP;
+        guest_info._si_code = POSIX_TRAP_BRKPT;
         break;
     case DBG_PRINTEXCEPTION_C:
     case DBG_PRINTEXCEPTION_WIDE_C:
@@ -142,6 +171,82 @@ static std::string DisassembleInstruction(void* code_address) {
     return buffer;
 }
 
+static s32 NativeSiCodeToGuest(s32 sig, s32 code) {
+    using namespace Libraries::Kernel;
+    switch (sig) {
+    case SIGUSR1:
+        return POSIX_SI_LWP;
+    case SIGSEGV:
+        switch (code) {
+        case SEGV_MAPERR:
+            return POSIX_SEGV_MAPERR;
+        case SEGV_ACCERR:
+            return POSIX_SEGV_ACCERR;
+        }
+    case SIGBUS:
+        switch (code) {
+        case BUS_ADRALN:
+            return POSIX_BUS_ADRALN;
+        case BUS_ADRERR:
+            return POSIX_BUS_ADRERR;
+        case BUS_OBJERR:
+            return POSIX_BUS_OBJERR;
+        }
+    case SIGILL:
+        switch (code) {
+        case ILL_ILLOPC:
+            return POSIX_ILL_ILLOPC;
+        case ILL_ILLOPN:
+            return POSIX_ILL_ILLOPN;
+        case ILL_ILLADR:
+            return POSIX_ILL_ILLADR;
+        case ILL_ILLTRP:
+            return POSIX_ILL_ILLTRP;
+        case ILL_PRVOPC:
+            return POSIX_ILL_PRVOPC;
+        case ILL_PRVREG:
+            return POSIX_ILL_PRVREG;
+        case ILL_COPROC:
+            return POSIX_ILL_COPROC;
+        case ILL_BADSTK:
+            return POSIX_ILL_BADSTK;
+        }
+    case SIGFPE:
+        switch (code) {
+        case FPE_INTOVF:
+            return POSIX_FPE_INTOVF;
+        case FPE_INTDIV:
+            return POSIX_FPE_INTDIV;
+        case FPE_FLTDIV:
+            return POSIX_FPE_FLTDIV;
+        case FPE_FLTOVF:
+            return POSIX_FPE_FLTOVF;
+        case FPE_FLTUND:
+            return POSIX_FPE_FLTUND;
+        case FPE_FLTRES:
+            return POSIX_FPE_FLTRES;
+        case FPE_FLTINV:
+            return POSIX_FPE_FLTINV;
+        case FPE_FLTSUB:
+            return POSIX_FPE_FLTSUB;
+        }
+    case SIGTRAP:
+        switch (code) {
+        case TRAP_BRKPT:
+            return POSIX_TRAP_BRKPT;
+        case TRAP_TRACE:
+            return POSIX_TRAP_TRACE;
+#ifdef __FreeBSD__
+        case TRAP_DTRACE:
+            return POSIX_TRAP_DTRACE;
+#endif
+        }
+
+    default:
+        return POSIX_SI_NOINFO;
+    }
+}
+
 void SignalHandler(int sig, siginfo_t* info, void* raw_context) {
     using namespace Libraries::Kernel;
     auto* thread = g_curthread;
@@ -155,7 +260,7 @@ void SignalHandler(int sig, siginfo_t* info, void* raw_context) {
         guest_info = *reinterpret_cast<Siginfo*>(info);
         guest_info._si_signo = sig == SIGUSR1 ? 0 : NativeToOrbisSignal(info->si_signo);
         guest_info._si_errno = NativeToPosixErrno(info->si_errno);
-        guest_info._si_code = sig == SIGUSR1 ? POSIX_SI_LWP : POSIX_SI_NOINFO;
+        guest_info._si_code = NativeSiCodeToGuest(sig, info->si_code);
         guest_info._si_addr = (void*)context.uc_mcontext.mc_rip;
     }
     Siginfo* info_p = info ? &guest_info : nullptr;
@@ -227,22 +332,33 @@ SignalDispatch::SignalDispatch() {
 #endif
 }
 
-SignalDispatch::~SignalDispatch() {
+void SignalDispatch::RemoveHandlers() {
+    // asserting here would get into an infinite loop until too
+    // many nested exceptions makes the OS kill the process
 #if defined(_WIN32)
-    ASSERT_MSG(RemoveVectoredExceptionHandler(handle), "Failed to remove exception handler.");
+    if (!(RemoveVectoredExceptionHandler(handle))) {
+        LOG_CRITICAL(Core, "Failed to remove exception handler.");
+        std::quick_exit(1);
+    }
 #else
     struct sigaction action{};
     action.sa_handler = SIG_DFL;
     action.sa_flags = 0;
     sigemptyset(&action.sa_mask);
 
-    ASSERT_MSG(
-        sigaction(SIGSEGV, &action, nullptr) == 0 && sigaction(SIGBUS, &action, nullptr) == 0 &&
-            sigaction(SIGILL, &action, nullptr) == 0 && sigaction(SIGFPE, &action, nullptr) == 0 &&
-            sigaction(SIGTRAP, &action, nullptr) == 0 && sigaction(SIGSYS, &action, nullptr) == 0 &&
-            sigaction(SIGUSR1, &action, nullptr) == 0 && sigaction(SIGSLEEP, &action, nullptr) == 0,
-        "Failed to remove signal handlers.");
+    if (!(sigaction(SIGSEGV, &action, nullptr) == 0 && sigaction(SIGBUS, &action, nullptr) == 0 &&
+          sigaction(SIGILL, &action, nullptr) == 0 && sigaction(SIGFPE, &action, nullptr) == 0 &&
+          sigaction(SIGTRAP, &action, nullptr) == 0 && sigaction(SIGSYS, &action, nullptr) == 0 &&
+          sigaction(SIGUSR1, &action, nullptr) == 0 &&
+          sigaction(SIGSLEEP, &action, nullptr) == 0)) {
+        LOG_CRITICAL(Core, "Failed to remove signal handlers.");
+        std::quick_exit(1);
+    }
 #endif
+}
+
+SignalDispatch::~SignalDispatch() {
+    RemoveHandlers();
 }
 
 bool SignalDispatch::DispatchAccessViolation(void* context, void* fault_address) const {

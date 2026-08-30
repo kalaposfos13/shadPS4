@@ -191,6 +191,7 @@ private:
 
 EqueueInternal* GetEqueue(OrbisKernelEqueue eq);
 u64 PS4_SYSV_ABI sceKernelGetEventData(const OrbisKernelEvent* ev);
+int PS4_SYSV_ABI sceKernelCreateEqueue(OrbisKernelEqueue* eq, const char* name);
 
 void RegisterEventQueue(Core::Loader::SymbolsResolver* sym);
 
