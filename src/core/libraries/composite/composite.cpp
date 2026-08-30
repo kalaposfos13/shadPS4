@@ -162,8 +162,8 @@ s32 PS4_SYSV_ABI sceCompositorInit() {
         "sceComposite HLE buffer 2");
     sce_compositor_video_size = 1_GB;
 
-    constexpr u32 sce_composite_color_width = 1920;
-    constexpr u32 sce_composite_color_height = 1080;
+    constexpr u32 sce_composite_color_width = 1280;
+    constexpr u32 sce_composite_color_height = 720;
     constexpr u32 color_target_size =
         Common::AlignUp(sce_composite_color_width * sce_composite_color_height * 4, 16_KB);
 
