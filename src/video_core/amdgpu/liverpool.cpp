@@ -365,8 +365,8 @@ Liverpool::Task Liverpool::ProcessGraphics(std::span<const u32> dcb, std::span<c
 
                     const auto nop_offset = header->type3.count;
                     if (nop_offset == 0x04) {
-                        ASSERT_MSG(payload[nop_offset] == 0xc0001000,
-                                   "NOP hint is missing in CB setup sequence");
+                        // ASSERT_MSG(payload[nop_offset] == 0xc0001000,
+                        //            "NOP hint is missing in CB setup sequence");
                         last_cb_extent[col_buf_id].raw = payload[nop_offset + 1];
                     }
                     break;
@@ -882,6 +882,9 @@ Liverpool::Task Liverpool::ProcessGraphics(std::span<const u32> dcb, std::span<c
                 }
                 break;
             }
+            case PM4ItOpcode::SurfaceSync:
+                LOG_WARNING(Render_Vulkan, "Unimplemented IT_SURFACE_SYNC");
+                break;
             default:
                 UNREACHABLE_MSG("Unknown PM4 type 3 opcode {:#x} with count {}",
                                 static_cast<u32>(opcode), count);

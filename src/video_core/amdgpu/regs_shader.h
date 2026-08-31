@@ -6,6 +6,7 @@
 #include "common/assert.h"
 #include "common/types.h"
 #include "shader_recompiler/params.h"
+#include "externals/xxhash/xxhash.h"
 
 namespace AmdGpu {
 
@@ -209,20 +210,23 @@ struct ComputeProgram {
     }
 };
 
-static constexpr const BinaryInfo& SearchBinaryInfo(const u32* code) {
+static constexpr const u32* SearchBinaryInfo(const u32* code) {
     constexpr u32 token_mov_vcchi = 0xBEEB03FF;
     if (code[0] == token_mov_vcchi) {
         const auto* info = std::bit_cast<const BinaryInfo*>(code + (code[1] + 1) * 2);
         if (info->Valid()) {
-            return *info;
+            return reinterpret_cast<const u32*>(info);
         }
     }
     constexpr u32 signature_size = sizeof(BinaryInfo::signature_ref) / sizeof(u8);
     constexpr u32 search_limit = 0x4000;
     const u32* end = code + search_limit;
     for (const u32* it = code; it < end; ++it) {
+        if (*it == 0xbf810000) {
+            return ++it;
+        }
         if (const BinaryInfo* info = std::bit_cast<const BinaryInfo*>(it); info->Valid()) {
-            return *info;
+            return reinterpret_cast<const u32*>(info);
         }
     }
     UNREACHABLE_MSG("Shader binary info not found.");
@@ -230,12 +234,20 @@ static constexpr const BinaryInfo& SearchBinaryInfo(const u32* code) {
 
 static constexpr Shader::ShaderParams GetParams(const auto& sh) {
     const auto* code = sh.template Address<u32*>();
-    const auto& bininfo = SearchBinaryInfo(code);
-    return {
-        .user_data = sh.user_data,
-        .code = std::span{code, bininfo.length / sizeof(u32)},
-        .hash = bininfo.shader_hash,
-    };
+    const auto* it = SearchBinaryInfo(code);
+    if (const BinaryInfo* info = std::bit_cast<const BinaryInfo*>(it); info->Valid()) {
+        return {
+            .user_data = sh.user_data,
+            .code = std::span{code, info->length / sizeof(u32)},
+            .hash = info->shader_hash,
+        };
+    } else {
+        return {
+            .user_data = sh.user_data,
+            .code = std::span{code, (u64)(it - code)},
+            .hash = XXH3_64bits(code, (u64)(it - code) * sizeof(u32)),
+        };
+    }
 }
 
 } // namespace AmdGpu

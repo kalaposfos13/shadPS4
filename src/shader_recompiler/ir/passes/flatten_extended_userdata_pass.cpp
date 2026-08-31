@@ -731,7 +731,10 @@ void FlattenExtendedUserdataPass(IR::Program& program) {
         };
         auto base0 = IR::DominanceSearch(ptr_composite->Arg(0), *inst->GetParent(), true, pred);
         auto base1 = IR::DominanceSearch(ptr_composite->Arg(1), *inst->GetParent(), true, pred);
-        ASSERT_MSG(base0 && base1, "ReadConst not from constant memory");
+        if (!base0 || !base1) {
+            LOG_ERROR(Render_Recompiler, "ReadConst not from constant memory");
+            continue;
+        }
 
         IR::Inst* ptr_lo = base0.value();
         ptr_lo = pass_info.DeduplicateInstruction(ptr_lo);
