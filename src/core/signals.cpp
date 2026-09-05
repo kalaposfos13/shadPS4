@@ -141,6 +141,7 @@ static LONG WINAPI SignalHandler(EXCEPTION_POINTERS* pExp) noexcept {
         use_static_windows_guest_red_zone_protection ? static_protection_exception : true;
     if (report_unhandled) {
         LOG_CRITICAL(Debug, "Unhandled Exception code {:#x} at {}", code, address);
+        Core::Signals::Instance()->RemoveHandlers();
         Common::Singleton<Core::Emulator>::Instance()->Shutdown();
     }
 
@@ -288,6 +289,7 @@ void SignalHandler(int sig, siginfo_t* info, void* raw_context) {
         if (thread && thread->DispatchSignal(NativeToOrbisSignal(sig), info_p, context_p)) {
             return;
         }
+        Core::Signals::Instance()->RemoveHandlers();
 
         UNREACHABLE_MSG("Unhandled signal {} at code address {}", sig, fmt::ptr(code_address));
     }
