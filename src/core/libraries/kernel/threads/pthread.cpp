@@ -266,10 +266,6 @@ static void* RunThread(void* arg) {
     UnblockPthreadCancelSignal();
 #endif
 
-#ifdef WIN32
-    std::set_terminate(Common::Log::Terminate);
-#endif
-
     /* Run the current thread's start routine with argument: */
     auto* const stack =
         (void*)(((size_t)curthread->attr.stackaddr_attr + curthread->attr.stacksize_attr) & (~15));
