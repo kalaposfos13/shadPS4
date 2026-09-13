@@ -741,6 +741,11 @@ void* PS4_SYSV_ABI posix_mmap(void* addr, u64 len, s32 prot, s32 flags, s32 fd, 
         "called addr = {}, len = {:#x}, prot = {:#x}, flags = {:#x}, fd = {}, phys_addr = {:#x}",
         fmt::ptr(addr), len, prot, flags, fd, phys_addr);
 
+    if (fd == 0x999) {
+        fd = -1;
+        flags |= s32(Core::MemoryMapFlags::System | Core::MemoryMapFlags::Anon);
+    }
+
     if (len == 0) {
         // If length is 0, mmap returns EINVAL.
         ErrSceToPosix(ORBIS_KERNEL_ERROR_EINVAL);
