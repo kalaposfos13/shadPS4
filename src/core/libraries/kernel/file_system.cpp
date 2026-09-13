@@ -873,6 +873,9 @@ s32 PS4_SYSV_ABI posix_ftruncate(s32 fd, s64 length) {
     auto* file = h->GetFile(fd);
 
     if (file == nullptr) {
+        if (fd == 0x999) {
+            return 0;
+        }
         *__Error() = POSIX_EBADF;
         return -1;
     }
@@ -1569,7 +1572,13 @@ s32 PS4_SYSV_ABI posix_select(s32 nfds, fd_set* readfds, fd_set* writefds, fd_se
 }
 #endif
 
+s32 PS4_SYSV_ABI posix_physhm_open() {
+    LOG_ERROR(Kernel_Fs, "called");
+    return 0x999;
+}
+
 void RegisterFileSystem(Core::Loader::SymbolsResolver* sym) {
+    LIB_FUNCTION("n371J5cP+uo", "libkernel", 1, "libkernel", posix_physhm_open);
     LIB_FUNCTION("6c3rCVE-fTU", "libkernel", 1, "libkernel", open);
     LIB_FUNCTION("wuCroIGjt2g", "libScePosix", 1, "libkernel", posix_open);
     LIB_FUNCTION("wuCroIGjt2g", "libkernel", 1, "libkernel", posix_open);
