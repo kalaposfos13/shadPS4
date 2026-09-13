@@ -17,7 +17,7 @@ extern std::unique_ptr<Vulkan::Presenter> presenter;
 
 namespace Libraries::VideoOut {
 
-static std::unique_ptr<VideoOutDriver> driver;
+std::unique_ptr<VideoOutDriver> driver;
 
 void PS4_SYSV_ABI sceVideoOutSetBufferAttribute(BufferAttribute* attribute, PixelFormat pixelFormat,
                                                 u32 tilingMode, u32 aspectRatio, u32 width,

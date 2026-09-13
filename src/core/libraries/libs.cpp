@@ -14,6 +14,7 @@
 #include "core/libraries/camera/camera.h"
 #include "core/libraries/companion/companion_httpd.h"
 #include "core/libraries/companion/companion_util.h"
+#include "core/libraries/composite/composite.h"
 #include "core/libraries/content_export/content_export.h"
 #include "core/libraries/disc_map/disc_map.h"
 #include "core/libraries/fiber/fiber.h"
@@ -111,6 +112,7 @@ void InitHLELibs(Core::Loader::SymbolsResolver* sym) {
             {"libSceSystemService.sprx", Libraries::SystemService::RegisterLib},
             {"libScePad.sprx", Libraries::Pad::RegisterLib},
             {"libSceCommonDialog.sprx", Libraries::CommonDialog::RegisterLib},
+            {"libSceComposite.sprx", Libraries::Composite::RegisterLib},
             {"libSceMsgDialog.sprx", Libraries::MsgDialog::RegisterLib},
             {"libSceAudioOut.sprx", Libraries::AudioOut::RegisterLib},
             {"libSceAudioIn.sprx", Libraries::AudioIn::RegisterLib},
